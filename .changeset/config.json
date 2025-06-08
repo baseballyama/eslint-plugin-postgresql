@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "baseballyama/postgresql-eslint-parser"
+      "repo": "baseballyama/eslint-plugin-postgresql"
     }
   ],
   "commit": false,
