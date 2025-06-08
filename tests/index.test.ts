@@ -19,6 +19,7 @@ describe("eslint-plugin-postgresql", () => {
     expect(plugin.rules).toBeDefined();
     if (plugin.rules) {
       expect(plugin.rules["no-syntax-error"]).toBeDefined();
+      expect(plugin.rules["require-limit"]).toBeDefined();
     }
   });
 
