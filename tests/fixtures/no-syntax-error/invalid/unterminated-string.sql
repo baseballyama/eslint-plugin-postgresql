@@ -1,0 +1,1 @@
+SELECT 'unterminated string FROM users;

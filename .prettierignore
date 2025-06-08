@@ -1,0 +1,5 @@
+coverage/
+dist/
+.vscode/settings.json
+pnpm-lock.yaml
+.oxlintrc.json

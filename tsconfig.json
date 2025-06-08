@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "allowImportingTsExtensions": true,
+    "types": ["vitest/importMeta"],
+
+    "declaration": true,
+    "noEmit": true,
+
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "noUncheckedSideEffectImports": true,
+    "resolveJsonModule": true,
+
+    "outDir": "${configDir}/dist",
+
+    "allowJs": false,
+    "checkJs": false,
+
+    "erasableSyntaxOnly": true,
+
+    "moduleDetection": "force",
+    "target": "esnext",
+
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedDeclarations": false,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "include": ["${configDir}"],
+  "exclude": [
+    "${configDir}/node_modules",
+    "${configDir}/dist",
+    "${configDir}/coverage",
+    "${configDir}/knip.ts",
+    "${configDir}/vitest.config.ts"
+  ]
+}
