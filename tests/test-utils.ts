@@ -17,7 +17,7 @@ const createRuleTester = () => {
 
 // Fixtureファイルを読み込む共通関数
 const readFixtureFiles = (
-  folderPath: string
+  folderPath: string,
 ): Array<{ code: string; filename: string }> => {
   const files = readdirSync(folderPath);
   return files
@@ -53,16 +53,16 @@ const readInvalidFixtures = (folderPath: string) => {
 export const runRuleTest = (
   ruleName: string,
   rule: any,
-  testDescription: string
+  testDescription: string,
 ) => {
   describe(ruleName, () => {
     it(testDescription, () => {
       const ruleTester = createRuleTester();
       const validFixtures = readFixtureFiles(
-        join(__dirname, `fixtures/${ruleName}/valid`)
+        join(__dirname, `fixtures/${ruleName}/valid`),
       );
       const invalidFixtures = readInvalidFixtures(
-        join(__dirname, `fixtures/${ruleName}/invalid`)
+        join(__dirname, `fixtures/${ruleName}/invalid`),
       );
 
       ruleTester.run(ruleName, rule, {
