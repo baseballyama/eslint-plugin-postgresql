@@ -67,10 +67,11 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "eslint": "^8.57.1 || ^9.0.0"
+    "eslint": "^8.57.1 || ^9.0.0",
+    "libpg-query": "17.1.1"
   },
   "dependencies": {
-    "libpg-query": "^17.6.0",
+    "libpg-query": "17.1.1",
     "postgresql-eslint-parser": "https://pkg.pr.new/postgresql-eslint-parser@56?target=19"
   }
 }
