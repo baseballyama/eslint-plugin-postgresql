@@ -15,8 +15,8 @@ importers:
         specifier: ^17.6.0
         version: 17.6.0
       postgresql-eslint-parser:
-        specifier: https://pkg.pr.new/postgresql-eslint-parser@56
-        version: https://pkg.pr.new/postgresql-eslint-parser@56
+        specifier: https://pkg.pr.new/postgresql-eslint-parser@56?target=18
+        version: https://pkg.pr.new/postgresql-eslint-parser@56?target=18
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.5.1
@@ -1455,8 +1455,8 @@ packages:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postgresql-eslint-parser@https://pkg.pr.new/postgresql-eslint-parser@56:
-    resolution: {tarball: https://pkg.pr.new/postgresql-eslint-parser@56}
+  postgresql-eslint-parser@https://pkg.pr.new/postgresql-eslint-parser@56?target=18:
+    resolution: {tarball: https://pkg.pr.new/postgresql-eslint-parser@56?target=18}
     version: 0.1.5
     engines: {node: '>=22.0.0', pnpm: '>=10.14.0'}
 
@@ -3129,7 +3129,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postgresql-eslint-parser@https://pkg.pr.new/postgresql-eslint-parser@56:
+  postgresql-eslint-parser@https://pkg.pr.new/postgresql-eslint-parser@56?target=18:
     dependencies:
       libpg-query: 17.6.0
 

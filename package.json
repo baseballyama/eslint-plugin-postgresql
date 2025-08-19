@@ -71,6 +71,6 @@
   },
   "dependencies": {
     "libpg-query": "^17.6.0",
-    "postgresql-eslint-parser": "https://pkg.pr.new/postgresql-eslint-parser@56"
+    "postgresql-eslint-parser": "https://pkg.pr.new/postgresql-eslint-parser@56?target=19"
   }
 }
