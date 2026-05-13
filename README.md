@@ -184,6 +184,11 @@ Warns on `char(n)` (a.k.a. `bpchar`) columns. PostgreSQL pads stored `char(n)` v
 Warns on `GRANT ... TO PUBLIC`. The PUBLIC pseudo-role covers every current and future role in the database, including ones added later for unrelated services or admin tooling. Privilege grants should name the role(s) explicitly. Note that `REVOKE ... FROM PUBLIC` is unaffected — revoking the implicit grants is good hygiene.
 
 **Type**: Problem  
+### `postgresql/snake-case-table-name`
+
+Warns when a `CREATE TABLE` declares a table name that is not snake_case (lowercase letters, digits, and underscores; must start with a letter). Quoted mixed-case identifiers (`"UserAccounts"`) preserve their case and force every caller to quote them — a steady source of `relation does not exist` errors. Unquoted `CamelCase` is silently lowercased by PostgreSQL, so it passes.
+
+**Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
 **Fixable**: ❌ No
 
@@ -207,6 +212,7 @@ CREATE TABLE t (created_at TIMESTAMP);
 CREATE TABLE t (code CHAR(3));
 CREATE TABLE t (code BPCHAR(3));
 GRANT SELECT ON users TO PUBLIC;
+CREATE TABLE "UserAccounts" (id INT PRIMARY KEY);
 ```
 
 ✅ Correct:
@@ -246,6 +252,8 @@ REVOKE ALL ON users FROM PUBLIC;
 CREATE INDEX CONCURRENTLY idx_users_email ON users (email);
 SELECT id FROM users u WHERE NOT EXISTS (SELECT 1 FROM blocks b WHERE b.user_id = u.id);
 SELECT 1 FROM users WHERE id NOT IN (1, 2, 3); -- literal list is fine
+CREATE TABLE user_accounts (id INT PRIMARY KEY);
+CREATE TABLE UserAccounts (id INT PRIMARY KEY); -- folded to useraccounts
 ```
 
 ### `postgresql/require-limit`
