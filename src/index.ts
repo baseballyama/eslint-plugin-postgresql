@@ -2,6 +2,7 @@ import type { ESLint, Linter } from "eslint";
 import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
 import noSelectStar from "./rules/no-select-star.js";
+import noDropTableCascade from "./rules/no-drop-table-cascade.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
 import requireLimit from "./rules/require-limit.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
@@ -14,6 +15,7 @@ const plugin: ESLint.Plugin = {
   },
   rules: {
     "no-select-star": noSelectStar,
+    "no-drop-table-cascade": noDropTableCascade,
     "no-syntax-error": noSyntaxError,
     "require-limit": requireLimit,
     "require-where-in-delete": requireWhereInDelete,
@@ -26,6 +28,7 @@ const plugin: ESLint.Plugin = {
         parser: postgresqlParser,
       },
       rules: {
+        "postgresql/no-drop-table-cascade": "warn",
         "postgresql/no-syntax-error": "error",
         "postgresql/require-limit": "warn",
         "postgresql/require-where-in-delete": "error",
