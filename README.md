@@ -190,6 +190,9 @@ Warns when a `CREATE TABLE` declares a table name that is not snake_case (lowerc
 ### `postgresql/snake-case-column-name`
 
 Warns when a column declared in `CREATE TABLE` is not snake_case. Same rationale as `snake-case-table-name`: PostgreSQL preserves the case of quoted identifiers, so a quoted `"CamelCol"` forces every consumer to quote-match the name, while unquoted `CamelCol` silently lowercases to `camelcol` and passes.
+### `postgresql/no-implicit-join`
+
+Warns on `SELECT ... FROM a, b WHERE ...` style implicit joins. Comma syntax is an implicit cross join whose join condition is buried in `WHERE`; forgetting the condition silently produces a cartesian product. Explicit `JOIN ... ON ...` puts the join condition next to the join.
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
@@ -217,6 +220,7 @@ CREATE TABLE t (code BPCHAR(3));
 GRANT SELECT ON users TO PUBLIC;
 CREATE TABLE "UserAccounts" (id INT PRIMARY KEY);
 CREATE TABLE t ("CamelCol" INT);
+SELECT a.id FROM a, b WHERE a.id = b.id;
 ```
 
 ✅ Correct:
@@ -260,6 +264,7 @@ CREATE TABLE user_accounts (id INT PRIMARY KEY);
 CREATE TABLE UserAccounts (id INT PRIMARY KEY); -- folded to useraccounts
 CREATE TABLE t (camel_col INT);
 CREATE TABLE t (CamelCol INT); -- folded to camelcol
+SELECT a.id FROM a JOIN b ON a.id = b.id;
 ```
 
 ### `postgresql/require-limit`
