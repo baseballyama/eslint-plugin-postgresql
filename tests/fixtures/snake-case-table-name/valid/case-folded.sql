@@ -1,0 +1,1 @@
+CREATE TABLE UserAccounts (id INT PRIMARY KEY);

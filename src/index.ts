@@ -20,6 +20,7 @@ import requireLimit from "./rules/require-limit.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
 import requirePrimaryKey from "./rules/require-primary-key.js";
+import snakeCaseTableName from "./rules/snake-case-table-name.js";
 
 const plugin: ESLint.Plugin = {
   meta: {
@@ -46,6 +47,7 @@ const plugin: ESLint.Plugin = {
     "require-where-in-delete": requireWhereInDelete,
     "require-where-in-update": requireWhereInUpdate,
     "require-primary-key": requirePrimaryKey,
+    "snake-case-table-name": snakeCaseTableName,
   },
   configs: {
     recommended: {
@@ -71,6 +73,7 @@ const plugin: ESLint.Plugin = {
         "postgresql/require-where-in-delete": "error",
         "postgresql/require-where-in-update": "error",
         "postgresql/require-primary-key": "warn",
+        "postgresql/snake-case-table-name": "warn",
       },
     } satisfies Linter.Config,
   },
