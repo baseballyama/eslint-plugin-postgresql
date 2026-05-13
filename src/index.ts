@@ -10,6 +10,7 @@ import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
+import preferTimestamptz from "./rules/prefer-timestamptz.js";
 import requireLimit from "./rules/require-limit.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
@@ -30,6 +31,7 @@ const plugin: ESLint.Plugin = {
     "prefer-jsonb-over-json": preferJsonbOverJson,
     "prefer-identity-over-serial": preferIdentityOverSerial,
     "prefer-text-over-varchar": preferTextOverVarchar,
+    "prefer-timestamptz": preferTimestamptz,
     "require-limit": requireLimit,
     "require-where-in-delete": requireWhereInDelete,
     "require-where-in-update": requireWhereInUpdate,
@@ -50,6 +52,7 @@ const plugin: ESLint.Plugin = {
         "postgresql/prefer-jsonb-over-json": "warn",
         "postgresql/prefer-identity-over-serial": "warn",
         "postgresql/prefer-text-over-varchar": "warn",
+        "postgresql/prefer-timestamptz": "warn",
         "postgresql/require-limit": "warn",
         "postgresql/require-where-in-delete": "error",
         "postgresql/require-where-in-update": "error",
