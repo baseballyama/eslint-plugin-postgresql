@@ -138,6 +138,12 @@ Errors on `NATURAL JOIN`. The join columns are implicit — any new column added
 
 **Type**: Problem  
 **Recommended**: ✅ Error  
+### `postgresql/prefer-jsonb-over-json`
+
+Warns on columns declared as `json`. `jsonb` stores the parsed representation, supports GIN indexes, and is what application code almost always wants. `json` only makes sense if you specifically need byte-exact round-tripping of the input text.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
 **Fixable**: ❌ No
 
 #### Examples
@@ -151,6 +157,7 @@ DROP TABLE users CASCADE;
 TRUNCATE users CASCADE;
 SELECT * FROM a CROSS JOIN b;
 SELECT * FROM a NATURAL JOIN b;
+CREATE TABLE events (payload JSON);
 ```
 
 ✅ Correct:
@@ -168,6 +175,7 @@ SELECT * FROM a INNER JOIN b USING (id);
 SELECT * FROM a JOIN b ON true; -- intentional cartesian
 SELECT * FROM a JOIN b USING (id);
 SELECT * FROM a JOIN b ON a.id = b.id;
+CREATE TABLE events (payload JSONB);
 ```
 
 ### `postgresql/require-limit`
