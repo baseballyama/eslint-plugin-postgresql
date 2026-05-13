@@ -84,12 +84,12 @@ SELECT * FROM WHERE id = 1;
 SELECT * FROM users WHERE id = 1;
 ```
 
-### `postgresql/no-select-star`
+### `postgresql/require-where-in-delete`
 
-Disallows `SELECT *` (and `<alias>.*`). Listing columns explicitly keeps result schemas stable when the underlying table evolves and avoids accidentally pulling new sensitive columns into a query.
+Errors on `DELETE` statements that have no `WHERE` clause — deleting every row in a table is almost always a mistake. Use `TRUNCATE` if you really mean to empty the table.
 
-**Type**: Suggestion  
-**Recommended**: ❌ Off by default  
+**Type**: Problem  
+**Recommended**: ✅ Error  
 **Fixable**: ❌ No
 
 #### Examples
@@ -97,15 +97,14 @@ Disallows `SELECT *` (and `<alias>.*`). Listing columns explicitly keeps result 
 ❌ Incorrect:
 
 ```sql
-SELECT * FROM users;
-SELECT u.* FROM users u;
+DELETE FROM users;
 ```
 
 ✅ Correct:
 
 ```sql
-SELECT id, name FROM users;
-SELECT count(*) FROM users; -- aggregate star is fine
+DELETE FROM users WHERE id = 1;
+DELETE FROM sessions WHERE expires_at < now();
 ```
 
 ### `postgresql/require-limit`
