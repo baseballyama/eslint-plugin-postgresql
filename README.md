@@ -165,6 +165,11 @@ Warns on `timestamp` (i.e. `timestamp without time zone`) columns. `timestamp` i
 Warns on `char(n)` (a.k.a. `bpchar`) columns. PostgreSQL pads stored `char(n)` values to `n` with trailing spaces and silently trims on read; the padding surprises comparisons, sorts, and round-trip pipelines. Use `text` (and a `CHECK` constraint if you need a length).
 
 **Type**: Suggestion  
+### `postgresql/no-grant-to-public`
+
+Warns on `GRANT ... TO PUBLIC`. The PUBLIC pseudo-role covers every current and future role in the database, including ones added later for unrelated services or admin tooling. Privilege grants should name the role(s) explicitly. Note that `REVOKE ... FROM PUBLIC` is unaffected — revoking the implicit grants is good hygiene.
+
+**Type**: Problem  
 **Recommended**: ⚠️ Warn  
 **Fixable**: ❌ No
 
@@ -187,6 +192,7 @@ CREATE TABLE users (name VARCHAR(255));
 CREATE TABLE t (created_at TIMESTAMP);
 CREATE TABLE t (code CHAR(3));
 CREATE TABLE t (code BPCHAR(3));
+GRANT SELECT ON users TO PUBLIC;
 ```
 
 ✅ Correct:
@@ -221,6 +227,8 @@ CREATE TABLE t (created_at TIMESTAMP WITH TIME ZONE);
 CREATE TABLE t (price NUMERIC(10, 2), currency CHAR(3));
 CREATE TABLE t (code TEXT);
 CREATE TABLE t (code TEXT CHECK (length(code) = 3));
+GRANT SELECT ON users TO reporting;
+REVOKE ALL ON users FROM PUBLIC;
 ```
 
 ### `postgresql/require-limit`

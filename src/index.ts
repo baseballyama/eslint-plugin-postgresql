@@ -7,6 +7,7 @@ import noCrossJoin from "./rules/no-cross-join.js";
 import noNaturalJoin from "./rules/no-natural-join.js";
 import noMoneyType from "./rules/no-money-type.js";
 import noCharType from "./rules/no-char-type.js";
+import noGrantToPublic from "./rules/no-grant-to-public.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
@@ -30,6 +31,7 @@ const plugin: ESLint.Plugin = {
     "no-natural-join": noNaturalJoin,
     "no-money-type": noMoneyType,
     "no-char-type": noCharType,
+    "no-grant-to-public": noGrantToPublic,
     "no-syntax-error": noSyntaxError,
     "no-truncate-cascade": noTruncateCascade,
     "prefer-jsonb-over-json": preferJsonbOverJson,
@@ -53,6 +55,7 @@ const plugin: ESLint.Plugin = {
         "postgresql/no-natural-join": "error",
         "postgresql/no-money-type": "error",
         "postgresql/no-char-type": "warn",
+        "postgresql/no-grant-to-public": "warn",
         "postgresql/no-syntax-error": "error",
         "postgresql/no-truncate-cascade": "warn",
         "postgresql/prefer-jsonb-over-json": "warn",

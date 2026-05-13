@@ -1,0 +1,1 @@
+REVOKE ALL ON users FROM PUBLIC;
