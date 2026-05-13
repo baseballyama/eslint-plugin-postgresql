@@ -14,6 +14,7 @@ import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
+import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
 import requireLimit from "./rules/require-limit.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
@@ -38,6 +39,7 @@ const plugin: ESLint.Plugin = {
     "prefer-identity-over-serial": preferIdentityOverSerial,
     "prefer-text-over-varchar": preferTextOverVarchar,
     "prefer-timestamptz": preferTimestamptz,
+    "prefer-create-index-concurrently": preferCreateIndexConcurrently,
     "require-limit": requireLimit,
     "require-where-in-delete": requireWhereInDelete,
     "require-where-in-update": requireWhereInUpdate,
