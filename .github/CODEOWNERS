@@ -1,0 +1,14 @@
+# GitHub CODEOWNERS — routes review requests automatically.
+#
+# Single-maintainer project for now. As subsystems emerge (e.g., new rule
+# directories, parser integration code), add per-path entries above the
+# wildcard so the right people are auto-requested for the right files.
+# Example:
+#
+#   /src/rules/      @rule-authors
+#   /scripts/        @tooling
+#
+# Lines later in the file take precedence, so keep `*` at the bottom as
+# the catch-all.
+
+* @baseballyama
