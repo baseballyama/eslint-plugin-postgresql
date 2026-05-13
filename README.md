@@ -187,6 +187,9 @@ Warns on `GRANT ... TO PUBLIC`. The PUBLIC pseudo-role covers every current and 
 ### `postgresql/snake-case-table-name`
 
 Warns when a `CREATE TABLE` declares a table name that is not snake_case (lowercase letters, digits, and underscores; must start with a letter). Quoted mixed-case identifiers (`"UserAccounts"`) preserve their case and force every caller to quote them — a steady source of `relation does not exist` errors. Unquoted `CamelCase` is silently lowercased by PostgreSQL, so it passes.
+### `postgresql/snake-case-column-name`
+
+Warns when a column declared in `CREATE TABLE` is not snake_case. Same rationale as `snake-case-table-name`: PostgreSQL preserves the case of quoted identifiers, so a quoted `"CamelCol"` forces every consumer to quote-match the name, while unquoted `CamelCol` silently lowercases to `camelcol` and passes.
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
@@ -213,6 +216,7 @@ CREATE TABLE t (code CHAR(3));
 CREATE TABLE t (code BPCHAR(3));
 GRANT SELECT ON users TO PUBLIC;
 CREATE TABLE "UserAccounts" (id INT PRIMARY KEY);
+CREATE TABLE t ("CamelCol" INT);
 ```
 
 ✅ Correct:
@@ -254,6 +258,8 @@ SELECT id FROM users u WHERE NOT EXISTS (SELECT 1 FROM blocks b WHERE b.user_id 
 SELECT 1 FROM users WHERE id NOT IN (1, 2, 3); -- literal list is fine
 CREATE TABLE user_accounts (id INT PRIMARY KEY);
 CREATE TABLE UserAccounts (id INT PRIMARY KEY); -- folded to useraccounts
+CREATE TABLE t (camel_col INT);
+CREATE TABLE t (CamelCol INT); -- folded to camelcol
 ```
 
 ### `postgresql/require-limit`
