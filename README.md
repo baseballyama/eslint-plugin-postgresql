@@ -141,6 +141,9 @@ Errors on `NATURAL JOIN`. The join columns are implicit — any new column added
 ### `postgresql/prefer-jsonb-over-json`
 
 Warns on columns declared as `json`. `jsonb` stores the parsed representation, supports GIN indexes, and is what application code almost always wants. `json` only makes sense if you specifically need byte-exact round-tripping of the input text.
+### `postgresql/prefer-identity-over-serial`
+
+Warns on `SMALLSERIAL`, `SERIAL`, `BIGSERIAL` columns. The serial pseudo-types create a separately-owned sequence that does not survive pg_dump round-trips cleanly and does not honor column privileges. `GENERATED ... AS IDENTITY` is the SQL-standard replacement and has been the PostgreSQL team's recommendation since version 10.
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
@@ -158,6 +161,8 @@ TRUNCATE users CASCADE;
 SELECT * FROM a CROSS JOIN b;
 SELECT * FROM a NATURAL JOIN b;
 CREATE TABLE events (payload JSON);
+CREATE TABLE t (id BIGSERIAL);
+CREATE TABLE t (id SERIAL);
 ```
 
 ✅ Correct:
@@ -176,6 +181,7 @@ SELECT * FROM a JOIN b ON true; -- intentional cartesian
 SELECT * FROM a JOIN b USING (id);
 SELECT * FROM a JOIN b ON a.id = b.id;
 CREATE TABLE events (payload JSONB);
+CREATE TABLE t (id BIGINT GENERATED ALWAYS AS IDENTITY);
 ```
 
 ### `postgresql/require-limit`
