@@ -8,6 +8,7 @@ import noNaturalJoin from "./rules/no-natural-join.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
+import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import requireLimit from "./rules/require-limit.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
@@ -25,6 +26,7 @@ const plugin: ESLint.Plugin = {
     "no-syntax-error": noSyntaxError,
     "no-truncate-cascade": noTruncateCascade,
     "prefer-jsonb-over-json": preferJsonbOverJson,
+    "prefer-identity-over-serial": preferIdentityOverSerial,
     "require-limit": requireLimit,
     "require-where-in-delete": requireWhereInDelete,
     "require-where-in-update": requireWhereInUpdate,
@@ -42,6 +44,7 @@ const plugin: ESLint.Plugin = {
         "postgresql/no-syntax-error": "error",
         "postgresql/no-truncate-cascade": "warn",
         "postgresql/prefer-jsonb-over-json": "warn",
+        "postgresql/prefer-identity-over-serial": "warn",
         "postgresql/require-limit": "warn",
         "postgresql/require-where-in-delete": "error",
         "postgresql/require-where-in-update": "error",
