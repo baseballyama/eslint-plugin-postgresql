@@ -144,6 +144,9 @@ Warns on columns declared as `json`. `jsonb` stores the parsed representation, s
 ### `postgresql/prefer-identity-over-serial`
 
 Warns on `SMALLSERIAL`, `SERIAL`, `BIGSERIAL` columns. The serial pseudo-types create a separately-owned sequence that does not survive pg_dump round-trips cleanly and does not honor column privileges. `GENERATED ... AS IDENTITY` is the SQL-standard replacement and has been the PostgreSQL team's recommendation since version 10.
+### `postgresql/require-primary-key`
+
+Warns on `CREATE TABLE` statements without a primary key — either column-level (`id INT PRIMARY KEY`) or table-level (`PRIMARY KEY (id)`). Tables without a primary key cannot be replicated cleanly with logical replication, are hard to shard, and break most ORMs and migration tools. The rule does not flag `CREATE TABLE ... PARTITION OF ...` (no `tableElts`); a partition inherits its parent's primary key.
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
@@ -163,6 +166,7 @@ SELECT * FROM a NATURAL JOIN b;
 CREATE TABLE events (payload JSON);
 CREATE TABLE t (id BIGSERIAL);
 CREATE TABLE t (id SERIAL);
+CREATE TABLE t (id INT, name TEXT);
 ```
 
 ✅ Correct:
@@ -182,6 +186,8 @@ SELECT * FROM a JOIN b USING (id);
 SELECT * FROM a JOIN b ON a.id = b.id;
 CREATE TABLE events (payload JSONB);
 CREATE TABLE t (id BIGINT GENERATED ALWAYS AS IDENTITY);
+CREATE TABLE t (id INT PRIMARY KEY, name TEXT);
+CREATE TABLE t (id INT, name TEXT, PRIMARY KEY (id));
 ```
 
 ### `postgresql/require-limit`

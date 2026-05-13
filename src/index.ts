@@ -12,6 +12,7 @@ import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import requireLimit from "./rules/require-limit.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
+import requirePrimaryKey from "./rules/require-primary-key.js";
 
 const plugin: ESLint.Plugin = {
   meta: {
@@ -30,6 +31,7 @@ const plugin: ESLint.Plugin = {
     "require-limit": requireLimit,
     "require-where-in-delete": requireWhereInDelete,
     "require-where-in-update": requireWhereInUpdate,
+    "require-primary-key": requirePrimaryKey,
   },
   configs: {
     recommended: {
@@ -48,6 +50,7 @@ const plugin: ESLint.Plugin = {
         "postgresql/require-limit": "warn",
         "postgresql/require-where-in-delete": "error",
         "postgresql/require-where-in-update": "error",
+        "postgresql/require-primary-key": "warn",
       },
     } satisfies Linter.Config,
   },
