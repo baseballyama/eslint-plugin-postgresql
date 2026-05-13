@@ -33,35 +33,29 @@ Run in this order; stop and report on the first failure unless the user said "ru
 everything":
 
 1. **Format** — does the code conform to the formatter?
-
    - Common: `prettier --check` / `cargo fmt --check` / `ruff format --check` / `gofmt -l`
    - If broken: try the auto-fix (`prettier --write` / `cargo fmt` / `ruff format`)
      before reporting. Re-run the check after fixing.
 
 2. **Lint** — static analysis.
-
    - Common: `eslint`, `oxlint`, `clippy`, `ruff check`, `golangci-lint`
    - Some lint errors auto-fix; try `--fix` or equivalent before reporting only the
      unfixable ones.
 
 3. **Type check** — for typed languages.
-
    - Common: `tsc --noEmit`, `cargo check`, `mypy`, `pyright`, `go vet`
    - Type errors are not auto-fixable; report them with file:line.
 
 4. **Unit tests**
-
    - Common: `pnpm test`, `cargo test`, `pytest`, `go test ./...`
    - Run the full unit suite. If the user has already done this in the session and
      no test files have changed, you can skip and say so.
 
 5. **Build** — for libraries that ship artifacts.
-
    - Common: `pnpm build`, `cargo build --release`, `python -m build`, `go build`
    - Catches errors in publish-time configuration that runtime tests miss.
 
 6. **Project-specific gates** — packages may have additional gates worth running:
-
    - **Bundle size** (if the project is a library): `pnpm size`, `bundlewatch`,
      `size-limit`
    - **Knip / unused exports**: `pnpm knip`

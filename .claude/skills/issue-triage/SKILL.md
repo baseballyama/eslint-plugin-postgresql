@@ -97,7 +97,6 @@ the conflict in your triage comment so the maintainer can adjust.
 Goal: a failing test that pins the bug, then a fix that flips it green, then a PR.
 
 1. **Reproduce in a test first.**
-
    - Add a failing test in the project's standard test location.
    - Name it after the issue: `issue-<num>` (file name or test name, depending on
      the test framework).
@@ -108,7 +107,6 @@ Goal: a failing test that pins the bug, then a fix that flips it green, then a P
      reproduce or the test is wrong — investigate.
 
 2. **If you reproduced it:**
-
    - Fix the underlying cause, not the symptom.
    - Re-run the test to confirm green.
    - Run the project's quality gates (`run-check-and-test` skill) before opening
@@ -120,7 +118,6 @@ Goal: a failing test that pins the bug, then a fix that flips it green, then a P
        command to verify locally.
 
 3. **If you couldn't reproduce:**
-
    - Do **not** apply `wontfix` or `invalid` — those are maintainer calls.
    - Post one comment on the issue explaining what you tried (versions, fixture,
      code path) and what specific information you need to make progress (minimal
@@ -141,11 +138,9 @@ This project follows the **"one way to do one thing"** policy. See `CLAUDE.md`
 to something already supported is rejected by default.
 
 1. **Score against the policy.** Three outcomes:
-
    - **Reject (most common):** the request adds a parallel API to an existing
      capability (e.g., a convenience helper for something the existing public API
      already supports in one line). Post a comment that:
-
      - thanks the reporter
      - shows the existing path with a code snippet
      - explains _why_ this project does not add a second path (link the relevant
@@ -163,7 +158,6 @@ to something already supported is rejected by default.
 
    a. **Spec the change** as a new comment on the original issue. The original
    issue is the tracking issue — don't open a separate one. The spec covers:
-
    - public API shape (entry points, exported names, types)
    - what existing path it replaces, if any (and a deprecation plan if relevant)
    - test plan (unit + at least one integration / round-trip case)

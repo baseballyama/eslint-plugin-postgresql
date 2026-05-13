@@ -209,9 +209,9 @@ clear changeset before 1.0). Adding a new rule (off by default in
 
 Write from the user's perspective.
 
-- ❌ `refactor: extract helper for visitor walk` — users don't care.
-- ✅ `feat: add `no-select-star` rule` — users want to know.
-- ✅ `fix: `require-limit`no longer flags`SELECT ... FOR UPDATE`` — symptom-based.
+- ❌ _refactor:_ extract helper for visitor walk — users don't care.
+- ✅ _feat:_ add `no-select-star` rule — users want to know.
+- ✅ _fix:_ `require-limit` no longer flags `SELECT ... FOR UPDATE` — symptom-based.
 
 A pure-internal refactor PR doesn't need a changeset; if it does need one,
 mark it `chore`.

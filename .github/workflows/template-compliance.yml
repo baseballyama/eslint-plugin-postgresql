@@ -10,10 +10,13 @@ name: Template Compliance
 #     default. Anyone who deletes the entire template loses the anchor and
 #     trips this workflow.
 #   - On submission (and edit), this workflow checks for the anchor and a few
-#     baseline shape checks. If they fail, it posts an explanatory comment and
-#     closes the issue / PR.
+#     baseline shape checks. If they fail, it posts an explanatory comment,
+#     applies the `template-noncompliant` label, and closes the issue / PR.
 #   - The author can edit the issue / PR to comply with the template; on edit,
-#     the workflow re-runs and reopens if it now passes.
+#     the workflow re-runs and reopens (and removes the label) only if the
+#     `template-noncompliant` label is currently present. A maintainer who
+#     later closes the issue manually will not have set this label, so we will
+#     not undo their decision.
 #
 # Maintainers are exempted from auto-close: anyone with `OWNER`, `MEMBER`, or
 # `COLLABORATOR` association can post issues / PRs without the template (e.g.,
@@ -90,19 +93,21 @@ jobs:
             );
 
             const prevState = issue.state;
+            // Label is the load-bearing signal that we (this workflow) closed
+            // the issue. A maintainer who later closes the issue manually for a
+            // different reason will not have this label set, so we will not
+            // re-open under them. The label is removed when we reopen.
+            const AUTO_CLOSE_LABEL = 'template-noncompliant';
 
             if (failures.length === 0) {
               core.info('Issue passes template compliance.');
               if (prevState === 'closed') {
-                // If we previously auto-closed and the author has now fixed it,
-                // reopen so a maintainer can triage.
-                const ourComments = await github.paginate(github.rest.issues.listComments, {
-                  owner, repo, issue_number: number, per_page: 100,
-                });
-                const closedByUs = ourComments.some(c =>
-                  c.user.login === 'github-actions[bot]' &&
-                  c.body.includes('<!-- template-compliance:closed -->'));
+                const labels = (issue.labels || []).map(l => typeof l === 'string' ? l : l.name);
+                const closedByUs = labels.includes(AUTO_CLOSE_LABEL);
                 if (closedByUs) {
+                  await github.rest.issues.removeLabel({
+                    owner, repo, issue_number: number, name: AUTO_CLOSE_LABEL,
+                  }).catch(() => {}); // 404 is fine — already removed
                   await github.rest.issues.update({
                     owner, repo, issue_number: number, state: 'open',
                   });
@@ -150,6 +155,12 @@ jobs:
             await github.rest.issues.createComment({
               owner, repo, issue_number: number, body: message,
             });
+
+            // Apply the marker label so a future reopen can tell our close
+            // apart from a maintainer's manual close.
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: number, labels: [AUTO_CLOSE_LABEL],
+            }).catch(err => core.warning(`Failed to apply ${AUTO_CLOSE_LABEL}: ${err.message}`));
 
             if (prevState !== 'closed') {
               await github.rest.issues.update({
@@ -216,17 +227,20 @@ jobs:
             );
 
             const prevState = pr.state;
+            // Same label-as-marker scheme as the issue branch above: a
+            // maintainer's manual close will not carry this label, so we will
+            // not undo their decision.
+            const AUTO_CLOSE_LABEL = 'template-noncompliant';
 
             if (failures.length === 0) {
               core.info('PR passes template compliance.');
               if (prevState === 'closed') {
-                const ourComments = await github.paginate(github.rest.issues.listComments, {
-                  owner, repo, issue_number: number, per_page: 100,
-                });
-                const closedByUs = ourComments.some(c =>
-                  c.user.login === 'github-actions[bot]' &&
-                  c.body.includes('<!-- template-compliance:closed -->'));
+                const labels = (pr.labels || []).map(l => typeof l === 'string' ? l : l.name);
+                const closedByUs = labels.includes(AUTO_CLOSE_LABEL);
                 if (closedByUs) {
+                  await github.rest.issues.removeLabel({
+                    owner, repo, issue_number: number, name: AUTO_CLOSE_LABEL,
+                  }).catch(() => {});
                   await github.rest.pulls.update({
                     owner, repo, pull_number: number, state: 'open',
                   });
@@ -274,6 +288,12 @@ jobs:
             await github.rest.issues.createComment({
               owner, repo, issue_number: number, body: message,
             });
+
+            // Marker label so the reopen path can distinguish our close from
+            // any later manual close by a maintainer.
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: number, labels: [AUTO_CLOSE_LABEL],
+            }).catch(err => core.warning(`Failed to apply ${AUTO_CLOSE_LABEL}: ${err.message}`));
 
             if (prevState !== 'closed') {
               await github.rest.pulls.update({
