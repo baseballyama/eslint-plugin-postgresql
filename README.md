@@ -132,6 +132,12 @@ Warns on `CROSS JOIN` (cartesian product without a join condition). Almost alway
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
+### `postgresql/no-natural-join`
+
+Errors on `NATURAL JOIN`. The join columns are implicit — any new column added to either side later with a matching name silently changes the join. Use `JOIN ... USING (...)` or `JOIN ... ON ...` to name the columns.
+
+**Type**: Problem  
+**Recommended**: ✅ Error  
 **Fixable**: ❌ No
 
 #### Examples
@@ -144,6 +150,7 @@ UPDATE users SET active = false;
 DROP TABLE users CASCADE;
 TRUNCATE users CASCADE;
 SELECT * FROM a CROSS JOIN b;
+SELECT * FROM a NATURAL JOIN b;
 ```
 
 ✅ Correct:
@@ -159,6 +166,8 @@ TRUNCATE users RESTRICT;
 SELECT * FROM a JOIN b ON a.id = b.id;
 SELECT * FROM a INNER JOIN b USING (id);
 SELECT * FROM a JOIN b ON true; -- intentional cartesian
+SELECT * FROM a JOIN b USING (id);
+SELECT * FROM a JOIN b ON a.id = b.id;
 ```
 
 ### `postgresql/require-limit`
