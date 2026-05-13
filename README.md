@@ -160,6 +160,9 @@ Warns on `varchar(n)` columns. PostgreSQL stores `text` and `varchar(n)` the sam
 ### `postgresql/prefer-timestamptz`
 
 Warns on `timestamp` (i.e. `timestamp without time zone`) columns. `timestamp` is timezone-naive: it stores the wall-clock literal you handed in and assumes every reader and writer share the same convention. Two clients with different `TimeZone` settings will disagree on which instant a row represents. `timestamptz` anchors everything to UTC at storage time and converts to the session timezone on read, which is what application code almost always wants.
+### `postgresql/no-char-type`
+
+Warns on `char(n)` (a.k.a. `bpchar`) columns. PostgreSQL pads stored `char(n)` values to `n` with trailing spaces and silently trims on read; the padding surprises comparisons, sorts, and round-trip pipelines. Use `text` (and a `CHECK` constraint if you need a length).
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
@@ -182,6 +185,8 @@ CREATE TABLE t (id SERIAL);
 CREATE TABLE t (id INT, name TEXT);
 CREATE TABLE users (name VARCHAR(255));
 CREATE TABLE t (created_at TIMESTAMP);
+CREATE TABLE t (code CHAR(3));
+CREATE TABLE t (code BPCHAR(3));
 ```
 
 ✅ Correct:
@@ -214,6 +219,8 @@ CREATE TABLE users (name TEXT CHECK (length(name) <= 255));
 CREATE TABLE t (created_at TIMESTAMPTZ);
 CREATE TABLE t (created_at TIMESTAMP WITH TIME ZONE);
 CREATE TABLE t (price NUMERIC(10, 2), currency CHAR(3));
+CREATE TABLE t (code TEXT);
+CREATE TABLE t (code TEXT CHECK (length(code) = 3));
 ```
 
 ### `postgresql/require-limit`

@@ -1,0 +1,1 @@
+CREATE TABLE t (code CHAR(3));

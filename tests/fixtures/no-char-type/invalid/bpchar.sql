@@ -1,0 +1,1 @@
+CREATE TABLE t (code BPCHAR(3));
