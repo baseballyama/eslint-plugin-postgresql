@@ -1,0 +1,1 @@
+CREATE TABLE t (price NUMERIC(10, 2));

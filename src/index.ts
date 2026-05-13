@@ -5,6 +5,7 @@ import noSelectStar from "./rules/no-select-star.js";
 import noDropTableCascade from "./rules/no-drop-table-cascade.js";
 import noCrossJoin from "./rules/no-cross-join.js";
 import noNaturalJoin from "./rules/no-natural-join.js";
+import noMoneyType from "./rules/no-money-type.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
@@ -26,6 +27,7 @@ const plugin: ESLint.Plugin = {
     "no-drop-table-cascade": noDropTableCascade,
     "no-cross-join": noCrossJoin,
     "no-natural-join": noNaturalJoin,
+    "no-money-type": noMoneyType,
     "no-syntax-error": noSyntaxError,
     "no-truncate-cascade": noTruncateCascade,
     "prefer-jsonb-over-json": preferJsonbOverJson,
@@ -47,6 +49,7 @@ const plugin: ESLint.Plugin = {
         "postgresql/no-drop-table-cascade": "warn",
         "postgresql/no-cross-join": "warn",
         "postgresql/no-natural-join": "error",
+        "postgresql/no-money-type": "error",
         "postgresql/no-syntax-error": "error",
         "postgresql/no-truncate-cascade": "warn",
         "postgresql/prefer-jsonb-over-json": "warn",

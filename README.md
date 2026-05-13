@@ -90,6 +90,12 @@ Disallows `SELECT *` (and `<alias>.*`). Listing columns explicitly keeps result 
 
 **Type**: Suggestion  
 **Recommended**: ❌ Off by default  
+### `postgresql/no-money-type`
+
+Errors on the `money` column type. Its output format and precision depend on the server's `lc_monetary` setting, so the same row prints differently on different servers and round-trips badly through clients. The PostgreSQL recommendation is `numeric` (and a separate currency column when you have more than one currency).
+
+**Type**: Problem  
+**Recommended**: ✅ Error  
 **Fixable**: ❌ No
 
 #### Examples
@@ -99,6 +105,7 @@ Disallows `SELECT *` (and `<alias>.*`). Listing columns explicitly keeps result 
 ```sql
 SELECT * FROM users;
 SELECT u.* FROM users u;
+CREATE TABLE t (price MONEY);
 ```
 
 ✅ Correct:
@@ -206,6 +213,7 @@ CREATE TABLE users (name TEXT CHECK (length(name) <= 255));
 
 CREATE TABLE t (created_at TIMESTAMPTZ);
 CREATE TABLE t (created_at TIMESTAMP WITH TIME ZONE);
+CREATE TABLE t (price NUMERIC(10, 2), currency CHAR(3));
 ```
 
 ### `postgresql/require-limit`
