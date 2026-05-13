@@ -126,6 +126,11 @@ Warns on `DROP TABLE ... CASCADE`. `CASCADE` silently removes dependent objects 
 Warns on `TRUNCATE ... CASCADE`. CASCADE on TRUNCATE transitively empties every table that has a foreign key referencing the target, which is essentially never the right tool for the intended operation.
 
 **Type**: Problem  
+### `postgresql/no-cross-join`
+
+Warns on `CROSS JOIN` (cartesian product without a join condition). Almost always a mistake — if the intent really is a cartesian product, write `JOIN ... ON true` so the intent is visible. Note that `INNER JOIN b` without `ON`/`USING` is a parser error in PostgreSQL, so the only shape this rule actually fires on in practice is the explicit `CROSS JOIN`.
+
+**Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
 **Fixable**: ❌ No
 
@@ -138,6 +143,7 @@ DELETE FROM users;
 UPDATE users SET active = false;
 DROP TABLE users CASCADE;
 TRUNCATE users CASCADE;
+SELECT * FROM a CROSS JOIN b;
 ```
 
 ✅ Correct:
@@ -150,6 +156,9 @@ DROP TABLE users;
 DROP TABLE users RESTRICT;
 TRUNCATE users;
 TRUNCATE users RESTRICT;
+SELECT * FROM a JOIN b ON a.id = b.id;
+SELECT * FROM a INNER JOIN b USING (id);
+SELECT * FROM a JOIN b ON true; -- intentional cartesian
 ```
 
 ### `postgresql/require-limit`

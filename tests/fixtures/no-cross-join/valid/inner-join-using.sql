@@ -1,0 +1,1 @@
+SELECT 1 FROM a INNER JOIN b USING (id);
