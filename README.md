@@ -84,6 +84,30 @@ SELECT * FROM WHERE id = 1;
 SELECT * FROM users WHERE id = 1;
 ```
 
+### `postgresql/no-select-star`
+
+Disallows `SELECT *` (and `<alias>.*`). Listing columns explicitly keeps result schemas stable when the underlying table evolves and avoids accidentally pulling new sensitive columns into a query.
+
+**Type**: Suggestion  
+**Recommended**: ❌ Off by default  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT * FROM users;
+SELECT u.* FROM users u;
+```
+
+✅ Correct:
+
+```sql
+SELECT id, name FROM users;
+SELECT count(*) FROM users; -- aggregate star is fine
+```
+
 ### `postgresql/require-limit`
 
 Requires LIMIT clause in SELECT statements. Prevents accidentally retrieving large amounts of data.
