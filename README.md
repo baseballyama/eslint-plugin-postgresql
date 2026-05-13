@@ -96,6 +96,12 @@ Errors on the `money` column type. Its output format and precision depend on the
 
 **Type**: Problem  
 **Recommended**: ✅ Error  
+### `postgresql/prefer-create-index-concurrently`
+
+Warns on plain `CREATE INDEX` and recommends `CREATE INDEX CONCURRENTLY`. A non-concurrent index build takes a `SHARE` lock on the target table for the duration of the build — readers are unaffected, but every writer is blocked. Concurrent builds avoid the lock but cannot run inside a transaction — most migration tools therefore need an explicit per-step opt-out for this. Off by default because the right answer depends on your migration framework.
+
+**Type**: Suggestion  
+**Recommended**: ❌ Off by default  
 **Fixable**: ❌ No
 
 #### Examples
@@ -106,6 +112,7 @@ Errors on the `money` column type. Its output format and precision depend on the
 SELECT * FROM users;
 SELECT u.* FROM users u;
 CREATE TABLE t (price MONEY);
+CREATE INDEX idx_users_email ON users (email);
 ```
 
 ✅ Correct:
@@ -229,6 +236,7 @@ CREATE TABLE t (code TEXT);
 CREATE TABLE t (code TEXT CHECK (length(code) = 3));
 GRANT SELECT ON users TO reporting;
 REVOKE ALL ON users FROM PUBLIC;
+CREATE INDEX CONCURRENTLY idx_users_email ON users (email);
 ```
 
 ### `postgresql/require-limit`
