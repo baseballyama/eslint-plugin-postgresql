@@ -1,0 +1,1 @@
+CREATE TABLE t (id INT PRIMARY KEY, created_at TIMESTAMPTZ);
