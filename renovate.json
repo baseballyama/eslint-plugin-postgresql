@@ -1,15 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
     ":automergePatch",
+    ":maintainLockFilesWeekly",
     ":timezone(Asia/Tokyo)",
+    "schedule:earlyMondays",
     "npm:unpublishSafe"
   ],
-  "dependencyDashboard": false,
-  "prConcurrentLimit": 10,
-  "prHourlyLimit": 0,
-  "reviewers": [],
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
   "minimumReleaseAge": "3 days",
   "major": {
     "stabilityDays": 30
@@ -20,7 +22,26 @@
   "patch": {
     "stabilityDays": 3
   },
-  "ignoreTests": false,
-  "lockFileMaintenance": { "enabled": true },
-  "packageRules": []
+  "packageRules": [
+    {
+      "description": "Group all non-major devDependency bumps into one PR",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "devDependencies (non-major)"
+    },
+    {
+      "description": "GitHub Actions: group all updates so the matrix moves together",
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions"
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on Monday"]
+  },
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  },
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 10
 }
