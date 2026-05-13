@@ -1,0 +1,1 @@
+SELECT 1 FROM users WHERE id NOT IN (1, 2, 3) LIMIT 100;
