@@ -102,6 +102,12 @@ Warns on plain `CREATE INDEX` and recommends `CREATE INDEX CONCURRENTLY`. A non-
 
 **Type**: Suggestion  
 **Recommended**: ❌ Off by default  
+### `postgresql/no-not-in-subquery`
+
+Errors on `NOT IN (subquery)`. PostgreSQL's `NOT IN` returns **no rows** if the subquery yields a single NULL — semantically correct under three-valued logic, but virtually always not what application code wants. Use `NOT EXISTS (SELECT 1 FROM ... WHERE ...)`, which handles NULL the way humans expect. `NOT IN (1, 2, 3)` with a literal list is unaffected.
+
+**Type**: Problem  
+**Recommended**: ✅ Error  
 **Fixable**: ❌ No
 
 #### Examples
@@ -113,6 +119,7 @@ SELECT * FROM users;
 SELECT u.* FROM users u;
 CREATE TABLE t (price MONEY);
 CREATE INDEX idx_users_email ON users (email);
+SELECT id FROM users WHERE id NOT IN (SELECT user_id FROM blocks);
 ```
 
 ✅ Correct:
@@ -237,6 +244,8 @@ CREATE TABLE t (code TEXT CHECK (length(code) = 3));
 GRANT SELECT ON users TO reporting;
 REVOKE ALL ON users FROM PUBLIC;
 CREATE INDEX CONCURRENTLY idx_users_email ON users (email);
+SELECT id FROM users u WHERE NOT EXISTS (SELECT 1 FROM blocks b WHERE b.user_id = u.id);
+SELECT 1 FROM users WHERE id NOT IN (1, 2, 3); -- literal list is fine
 ```
 
 ### `postgresql/require-limit`
