@@ -47,15 +47,15 @@ started triaging. Don't duplicate or contradict prior work without addressing it
 One of: `bug`, `enhancement` (feature request), `documentation`, `question`,
 `dependencies`, or `other`.
 
-| Signal                                                          | Likely class    |
-| --------------------------------------------------------------- | --------------- |
-| "throws", "wrong output", repro steps + expected vs actual      | bug             |
-| "would be nice if", "support for X", "add an option to ..."     | enhancement     |
-| "how do I ...", "is this supported?"                            | question        |
-| typo / wrong sample / link rot in README or docs                | documentation   |
-| renovate / dependabot / lockfile bump                           | dependencies    |
-| spam / off-topic / unrelated repo                               | other (invalid) |
-| CI flake or build error in the user's environment              | usually question, unless reproducible against a clean checkout — then bug |
+| Signal                                                      | Likely class                                                              |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------- |
+| "throws", "wrong output", repro steps + expected vs actual  | bug                                                                       |
+| "would be nice if", "support for X", "add an option to ..." | enhancement                                                               |
+| "how do I ...", "is this supported?"                        | question                                                                  |
+| typo / wrong sample / link rot in README or docs            | documentation                                                             |
+| renovate / dependabot / lockfile bump                       | dependencies                                                              |
+| spam / off-topic / unrelated repo                           | other (invalid)                                                           |
+| CI flake or build error in the user's environment           | usually question, unless reproducible against a clean checkout — then bug |
 
 Edge cases:
 
@@ -97,6 +97,7 @@ the conflict in your triage comment so the maintainer can adjust.
 Goal: a failing test that pins the bug, then a fix that flips it green, then a PR.
 
 1. **Reproduce in a test first.**
+
    - Add a failing test in the project's standard test location.
    - Name it after the issue: `issue-<num>` (file name or test name, depending on
      the test framework).
@@ -107,6 +108,7 @@ Goal: a failing test that pins the bug, then a fix that flips it green, then a P
      reproduce or the test is wrong — investigate.
 
 2. **If you reproduced it:**
+
    - Fix the underlying cause, not the symptom.
    - Re-run the test to confirm green.
    - Run the project's quality gates (`run-check-and-test` skill) before opening
@@ -118,6 +120,7 @@ Goal: a failing test that pins the bug, then a fix that flips it green, then a P
        command to verify locally.
 
 3. **If you couldn't reproduce:**
+
    - Do **not** apply `wontfix` or `invalid` — those are maintainer calls.
    - Post one comment on the issue explaining what you tried (versions, fixture,
      code path) and what specific information you need to make progress (minimal
@@ -128,7 +131,7 @@ Goal: a failing test that pins the bug, then a fix that flips it green, then a P
    Skeleton (translate to the issue's language):
 
    > Thanks for the report! I tried to reproduce against `main` with `<what you
-   > tried>` and it succeeded / produced `<actual>`. To move this forward, could
+tried>` and it succeeded / produced `<actual>`. To move this forward, could
    > you share `<specific thing>`? @<author>
 
 ### 3b. Feature request workflow
@@ -142,9 +145,10 @@ to something already supported is rejected by default.
    - **Reject (most common):** the request adds a parallel API to an existing
      capability (e.g., a convenience helper for something the existing public API
      already supports in one line). Post a comment that:
+
      - thanks the reporter
      - shows the existing path with a code snippet
-     - explains *why* this project does not add a second path (link the relevant
+     - explains _why_ this project does not add a second path (link the relevant
        README / CLAUDE.md section if applicable)
      - leaves the maintainer to close. Do not close yourself.
 
@@ -158,22 +162,22 @@ to something already supported is rejected by default.
 2. **Spec → implement → PR (only for accepted requests).**
 
    a. **Spec the change** as a new comment on the original issue. The original
-      issue is the tracking issue — don't open a separate one. The spec covers:
-      - public API shape (entry points, exported names, types)
-      - what existing path it replaces, if any (and a deprecation plan if relevant)
-      - test plan (unit + at least one integration / round-trip case)
-      - documentation impact
+   issue is the tracking issue — don't open a separate one. The spec covers:
+
+   - public API shape (entry points, exported names, types)
+   - what existing path it replaces, if any (and a deprecation plan if relevant)
+   - test plan (unit + at least one integration / round-trip case)
+   - documentation impact
 
    b. **Pause for `op` approval.** A spec comment commits the project to a
-      direction. Wait for the user to say "go" before posting it, and pause again
-      before starting implementation if the spec is non-trivial.
+   direction. Wait for the user to say "go" before posting it, and pause again
+   before starting implementation if the spec is non-trivial.
 
    c. **Implement** on a branch `feat/issue-<num>-<short-slug>`. Tests first;
-      production code to make them pass. Run the full project quality gate
-      (`run-check-and-test`) before opening the PR.
+   production code to make them pass. Run the full project quality gate
+   (`run-check-and-test`) before opening the PR.
 
-   d. **PR body** includes the spec (or a link to the spec comment), "Closes
-      #<num>", and a manual verification step.
+   d. **PR body** includes the spec (or a link to the spec comment), "Closes #<num>", and a manual verification step.
 
 ### 3c. Question workflow
 
@@ -188,7 +192,7 @@ You can do this with `<existing API>`:
 <minimal example>
 \`\`\`
 
-This is documented in [<section>](<link>). Let me know if that doesn't fit your
+This is documented in [<section>](link). Let me know if that doesn't fit your
 case — happy to dig deeper.
 ```
 

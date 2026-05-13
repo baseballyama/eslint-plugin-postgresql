@@ -1,8 +1,8 @@
 ---
 name: Feature request
 about: Propose a new rule, configuration option, or change to the public API.
-title: 'feat: <one-line summary>'
-labels: ['enhancement', 'needs-triage']
+title: "feat: <one-line summary>"
+labels: ["enhancement", "needs-triage"]
 ---
 
 <!-- issue-template:feature:v1 -->

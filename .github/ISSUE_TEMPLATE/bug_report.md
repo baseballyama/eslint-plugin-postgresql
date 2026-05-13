@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Report something that's broken or behaves contrary to the documentation.
-title: 'bug: <one-line summary>'
-labels: ['bug', 'needs-triage']
+title: "bug: <one-line summary>"
+labels: ["bug", "needs-triage"]
 ---
 
 <!-- issue-template:bug:v1 -->

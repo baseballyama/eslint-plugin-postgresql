@@ -13,31 +13,31 @@ to parse `.sql` files into an ESLint-compatible AST.
   `eslint-plugin-postgresql`. Built with rolldown, tested with vitest, type-
   checked with `tsc`, linted with oxlint, formatted with Prettier.
 - **Package manager**: pnpm. Lockfile is committed. Use `pnpm install
-  --frozen-lockfile` in CI.
+--frozen-lockfile` in CI.
 - **Public API**: the default export from `dist/index.js` — a `plugin` object
   exposing `rules` and `configs.recommended`. Anything not reachable through
   that export is internal.
 - **Related projects**:
   - [`postgresql-eslint-parser`](https://github.com/baseballyama/postgresql-eslint-parser) — parser layer.
   - [`libpg-query`](https://github.com/pganalyze/libpg-query-node) — actual PostgreSQL parser.
-  Bugs in those layers should go upstream, not here.
+    Bugs in those layers should go upstream, not here.
 
 OSS is not the same as "code only I touch." Optimize for **a stranger not
 getting confused**, not for your own convenience.
 
 ## Repository layout
 
-| Path                        | Purpose                                                       |
-| --------------------------- | ------------------------------------------------------------- |
-| `src/index.ts`              | Plugin entry point (`rules`, `configs.recommended`).          |
-| `src/rules/*.ts`            | One file per rule. Export an ESLint rule object as default.   |
-| `src/meta.ts`               | Package name / version pulled into the plugin meta.           |
-| `tests/*.test.ts`           | Vitest unit tests, one per rule plus an `index` smoke test.   |
-| `tests/fixtures/<rule>/`    | SQL fixtures + expected-output snapshots, snapshot-driven.    |
-| `tests/test-utils.ts`       | Shared test helpers (RuleTester wiring, fixture loader).      |
-| `scripts/create-rule.js`    | Scaffold a new rule + tests + fixture directory.              |
-| `dist/`                     | Build output (gitignored except for publish).                 |
-| `.changeset/`               | Pending changesets — drive the release PR.                    |
+| Path                     | Purpose                                                     |
+| ------------------------ | ----------------------------------------------------------- |
+| `src/index.ts`           | Plugin entry point (`rules`, `configs.recommended`).        |
+| `src/rules/*.ts`         | One file per rule. Export an ESLint rule object as default. |
+| `src/meta.ts`            | Package name / version pulled into the plugin meta.         |
+| `tests/*.test.ts`        | Vitest unit tests, one per rule plus an `index` smoke test. |
+| `tests/fixtures/<rule>/` | SQL fixtures + expected-output snapshots, snapshot-driven.  |
+| `tests/test-utils.ts`    | Shared test helpers (RuleTester wiring, fixture loader).    |
+| `scripts/create-rule.js` | Scaffold a new rule + tests + fixture directory.            |
+| `dist/`                  | Build output (gitignored except for publish).               |
+| `.changeset/`            | Pending changesets — drive the release PR.                  |
 
 ## Daily commands
 
@@ -59,13 +59,13 @@ pnpm update-fixtures        # regenerate fixture snapshots when intentional
 
 Every line of code must be justified.
 
-| Principle             | Meaning                                                                            |
-| --------------------- | ---------------------------------------------------------------------------------- |
-| Simplicity            | No premature abstraction, no features for hypothetical futures. YAGNI.             |
-| Consistency           | Match existing patterns. New patterns require an explicit reason.                  |
-| Performance           | Don't write N+1 / O(n²) in the first place. Defend with code shape, not profilers. |
-| Security              | Validate at boundaries (rule input, file I/O). Watch OWASP.                        |
-| Maintainability       | Write code that you in 6 months and a new contributor can read and understand.     |
+| Principle               | Meaning                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| Simplicity              | No premature abstraction, no features for hypothetical futures. YAGNI.                  |
+| Consistency             | Match existing patterns. New patterns require an explicit reason.                       |
+| Performance             | Don't write N+1 / O(n²) in the first place. Defend with code shape, not profilers.      |
+| Security                | Validate at boundaries (rule input, file I/O). Watch OWASP.                             |
+| Maintainability         | Write code that you in 6 months and a new contributor can read and understand.          |
 | Backwards compatibility | Public API is preserved unless a breaking change is genuinely justified. Follow SemVer. |
 
 ## "One way to do one thing"
@@ -97,12 +97,12 @@ Decision flow when evaluating a feature request:
 
 **Yes at boundaries; no internally.**
 
-| Situation                                     | Defend?  | Example                                                |
-| --------------------------------------------- | -------- | ------------------------------------------------------ |
-| User SQL fed into the parser                  | **Yes**  | Parser may throw; surface as `no-syntax-error`, don't crash the linter. |
-| User rule options                             | **Yes**  | Validate option shape via the rule's `schema`.         |
-| ESLint AST node types we visit                | No       | Trust the parser's types; don't re-check `node.type`.  |
-| Cases ruled out by the type system            | No       | No "just in case" guards on `unknown`-narrowed values. |
+| Situation                          | Defend? | Example                                                                 |
+| ---------------------------------- | ------- | ----------------------------------------------------------------------- |
+| User SQL fed into the parser       | **Yes** | Parser may throw; surface as `no-syntax-error`, don't crash the linter. |
+| User rule options                  | **Yes** | Validate option shape via the rule's `schema`.                          |
+| ESLint AST node types we visit     | No      | Trust the parser's types; don't re-check `node.type`.                   |
+| Cases ruled out by the type system | No      | No "just in case" guards on `unknown`-narrowed values.                  |
 
 "Just in case" checks pile up and **bury the real validation** under noise.
 
@@ -211,7 +211,7 @@ Write from the user's perspective.
 
 - ❌ `refactor: extract helper for visitor walk` — users don't care.
 - ✅ `feat: add `no-select-star` rule` — users want to know.
-- ✅ `fix: `require-limit` no longer flags `SELECT ... FOR UPDATE`` — symptom-based.
+- ✅ `fix: `require-limit`no longer flags`SELECT ... FOR UPDATE`` — symptom-based.
 
 A pure-internal refactor PR doesn't need a changeset; if it does need one,
 mark it `chore`.
@@ -256,13 +256,13 @@ anything visible to the public.
 The `.claude/skills/` directory contains workflow-specific guides. Use them
 when the situation matches.
 
-| Skill                | When to use                                                          |
-| -------------------- | -------------------------------------------------------------------- |
-| `pr-workflow`        | Creating a PR                                                        |
+| Skill                | When to use                                                            |
+| -------------------- | ---------------------------------------------------------------------- |
+| `pr-workflow`        | Creating a PR                                                          |
 | `full-code-review`   | Reviewing a branch from a maintainer's perspective before opening a PR |
-| `review-response`    | Responding to GitHub review comments                                 |
-| `run-check-and-test` | Running quality checks and tests before commit / PR                  |
-| `issue-triage`       | Classifying a GitHub issue and routing it to the right workflow      |
+| `review-response`    | Responding to GitHub review comments                                   |
+| `run-check-and-test` | Running quality checks and tests before commit / PR                    |
+| `issue-triage`       | Classifying a GitHub issue and routing it to the right workflow        |
 
 When you add a new skill, append it to this table.
 

@@ -64,12 +64,12 @@ Confirm with the user:
 
 Possible verdicts:
 
-| Verdict      | Meaning                                                                 | Next step                                          |
-| ------------ | ----------------------------------------------------------------------- | -------------------------------------------------- |
-| Justified    | Real problem, fits scope, no existing path covers it                    | Continue to Phase 2                                |
+| Verdict         | Meaning                                                                | Next step                                           |
+| --------------- | ---------------------------------------------------------------------- | --------------------------------------------------- |
+| Justified       | Real problem, fits scope, no existing path covers it                   | Continue to Phase 2                                 |
 | Already covered | Existing API solves this; the PR is a parallel path → reject by policy | Stop. Recommend closing the PR with a code pointer. |
-| Out of scope | Inside the user's universe, but not this library's scope                | Stop. Recommend redirecting to the right project.  |
-| Unclear      | Reason isn't articulated                                                | Ask the user for the missing context              |
+| Out of scope    | Inside the user's universe, but not this library's scope               | Stop. Recommend redirecting to the right project.   |
+| Unclear         | Reason isn't articulated                                               | Ask the user for the missing context                |
 
 Don't proceed past Phase 1 until the verdict is "Justified."
 
@@ -79,23 +79,27 @@ Now look at the **shape** of the change, not the code. Use the diff and a sketch
 the new public surface. Specifically check:
 
 1. **API surface impact**
+
    - What new public exports / types / commands does this introduce?
    - What existing exports change behavior, signature, or semantics?
    - Are any breaking changes hidden as "fixes"? (Renames, type narrowings,
      defaults flipping, error types changing all count as breaking.)
 
 2. **"One way to do one thing" check**
+
    - Does the new path duplicate a capability already in the API?
-   - If yes: reject the design unless this is a *strictly better* replacement (and
+   - If yes: reject the design unless this is a _strictly better_ replacement (and
      the old path is being removed in the same change).
 
 3. **Consistency with existing patterns**
+
    - Naming, error types, async patterns, return shapes, file organization — does it
      look like the rest of the codebase, or did the author invent a one-off pattern?
    - If the pattern is intentionally new, is the reason in a comment, the PR body, or
      a discussion?
 
 4. **Complexity vs need**
+
    - Is the abstraction level appropriate, or is there a hypothetical-future-need
      abstraction in here? (Generic helper for one caller, configuration for one
      unused option, etc.)
@@ -235,11 +239,11 @@ forward, or unverifiable correctness.
 
 ## Severity definitions
 
-| Severity   | Meaning                                                          | Action                                  |
-| ---------- | ---------------------------------------------------------------- | --------------------------------------- |
-| Critical   | Security hole, data corruption risk, breaking change to the public API without intent | Must fix. Cannot merge.    |
-| Major      | Performance regression, design problem, missing tests for new behavior | Should fix. Skip only with explicit reason. |
-| Minor      | Naming, comments, small readability issues                       | Recommend. Author's call.               |
+| Severity | Meaning                                                                               | Action                                      |
+| -------- | ------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Critical | Security hole, data corruption risk, breaking change to the public API without intent | Must fix. Cannot merge.                     |
+| Major    | Performance regression, design problem, missing tests for new behavior                | Should fix. Skip only with explicit reason. |
+| Minor    | Naming, comments, small readability issues                                            | Recommend. Author's call.                   |
 
 ## Mindset
 
