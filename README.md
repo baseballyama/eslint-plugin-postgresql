@@ -121,6 +121,9 @@ Errors on `UPDATE` statements without a `WHERE` clause — updating every row in
 ### `postgresql/no-drop-table-cascade`
 
 Warns on `DROP TABLE ... CASCADE`. `CASCADE` silently removes dependent objects (views, foreign keys, sequences) and is one of the most common ways migrations destroy more than intended. The fix is to list the dependents explicitly. The rule scopes to `DROP TABLE` to match its name; other `DROP ... CASCADE` variants (schema, type, etc.) are not covered.
+### `postgresql/no-truncate-cascade`
+
+Warns on `TRUNCATE ... CASCADE`. CASCADE on TRUNCATE transitively empties every table that has a foreign key referencing the target, which is essentially never the right tool for the intended operation.
 
 **Type**: Problem  
 **Recommended**: ⚠️ Warn  
@@ -134,6 +137,7 @@ Warns on `DROP TABLE ... CASCADE`. `CASCADE` silently removes dependent objects 
 DELETE FROM users;
 UPDATE users SET active = false;
 DROP TABLE users CASCADE;
+TRUNCATE users CASCADE;
 ```
 
 ✅ Correct:
@@ -144,6 +148,8 @@ DELETE FROM sessions WHERE expires_at < now();
 UPDATE users SET active = false WHERE id = 1;
 DROP TABLE users;
 DROP TABLE users RESTRICT;
+TRUNCATE users;
+TRUNCATE users RESTRICT;
 ```
 
 ### `postgresql/require-limit`
