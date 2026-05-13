@@ -5,8 +5,9 @@
 **Do not file a public GitHub issue for security bugs.**
 
 Please report security issues privately via [GitHub's Private Vulnerability
-Reporting](../../security/advisories/new). The maintainer will acknowledge
-within a reasonable timeframe and coordinate a fix and disclosure.
+Reporting](https://github.com/baseballyama/eslint-plugin-postgresql/security/advisories/new).
+The maintainer will acknowledge within a reasonable timeframe and coordinate
+a fix and disclosure.
 
 Examples of issues in scope:
 

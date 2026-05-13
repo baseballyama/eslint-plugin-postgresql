@@ -181,15 +181,18 @@ fixability.
 
 ### Tests
 
-Two layers:
+The repo's pattern is **fixture-driven**: each rule has a single test file
+that wires the fixture loader.
 
-1. **`tests/<rule>.test.ts`** — RuleTester-style cases with inline SQL strings
-   for the canonical happy path and a few edge cases.
-2. **`tests/fixtures/<rule>/`** — larger SQL fixtures snapshot-tested against
-   the rule's output. Regenerate with `pnpm update-fixtures` when the change
-   is intentional, and review the diff carefully before committing.
+1. **`tests/<rule>.test.ts`** — one-line file that calls
+   `runRuleTest("<rule>", rule, "<description>")`; the helper auto-loads
+   every `.sql` file under `tests/fixtures/<rule>/{valid,invalid}/`.
+2. **`tests/fixtures/<rule>/valid/*.sql`** — SQL the rule must accept.
+3. **`tests/fixtures/<rule>/invalid/*.sql`** — SQL the rule must flag, paired
+   with `<basename>-errors.expected.json` listing the expected `messageId`s
+   (and optional positions).
 
-A bug fix must include a fixture that fails on the parent commit.
+A bug fix must include a new invalid fixture that fails on the parent commit.
 
 ## Public API is a contract
 
