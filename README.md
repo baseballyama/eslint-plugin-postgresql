@@ -147,6 +147,9 @@ Warns on `SMALLSERIAL`, `SERIAL`, `BIGSERIAL` columns. The serial pseudo-types c
 ### `postgresql/require-primary-key`
 
 Warns on `CREATE TABLE` statements without a primary key — either column-level (`id INT PRIMARY KEY`) or table-level (`PRIMARY KEY (id)`). Tables without a primary key cannot be replicated cleanly with logical replication, are hard to shard, and break most ORMs and migration tools. The rule does not flag `CREATE TABLE ... PARTITION OF ...` (no `tableElts`); a partition inherits its parent's primary key.
+### `postgresql/prefer-text-over-varchar`
+
+Warns on `varchar(n)` columns. PostgreSQL stores `text` and `varchar(n)` the same way internally; the length is enforced by a per-table constraint that you cannot relax without rewriting the table. Use `text` and add a `CHECK (length(col) <= N)` constraint when you actually need a cap.
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
@@ -167,6 +170,7 @@ CREATE TABLE events (payload JSON);
 CREATE TABLE t (id BIGSERIAL);
 CREATE TABLE t (id SERIAL);
 CREATE TABLE t (id INT, name TEXT);
+CREATE TABLE users (name VARCHAR(255));
 ```
 
 ✅ Correct:
@@ -189,6 +193,12 @@ CREATE TABLE t (id BIGINT GENERATED ALWAYS AS IDENTITY);
 CREATE TABLE t (id INT PRIMARY KEY, name TEXT);
 CREATE TABLE t (id INT, name TEXT, PRIMARY KEY (id));
 ```
+
+CREATE TABLE users (name TEXT);
+CREATE TABLE users (name TEXT CHECK (length(name) <= 255));
+```
+
+`VARCHAR` without a length limit is also allowed.
 
 ### `postgresql/require-limit`
 
