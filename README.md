@@ -150,6 +150,9 @@ Warns on `CREATE TABLE` statements without a primary key — either column-level
 ### `postgresql/prefer-text-over-varchar`
 
 Warns on `varchar(n)` columns. PostgreSQL stores `text` and `varchar(n)` the same way internally; the length is enforced by a per-table constraint that you cannot relax without rewriting the table. Use `text` and add a `CHECK (length(col) <= N)` constraint when you actually need a cap.
+### `postgresql/prefer-timestamptz`
+
+Warns on `timestamp` (i.e. `timestamp without time zone`) columns. `timestamp` is timezone-naive: it stores the wall-clock literal you handed in and assumes every reader and writer share the same convention. Two clients with different `TimeZone` settings will disagree on which instant a row represents. `timestamptz` anchors everything to UTC at storage time and converts to the session timezone on read, which is what application code almost always wants.
 
 **Type**: Suggestion  
 **Recommended**: ⚠️ Warn  
@@ -171,6 +174,7 @@ CREATE TABLE t (id BIGSERIAL);
 CREATE TABLE t (id SERIAL);
 CREATE TABLE t (id INT, name TEXT);
 CREATE TABLE users (name VARCHAR(255));
+CREATE TABLE t (created_at TIMESTAMP);
 ```
 
 ✅ Correct:
@@ -199,6 +203,10 @@ CREATE TABLE users (name TEXT CHECK (length(name) <= 255));
 ```
 
 `VARCHAR` without a length limit is also allowed.
+
+CREATE TABLE t (created_at TIMESTAMPTZ);
+CREATE TABLE t (created_at TIMESTAMP WITH TIME ZONE);
+```
 
 ### `postgresql/require-limit`
 
