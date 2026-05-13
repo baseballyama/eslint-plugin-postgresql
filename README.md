@@ -112,6 +112,10 @@ SELECT count(*) FROM users; -- aggregate star is fine
 
 Errors on `DELETE` statements that have no `WHERE` clause — deleting every row in a table is almost always a mistake. Use `TRUNCATE` if you really mean to empty the table.
 
+### `postgresql/require-where-in-update`
+
+Errors on `UPDATE` statements without a `WHERE` clause — updating every row in a table is almost always a mistake.
+
 **Type**: Problem  
 **Recommended**: ✅ Error  
 **Fixable**: ❌ No
@@ -122,6 +126,7 @@ Errors on `DELETE` statements that have no `WHERE` clause — deleting every row
 
 ```sql
 DELETE FROM users;
+UPDATE users SET active = false;
 ```
 
 ✅ Correct:
@@ -129,6 +134,7 @@ DELETE FROM users;
 ```sql
 DELETE FROM users WHERE id = 1;
 DELETE FROM sessions WHERE expires_at < now();
+UPDATE users SET active = false WHERE id = 1;
 ```
 
 ### `postgresql/require-limit`
