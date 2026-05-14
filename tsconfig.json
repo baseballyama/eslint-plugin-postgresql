@@ -46,6 +46,7 @@
     "${configDir}/dist",
     "${configDir}/coverage",
     "${configDir}/knip.ts",
-    "${configDir}/vitest.config.ts"
+    "${configDir}/vitest.config.ts",
+    "${configDir}/site"
   ]
 }
