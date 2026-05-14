@@ -1,5 +1,51 @@
 # eslint-plugin-postgresql
 
+## 0.7.0
+
+### Minor Changes
+
+- [#149](https://github.com/baseballyama/eslint-plugin-postgresql/pull/149) [`454798d`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/454798d6929dfdae44615cdfad4d7558806148b6) Thanks [@baseballyama](https://github.com/baseballyama)! - - **#145 fix:** `prefer-keyword-case` no longer uppercases built-in
+  type keywords (`text`, `int`, `real`, `bigint`, `numeric`, ...) in
+  positions where user-defined type identifiers are also valid
+  (function signatures, column types, `CAST(... AS ...)`, `x::type`).
+  The previous behavior left mixed casing in the same arg list when
+  the file used custom domain or enum names alongside built-ins. The
+  rule now skips `Keyword` tokens that land at the parser's `names`
+  (typeName) positions.
+  - **#146 feat:** new `postgresql/align-values` rule (`configs.stylistic`,
+    auto-fixable). Aligns column values vertically inside multi-row
+    `INSERT ... VALUES (...)`. Uses per-column max width across the
+    current rows so deleting a wide value tightens the layout. Skips
+    multi-line tuples, lines with inline comments, and rows with
+    mismatched column counts.
+
+### Patch Changes
+
+- [#147](https://github.com/baseballyama/eslint-plugin-postgresql/pull/147) [`7b5b8fd`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/7b5b8fdaa2e4c08478e8b83755b5382c9820945b) Thanks [@baseballyama](https://github.com/baseballyama)! - Four autofix correctness bugs reported against 0.6.0:
+  - **#140 fix:** `prefer-between-over-and` and `prefer-in-list-over-or`
+    no longer drop the literal operand of cast expressions. The rules
+    used `node.range` directly, but `TypeCast.range` covers only the
+    `::` operator (or the `CAST` keyword) — so `'1900-01-01'::TIMESTAMPTZ`
+    collapsed to just `::` in the rewrite, producing invalid SQL like
+    `BETWEEN :: AND ::TIMESTAMPTZ`. Both rules now compute true source
+    ranges by walking descendants.
+  - **#142 fix:** `align-column-definitions` now keeps `TYPE[]` (and
+    `TYPE[3]`, `TYPE[][]`) together as a single alignment column, the
+    same way `TIMESTAMP(3)` was already handled. The parser does not
+    emit `[` / `]` as tokens, so the rule consumes any bracket suffix
+    directly from the source text when `typeName.arrayBounds` is set.
+  - **#143 fix:** `require-trailing-semicolon` no longer inserts `;`
+    in the middle of `NOT NULL` of the last column in a single-statement
+    `CREATE TABLE`. The parser's per-statement `range[1]` is unreliable
+    for single-statement files; the rule reverts to a file-level check
+    ("the last source token must be `;`") which catches the original
+    user intent without relying on internal-node ranges.
+  - **#144 fix:** `prefer-keyword-case` no longer uppercases identifier
+    tokens whose spelling collides with a SQL keyword (`trigger`,
+    `user`, `order`, ...). The rule now collects identifier positions
+    from the AST (`ColumnDef`, `RangeVar`, `Constraint`) and skips
+    `Keyword` tokens that land at one of those positions.
+
 ## 0.6.0
 
 ### Minor Changes
