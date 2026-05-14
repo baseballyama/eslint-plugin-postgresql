@@ -1145,6 +1145,29 @@ VACUUM users;
 VACUUM ANALYZE users;
 ```
 
+### `postgresql/no-cluster`
+
+Warns on the `CLUSTER` statement. Like `VACUUM FULL`, it takes `ACCESS EXCLUSIVE` and rewrites the table. PostgreSQL does not keep rows clustered as you continue to write — every subsequent `CLUSTER` must rewrite everything again. Use `pg_repack --order-by` for online clustering, or build the index in the order you actually want to read.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CLUSTER users USING users_pkey;
+```
+
+✅ Correct:
+
+```sql
+VACUUM users;
+-- Or: pg_repack --order-by from outside SQL.
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
