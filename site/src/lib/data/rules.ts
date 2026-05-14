@@ -645,6 +645,21 @@ export const rules: RuleMeta[] = [
       "CREATE TABLE jobs (id int, duration interval);",
     ],
   },
+  {
+    name: "no-set-not-null",
+    description: "Warn on `SET NOT NULL` — full scan under ACCESS EXCLUSIVE.",
+    longDescription:
+      "PostgreSQL scans the whole table to verify no nulls, holding `ACCESS EXCLUSIVE` for the duration. The PG ≥ 12 pattern is `ADD CHECK (col IS NOT NULL) NOT VALID` → `VALIDATE CONSTRAINT` → `SET NOT NULL` (PG reuses the validated CHECK and skips the scan).",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE users ALTER COLUMN email SET NOT NULL;"],
+    correct: [
+      "ALTER TABLE users ADD CONSTRAINT users_email_not_null CHECK (email IS NOT NULL) NOT VALID;",
+      "ALTER TABLE users VALIDATE CONSTRAINT users_email_not_null;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

@@ -23,6 +23,7 @@ import noRenameColumn from "./rules/no-rename-column.js";
 import noRenameTable from "./rules/no-rename-table.js";
 import noSelectInto from "./rules/no-select-into.js";
 import noSelectStar from "./rules/no-select-star.js";
+import noSetNotNull from "./rules/no-set-not-null.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
 import noTemporaryTable from "./rules/no-temporary-table.js";
 import noTimeType from "./rules/no-time-type.js";
@@ -66,6 +67,7 @@ const rules = {
   "no-rename-table": noRenameTable,
   "no-select-into": noSelectInto,
   "no-select-star": noSelectStar,
+  "no-set-not-null": noSetNotNull,
   "no-syntax-error": noSyntaxError,
   "no-temporary-table": noTemporaryTable,
   "no-time-type": noTimeType,
@@ -129,6 +131,7 @@ plugin.configs = {
       "postgresql/no-rename-column": "warn",
       "postgresql/no-rename-table": "warn",
       "postgresql/no-select-into": "warn",
+      "postgresql/no-set-not-null": "warn",
       "postgresql/no-syntax-error": "error",
       "postgresql/no-temporary-table": "warn",
       "postgresql/no-time-type": "warn",
