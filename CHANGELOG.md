@@ -1,5 +1,64 @@
 # eslint-plugin-postgresql
 
+## 0.10.0
+
+### Minor Changes
+
+- [#165](https://github.com/baseballyama/eslint-plugin-postgresql/pull/165) [`0d974d0`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/0d974d07d46dc28ebcf5ef9207a2c38594d394e7) Thanks [@baseballyama](https://github.com/baseballyama)! - Three migration-safety rules added to `configs.recommended` at
+  `error`:
+  - `no-add-check-constraint-without-not-valid` — companion to
+    `prefer-fk-not-valid`; CHECK constraints added without `NOT VALID`
+    hold `ACCESS EXCLUSIVE` for the entire validating scan.
+  - `no-add-unique-constraint-directly` — inline
+    `ALTER TABLE ... ADD CONSTRAINT ... UNIQUE (cols)` builds the
+    underlying index synchronously under `ACCESS EXCLUSIVE`. Build the
+    index out-of-band with `CREATE UNIQUE INDEX CONCURRENTLY` and then
+    promote it via `ADD CONSTRAINT ... UNIQUE USING INDEX <name>`.
+  - `no-volatile-default-on-add-column` — `ADD COLUMN ... DEFAULT
+random()` (or any other VOLATILE function) forces a full table
+    rewrite under `ACCESS EXCLUSIVE` because the PG10+ stable-default
+    short-cut cannot apply. Recognized volatile generators include
+    `random`, `gen_random_uuid`, `uuid_generate_v1*`, `uuid_generate_v4`,
+    `clock_timestamp`, `timeofday`. `now()` / `current_timestamp` /
+    `current_date` are STABLE within a statement and not flagged.
+
+- [#164](https://github.com/baseballyama/eslint-plugin-postgresql/pull/164) [`7760a95`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/7760a95501f2db966d772d4e6d729a0af55cc8c0) Thanks [@baseballyama](https://github.com/baseballyama)! - Add 3 new rules and extend `prefer-current-timestamp-over-now`:
+  - `no-grant-all`: forbids `GRANT ALL` (catch-all privilege grants are too coarse — list privileges explicitly).
+  - `prefer-exists-over-in-subquery`: prefer `EXISTS (subquery)` over `column IN (subquery)`. `IN` semantics with NULL on the right side surprise users; `EXISTS` is also typically cheaper.
+  - `require-index-on-fk-column`: every foreign-key column must be backed by a leading-column index in the same file. Cross-statement (looks across `CREATE TABLE`, `CREATE INDEX`, `ALTER TABLE ADD CONSTRAINT`).
+  - `prefer-current-timestamp-over-now`: now also flags bareword `LOCALTIMESTAMP` / `LOCALTIME` and autofixes them to `CURRENT_TIMESTAMP` / `CURRENT_TIME`. New message IDs `preferCurrentTimestampOverLocal` / `preferCurrentTimeOverLocal`.
+
+  The three new rules are in `configs.recommended` at `warn`.
+
+- [#161](https://github.com/baseballyama/eslint-plugin-postgresql/pull/161) [`2ed978a`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/2ed978ae0de89965c5a0ac03ccfe20ba020a4609) Thanks [@baseballyama](https://github.com/baseballyama)! - Three security/correctness rules added to `configs.recommended` at
+  `error`:
+  - `no-security-definer-without-search-path` — `SECURITY DEFINER`
+    functions that omit `SET search_path = ...` are a well-known
+    privilege-escalation vector. An attacker who can create a schema
+    in the caller's `search_path` can shadow built-in objects called
+    from inside the function body and get arbitrary code execution as
+    the function owner. Pin `search_path` (e.g. to `pg_catalog,
+pg_temp`) on every `SECURITY DEFINER` definition.
+  - `no-equality-with-null` — `x = NULL` / `x <> NULL` always evaluate
+    to NULL (treated as false), silently filtering away rows the author
+    intended to keep. The fix is `IS NULL` / `IS NOT NULL`.
+  - `no-update-without-from-binding` — `UPDATE t SET ... FROM other`
+    without a `WHERE` clause produces a Cartesian product with the
+    target and updates every row of `t` once per row of `other`. Add a
+    join condition in `WHERE`.
+
+### Patch Changes
+
+- [#166](https://github.com/baseballyama/eslint-plugin-postgresql/pull/166) [`3cd2e19`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/3cd2e19633431aafc63d63c190151b19763918b2) Thanks [@baseballyama](https://github.com/baseballyama)! - Docs site catalog now covers every shipped rule, with options documented
+  for rules that take them. A new smoke test asserts that every entry in
+  `plugin.rules` has a matching entry in `site/src/lib/data/rules.ts`, so
+  adding a rule without updating the catalog now fails CI.
+
+- [#160](https://github.com/baseballyama/eslint-plugin-postgresql/pull/160) [`db2c02e`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/db2c02ede5e07a0ae8b24bbd0748e915c5c088aa) Thanks [@baseballyama](https://github.com/baseballyama)! - Closes #159: `require-limit` no longer fires on
+  `INSERT INTO ... VALUES (...)`. libpg-query rewrites the `VALUES`
+  list as a synthetic `SelectStmt` with a populated `valuesLists`, and
+  the rule now recognizes that shape and skips it.
+
 ## 0.9.0
 
 ### Minor Changes
