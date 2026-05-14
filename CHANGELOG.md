@@ -1,5 +1,74 @@
 # eslint-plugin-postgresql
 
+## 0.8.0
+
+### Minor Changes
+
+- [#154](https://github.com/baseballyama/eslint-plugin-postgresql/pull/154) [`8f908f3`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/8f908f36f9f1c37eac9020a8ea43143b6295bab2) Thanks [@baseballyama](https://github.com/baseballyama)! - `postgresql/prefer-keyword-case` gains a `types` option for casing
+  built-in type-name keywords (`text`, `int`, `bigint`, `numeric`, ...).
+
+  ```jsonc
+  {
+    "rules": {
+      "postgresql/prefer-keyword-case": [
+        "error",
+        { "case": "upper", "types": "upper" },
+      ],
+    },
+  }
+  ```
+
+  Values:
+  - `"skip"` (default) — leave type-name keywords alone, current 0.7.0
+    behavior. Avoids mixed casing in signatures that mix built-ins with
+    user-defined identifiers (#145).
+  - `"upper"` — force type names to uppercase across all positions
+    (column defs, function args, casts, ...).
+  - `"lower"` — force type names to lowercase across all positions.
+
+  Closes the enhancement portion of #152: projects whose convention is
+  "all type references one case, everywhere" can now opt in.
+
+- [#153](https://github.com/baseballyama/eslint-plugin-postgresql/pull/153) [`e5a3e7f`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/e5a3e7ff8832269c6f43966d1e903f0d8fcf6bee) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `postgresql/no-update-primary-key` (in `configs.recommended` at
+  `error`).
+
+  Visits `UpdateStmt` and flags any `SET <pk> = ...` where `<pk>` matches
+  a heuristic for "this is the table's primary-key column":
+  - The literal name `id` (configurable via the `pkColumnNames` option).
+  - The pattern `<table>_id` (auto-derived per statement from
+    `relation.relname`).
+
+  Primary keys are intended to be immutable — FK references, audit logs,
+  and external systems can hold the old value. Without schema knowledge
+  the rule has to guess; the heuristic is intentionally narrow and the
+  option lets a project add its own conventions (`uuid`, `<table>_pk`,
+  etc.).
+
+- [#141](https://github.com/baseballyama/eslint-plugin-postgresql/pull/141) [`a561c3f`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/a561c3ff305af347b59153fc4e3185d892879fa9) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `postgresql/prefer-cast-operator` (in `configs.stylistic`,
+  auto-fixable).
+
+  Enforces a single style for type casts: defaults to the operator form
+  (`x::integer`), pass `["error", { "form": "function" }]` to flip to
+  `CAST(x AS integer)`.
+
+  The rule walks the token stream after detecting the cast's source form
+  (the token at the `TypeCast` node's location is either `CAST` or
+  `::`), so qualified type names (`schema.type`) and parameterized types
+  (`numeric(10, 2)`) are handled without depending on the parser's
+  partial `typeName.range`.
+
+- [#151](https://github.com/baseballyama/eslint-plugin-postgresql/pull/151) [`485f278`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/485f27898afba1e5fe950943daefbc8b92034c5e) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `postgresql/require-on-delete-action` (in `configs.recommended` at
+  `warn`). Companion to `no-on-delete-cascade`: requires every foreign-key
+  constraint to spell out an explicit `ON DELETE` clause. The implicit
+  default is `NO ACTION`, but making the choice visible at constraint
+  definition time means reviewers can see whether an FK's intent is to
+  restrict, set null, or just default — instead of guessing.
+
+  Detection is token-based: AST's `fk_del_action === 'a'` does not
+  distinguish "no clause written" from "explicit `ON DELETE NO ACTION`",
+  so the rule walks the constraint's source span and reports if no
+  `ON DELETE` keyword pair appears at paren-depth 0.
+
 ## 0.7.0
 
 ### Minor Changes
