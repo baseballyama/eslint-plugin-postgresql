@@ -4,16 +4,24 @@ type CaseStyle = "upper" | "lower";
 
 const DEFAULT_CASE: CaseStyle = "upper";
 
-// Node `type`s whose `range` covers an identifier — a column / table /
-// constraint name. The parser's tokenizer classifies these as
-// `Keyword` whenever the spelling collides with a SQL keyword (e.g.
-// a column literally named `trigger` or `user`). We skip Keyword
-// tokens whose range matches one of these positions so the rule does
-// not rewrite identifier source as if it were a real keyword.
+// Node `type`s whose `range` covers a position the rule must NOT
+// uppercase. The parser's tokenizer is context-free, so:
+//
+// - identifier positions (a column / table / constraint name) get
+//   tagged `Keyword` whenever the spelling collides with a SQL keyword
+//   (`trigger`, `user`, `order`, ...) — see #144.
+// - type-name positions accept both built-in type keywords and user-
+//   defined identifiers; uppercasing only the built-ins (`text` →
+//   `TEXT`) leaves the file with mixed casing in the same arg list
+//   alongside untouched user identifiers (`ulid`, ...) — see #145.
+//
+// `names` is libpg-query's representation for any qualified type
+// reference, including the single-identifier case.
 const IDENTIFIER_NODE_TYPES: ReadonlySet<string> = new Set([
   "ColumnDef",
   "RangeVar",
   "Constraint",
+  "names",
 ]);
 
 const collectIdentifierStarts = (program: unknown): Set<number> => {

@@ -1,0 +1,3 @@
+INSERT INTO t (a, b, c) VALUES
+  ('GPT-5',  1.25, CURRENT_TIMESTAMP),
+  ('Claude', 5,    CURRENT_TIMESTAMP);
