@@ -660,6 +660,19 @@ export const rules: RuleMeta[] = [
       "ALTER TABLE users VALIDATE CONSTRAINT users_email_not_null;",
     ],
   },
+  {
+    name: "no-set-search-path",
+    description:
+      "Disallow `SET search_path` in versioned SQL; qualify identifiers instead.",
+    longDescription:
+      "`SET search_path` makes name resolution depend on session state — a known footgun for SECURITY DEFINER functions and `CREATE TABLE foo` statements that silently target a different schema. Qualify identifiers (`audit.events`, `public.users`) instead.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["SET search_path TO audit, public;"],
+    correct: ["SELECT id FROM audit.events;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

@@ -1054,6 +1054,28 @@ ALTER TABLE users VALIDATE CONSTRAINT users_email_not_null;
 -- Phase 3 (optional): now `SET NOT NULL` is instant.
 ```
 
+### `postgresql/no-set-search-path`
+
+Warns on `SET search_path = ...` in versioned SQL. The statement changes name resolution for the rest of the session and is a known footgun: a security-definer function written under one search_path may run under another in production, and `CREATE TABLE foo` may target a schema you didn't intend. Qualify identifiers (`audit.events`, `public.users`) instead.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SET search_path TO audit, public;
+```
+
+✅ Correct:
+
+```sql
+SELECT id FROM audit.events;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
