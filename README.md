@@ -859,6 +859,28 @@ ALTER TABLE users DROP COLUMN legacy_flag;
 ALTER TABLE users ADD COLUMN status text;
 ```
 
+### `postgresql/no-drop-not-null`
+
+Warns on `ALTER TABLE ... ALTER COLUMN ... DROP NOT NULL`. Relaxing the constraint lets the column store NULLs again — every consumer that already assumes the column is non-null (joins, `COALESCE` coverage, app-level types) silently breaks. If a row genuinely needs no value, model it with a sentinel or a separate optional table.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+```
+
+✅ Correct:
+
+```sql
+ALTER TABLE users ALTER COLUMN status DROP DEFAULT;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
