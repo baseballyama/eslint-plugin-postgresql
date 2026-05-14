@@ -509,6 +509,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["ALTER TABLE users RENAME COLUMN email_address TO email;"],
     correct: ["ALTER TABLE users ADD COLUMN email text;"],
   },
+  {
+    name: "no-rename-table",
+    description:
+      "Warn on `RENAME TO` — breaks deployed code reading the old name.",
+    longDescription:
+      "Renaming a table is fast in the database but breaks every running app that still queries the old name. Keep the old table accessible via a view until callers are migrated, then drop it in a separate deploy.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE legacy_users RENAME TO users;"],
+    correct: ["CREATE TABLE users (id BIGINT PRIMARY KEY);"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

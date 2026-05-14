@@ -812,6 +812,29 @@ ALTER TABLE users ADD COLUMN email text;
 -- (Backfill, dual-write, drop old column in a later migration.)
 ```
 
+### `postgresql/no-rename-table`
+
+Warns on `ALTER TABLE ... RENAME TO`. Renaming a table is fast in the database but breaks every running app that still queries the old name. The safer pattern is to leave the old table in place as a view (`CREATE VIEW old_name AS SELECT * FROM new_name`) until callers are migrated, then drop the view in a separate deploy.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE legacy_users RENAME TO users;
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE users (id BIGINT PRIMARY KEY);
+-- Migrate writers, then drop the legacy table in a later deploy.
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
