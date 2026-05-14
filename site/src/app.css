@@ -1,0 +1,396 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   eslint-plugin-postgresql — docs theme
+   Aligned with postgresql-eslint-parser/docs: light by default, restrained
+   typography, ESLint purple as the single brand colour.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* surfaces */
+  --bg: #ffffff;
+  --bg-soft: #f8f8fa;
+  --bg-code: #f3f3f5;
+  --bg-elevated: #ffffff;
+
+  /* text */
+  --fg: #1d1f21;
+  --fg-strong: #0b0d10;
+  --fg-muted: #5b6068;
+  --fg-faint: #8b8f96;
+
+  /* lines */
+  --rule: #e4e4e8;
+  --rule-strong: #cdced3;
+
+  /* brand — ESLint purple */
+  --brand: #4b32c3;
+  --brand-strong: #341cb9;
+  --brand-soft: #ede9f9;
+  --brand-tint: #f5f2fc;
+
+  /* code accents (kept subtle) */
+  --kw: #4b32c3;
+  --str: #277a32;
+  --num: #a43a30;
+  --com: #8b8f96;
+  --typ: #2452a9;
+  --punc: #5b6068;
+
+  /* severity */
+  --err: #c0392b;
+  --err-bg: #fff1ee;
+  --err-border: #f3c3b5;
+  --warn: #8a6300;
+  --warn-bg: #fff8df;
+  --warn-border: #ebd58a;
+  --ok: #207a3a;
+  --ok-bg: #e9f5ec;
+
+  /* typography */
+  --font-body:
+    "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* layout */
+  --max-w: 72rem;
+  --gutter: clamp(1rem, 3vw, 2rem);
+  --radius: 6px;
+}
+
+/* Dark palette — shared between `data-theme="dark"` and the auto fallback. */
+:root[data-theme="dark"],
+:root[data-theme="auto"] {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    color-scheme: dark;
+    --bg: #1d1f21;
+    --bg-soft: #25272a;
+    --bg-code: #2a2c2f;
+    --bg-elevated: #25272a;
+
+    --fg: #e6e6e9;
+    --fg-strong: #ffffff;
+    --fg-muted: #b3b6bb;
+    --fg-faint: #82858b;
+
+    --rule: #34373b;
+    --rule-strong: #4a4d52;
+
+    --brand: #a08bef;
+    --brand-strong: #c3b3f7;
+    --brand-soft: #2d2647;
+    --brand-tint: #25223a;
+
+    --kw: #c0acff;
+    --str: #9bcfa3;
+    --num: #f0907a;
+    --com: #82858b;
+    --typ: #92b4f0;
+    --punc: #b3b6bb;
+
+    --err: #ef8074;
+    --err-bg: #3a1a14;
+    --err-border: #6a2a1f;
+    --warn: #e9c46a;
+    --warn-bg: #2c2614;
+    --warn-border: #4f4220;
+    --ok: #7fc69a;
+    --ok-bg: #1a2a1f;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1d1f21;
+  --bg-soft: #25272a;
+  --bg-code: #2a2c2f;
+  --bg-elevated: #25272a;
+
+  --fg: #e6e6e9;
+  --fg-strong: #ffffff;
+  --fg-muted: #b3b6bb;
+  --fg-faint: #82858b;
+
+  --rule: #34373b;
+  --rule-strong: #4a4d52;
+
+  --brand: #a08bef;
+  --brand-strong: #c3b3f7;
+  --brand-soft: #2d2647;
+  --brand-tint: #25223a;
+
+  --kw: #c0acff;
+  --str: #9bcfa3;
+  --num: #f0907a;
+  --com: #82858b;
+  --typ: #92b4f0;
+  --punc: #b3b6bb;
+
+  --err: #ef8074;
+  --err-bg: #3a1a14;
+  --err-border: #6a2a1f;
+  --warn: #e9c46a;
+  --warn-bg: #2c2614;
+  --warn-border: #4f4220;
+  --ok: #7fc69a;
+  --ok-bg: #1a2a1f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border-radius: 20px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  color: var(--fg-strong);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+h2 {
+  font-size: 1.5rem;
+}
+h3 {
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0;
+  color: var(--fg);
+}
+
+a {
+  color: var(--brand);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+a:hover {
+  color: var(--brand-strong);
+  border-bottom-color: currentColor;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+}
+
+button {
+  font: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.shell {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.shell-wide {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Shared building blocks
+   ────────────────────────────────────────────────────────────────────────── */
+
+.eyebrow {
+  display: inline-block;
+  color: var(--brand);
+  background: var(--brand-tint);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+.btn.primary {
+  background: var(--brand);
+  color: #fff;
+}
+.btn.primary:hover {
+  background: var(--brand-strong);
+  color: #fff;
+  border-bottom: 1px solid transparent;
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--brand);
+  border-color: var(--rule-strong);
+}
+.btn.ghost:hover {
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.btn.quiet {
+  background: var(--bg-soft);
+  color: var(--fg-muted);
+  border-color: var(--rule);
+}
+.btn.quiet:hover {
+  color: var(--fg-strong);
+  background: var(--bg);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pill-error {
+  color: var(--err);
+  background: var(--err-bg);
+  border-color: var(--err-border);
+}
+.pill-warn {
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-color: var(--warn-border);
+}
+.pill-off {
+  color: var(--fg-muted);
+  background: var(--bg-soft);
+  border-color: var(--rule);
+}
+.pill-problem {
+  color: var(--brand);
+  background: var(--brand-tint);
+  border-color: var(--brand-soft);
+}
+.pill-suggestion {
+  color: var(--typ);
+  background: var(--bg-soft);
+  border-color: var(--rule-strong);
+}
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+
+/* Lightweight SQL highlight (used by SqlBlock) — token colours come from the
+   shared accent variables so light/dark stay in sync. */
+
+.sql-kw {
+  color: var(--kw);
+  font-weight: 600;
+}
+.sql-type {
+  color: var(--typ);
+  font-weight: 500;
+}
+.sql-str {
+  color: var(--str);
+}
+.sql-num {
+  color: var(--num);
+}
+.sql-cmt {
+  color: var(--com);
+  font-style: italic;
+}
+.sql-id {
+  color: var(--fg-strong);
+}
