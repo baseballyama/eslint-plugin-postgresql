@@ -881,6 +881,33 @@ ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
 ALTER TABLE users ALTER COLUMN status DROP DEFAULT;
 ```
 
+### `postgresql/prefer-fk-not-valid`
+
+Warns on `ALTER TABLE ... ADD CONSTRAINT ... FOREIGN KEY (...)` that does not include `NOT VALID`. Adding a foreign key normally validates every existing row under an `ACCESS EXCLUSIVE` lock that blocks writers for the full scan. The safer pattern is to add the constraint with `NOT VALID` (a fast metadata-only operation) and then `ALTER TABLE ... VALIDATE CONSTRAINT ...` in a separate migration — `VALIDATE` only takes a `SHARE UPDATE EXCLUSIVE` lock.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE orders
+  ADD CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);
+```
+
+✅ Correct:
+
+```sql
+ALTER TABLE orders
+  ADD CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;
+
+-- Later migration, no exclusive lock:
+ALTER TABLE orders VALIDATE CONSTRAINT orders_customer_fk;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
