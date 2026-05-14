@@ -908,6 +908,35 @@ ALTER TABLE orders
 ALTER TABLE orders VALIDATE CONSTRAINT orders_customer_fk;
 ```
 
+### `postgresql/require-named-constraint`
+
+Warns when a table-level `CHECK`, `UNIQUE`, `FOREIGN KEY`, or `EXCLUSION` constraint is declared without an explicit `CONSTRAINT <name>`. PostgreSQL invents a name for unnamed constraints (e.g., `items_code_key`); the generated name varies subtly across environments and migration tools, which makes later `DROP CONSTRAINT` / `ALTER CONSTRAINT` statements brittle. Column-level `NOT NULL` and `PRIMARY KEY` are allowed without names — the auto-generated names there are stable.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE TABLE items (id int, code text, UNIQUE (code));
+ALTER TABLE items ADD CHECK (length(code) > 0);
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE items (
+  id int,
+  code text,
+  CONSTRAINT items_code_unique UNIQUE (code)
+);
+
+ALTER TABLE items ADD CONSTRAINT items_code_non_empty CHECK (length(code) > 0);
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
