@@ -55,6 +55,28 @@ export default [
 ];
 ```
 
+### Stylistic preset (optional)
+
+Layout / casing / formatting rules live in a separate `configs.stylistic`
+preset. PostgreSQL formatters (`prettier-plugin-sql`, `pg_format`) do not
+cover PL/pgSQL well, so this plugin ships an opt-in stylistic layer. Every
+rule in `configs.stylistic` is auto-fixable.
+
+```js
+import postgresql from "eslint-plugin-postgresql";
+
+export default [
+  {
+    files: ["**/*.sql"],
+    ...postgresql.configs.recommended,
+  },
+  {
+    files: ["**/*.sql"],
+    ...postgresql.configs.stylistic,
+  },
+];
+```
+
 ## Rules
 
 Click a rule name to open its documentation page (examples, rationale, options).
@@ -63,6 +85,7 @@ Click a rule name to open its documentation page (examples, rationale, options).
 
 - ✅ — enabled as `error` in `configs.recommended`
 - ⚠️ — enabled as `warn` in `configs.recommended`
+- 🎨 — enabled in `configs.stylistic` (auto-fixable)
 - (blank) — off by default; opt in per project
 
 | Rule                                                                                                                                           | Description                                                                | Recommended |
@@ -108,6 +131,7 @@ Click a rule name to open its documentation page (examples, rationale, options).
 | [prefer-fk-not-valid](https://baseballyama.github.io/eslint-plugin-postgresql/rules/prefer-fk-not-valid)                                       | Prefer adding foreign keys with `NOT VALID`, then `VALIDATE CONSTRAINT`    |     ⚠️      |
 | [prefer-identity-over-serial](https://baseballyama.github.io/eslint-plugin-postgresql/rules/prefer-identity-over-serial)                       | Prefer `GENERATED ... AS IDENTITY` over `serial` pseudo-types              |     ⚠️      |
 | [prefer-jsonb-over-json](https://baseballyama.github.io/eslint-plugin-postgresql/rules/prefer-jsonb-over-json)                                 | Prefer `jsonb` over `json` columns                                         |     ⚠️      |
+| [prefer-keyword-case](https://baseballyama.github.io/eslint-plugin-postgresql/rules/prefer-keyword-case)                                       | Enforce a consistent case (upper or lower) for SQL keywords                |     🎨      |
 | [prefer-reindex-concurrently](https://baseballyama.github.io/eslint-plugin-postgresql/rules/prefer-reindex-concurrently)                       | Prefer `REINDEX ... CONCURRENTLY`                                          |     ⚠️      |
 | [prefer-text-over-varchar](https://baseballyama.github.io/eslint-plugin-postgresql/rules/prefer-text-over-varchar)                             | Prefer `text` over `varchar(n)`                                            |     ⚠️      |
 | [prefer-timestamptz](https://baseballyama.github.io/eslint-plugin-postgresql/rules/prefer-timestamptz)                                         | Prefer `timestamptz` over `timestamp`                                      |     ⚠️      |
