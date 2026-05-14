@@ -19,6 +19,14 @@ const rule: Rule.RuleModule = {
   create(context) {
     return {
       SelectStmt(node: Ast.SelectStmt) {
+        // libpg-query rewrites `INSERT INTO t VALUES (...)` as an
+        // InsertStmt whose `selectStmt` is a SelectStmt with a non-
+        // empty `valuesLists` and no `targetList` — i.e. a synthetic
+        // "SELECT of literal rows", not a user-written SELECT. LIMIT
+        // is meaningless there, so skip (#159).
+        const valuesLists = (node as { valuesLists?: unknown }).valuesLists;
+        if (Array.isArray(valuesLists) && valuesLists.length > 0) return;
+
         // A SELECT has a LIMIT if `limitCount` is set and `limitOption`
         // isn't the parser's default sentinel.
         const hasLimit =
