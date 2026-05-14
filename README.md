@@ -570,6 +570,30 @@ SELECT * FROM users LIMIT 100;
 SELECT name, email FROM users WHERE active = true LIMIT 50;
 ```
 
+### `postgresql/no-order-by-ordinal`
+
+Disallows positional `ORDER BY` references such as `ORDER BY 1, 2`. Ordinals silently change meaning when the SELECT list is reordered or a column is inserted, and they're invisible at the call site of any view or CTE that contains them. Reference the column by name or by an alias instead.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT id, name FROM users ORDER BY 1;
+SELECT id, name, email FROM users ORDER BY 1, 2 DESC;
+```
+
+✅ Correct:
+
+```sql
+SELECT id, name FROM users ORDER BY name;
+SELECT id, name AS display_name FROM users ORDER BY display_name;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
