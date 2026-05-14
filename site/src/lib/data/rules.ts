@@ -200,10 +200,11 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-timestamptz",
-    description: "Prefer TIMESTAMPTZ over TIMESTAMP for wall-clock columns.",
+    name: "consistent-timestamptz",
+    description:
+      "Enforce a consistent stance on `timestamptz` vs `timestamp` for wall-clock columns.",
     longDescription:
-      "`timestamp` (a.k.a. `timestamp without time zone`) is timezone-naive: two clients with different `TimeZone` settings disagree on which instant a row represents. `timestamptz` anchors everything to UTC at storage time and converts on read.",
+      "Two valid stances exist: (a) require `timestamptz` so the database anchors everything to UTC at storage time and converts on read (avoiding the timezone-naive trap of `timestamp`), or (b) forbid `timestamptz` so the type is consistent across a project that treats every timestamp as UTC at the application layer and doesn't want implicit per-session `TimeZone` conversions. Pick one with the `style` option.",
     type: "suggestion",
     recommended: "warn",
     fixable: false,
@@ -212,6 +213,15 @@ export const rules: RuleMeta[] = [
     correct: [
       "CREATE TABLE t (created_at TIMESTAMPTZ);",
       "CREATE TABLE t (created_at TIMESTAMP WITH TIME ZONE);",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "Which stance to enforce. `always` (default) requires `timestamptz` over `timestamp`. `never` requires `timestamp` over `timestamptz` — useful when the application treats every value as UTC and doesn't want implicit per-session conversions.",
+      },
     ],
   },
   {

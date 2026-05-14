@@ -5,6 +5,7 @@ import alignColumnDefinitions from "./rules/align-column-definitions.js";
 import alignValues from "./rules/align-values.js";
 import consistentCreateIndexConcurrently from "./rules/consistent-create-index-concurrently.js";
 import consistentCreateOrReplace from "./rules/consistent-create-or-replace.js";
+import consistentTimestamptz from "./rules/consistent-timestamptz.js";
 import noAddCheckConstraintWithoutNotValid from "./rules/no-add-check-constraint-without-not-valid.js";
 import noAddColumnNotNullWithoutDefault from "./rules/no-add-column-not-null-without-default.js";
 import noAddUniqueConstraintDirectly from "./rules/no-add-unique-constraint-directly.js";
@@ -73,7 +74,6 @@ import preferKeywordCase from "./rules/prefer-keyword-case.js";
 import preferNotEqualsOperator from "./rules/prefer-not-equals-operator.js";
 import preferReindexConcurrently from "./rules/prefer-reindex-concurrently.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
-import preferTimestamptz from "./rules/prefer-timestamptz.js";
 import requireIfExists from "./rules/require-if-exists.js";
 import requireIndexOnFkColumn from "./rules/require-index-on-fk-column.js";
 import requireLimit from "./rules/require-limit.js";
@@ -92,6 +92,7 @@ const rules = {
   "align-values": alignValues,
   "consistent-create-index-concurrently": consistentCreateIndexConcurrently,
   "consistent-create-or-replace": consistentCreateOrReplace,
+  "consistent-timestamptz": consistentTimestamptz,
   "no-add-check-constraint-without-not-valid":
     noAddCheckConstraintWithoutNotValid,
   "no-add-column-not-null-without-default": noAddColumnNotNullWithoutDefault,
@@ -161,7 +162,6 @@ const rules = {
   "prefer-not-equals-operator": preferNotEqualsOperator,
   "prefer-reindex-concurrently": preferReindexConcurrently,
   "prefer-text-over-varchar": preferTextOverVarchar,
-  "prefer-timestamptz": preferTimestamptz,
   "require-if-exists": requireIfExists,
   "require-index-on-fk-column": requireIndexOnFkColumn,
   "require-limit": requireLimit,
@@ -197,6 +197,7 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/consistent-timestamptz": "warn",
       "postgresql/no-add-check-constraint-without-not-valid": "error",
       "postgresql/no-add-column-not-null-without-default": "error",
       "postgresql/no-add-unique-constraint-directly": "error",
@@ -250,7 +251,6 @@ plugin.configs = {
       "postgresql/prefer-jsonb-over-json": "warn",
       "postgresql/prefer-reindex-concurrently": "warn",
       "postgresql/prefer-text-over-varchar": "warn",
-      "postgresql/prefer-timestamptz": "warn",
       "postgresql/require-limit": "warn",
       "postgresql/require-named-constraint": "warn",
       "postgresql/require-on-delete-action": "warn",
