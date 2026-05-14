@@ -1,0 +1,4 @@
+DROP TABLE foo;
+DROP INDEX idx_foo;
+DROP FUNCTION fn();
+DROP DATABASE bar;
