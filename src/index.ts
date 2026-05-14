@@ -45,6 +45,7 @@ import preferBigintId from "./rules/prefer-bigint-id.js";
 import preferAddConstraintNotValid from "./rules/prefer-add-constraint-not-valid.js";
 import preferAsForColumnAlias from "./rules/prefer-as-for-column-alias.js";
 import preferAsForTableAlias from "./rules/prefer-as-for-table-alias.js";
+import preferBetweenOverAnd from "./rules/prefer-between-over-and.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
 import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
@@ -54,6 +55,7 @@ import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js
 import preferExplicitOuterJoin from "./rules/prefer-explicit-outer-join.js";
 import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
+import preferInListOverOr from "./rules/prefer-in-list-over-or.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
 import preferKeywordCase from "./rules/prefer-keyword-case.js";
 import preferNotEqualsOperator from "./rules/prefer-not-equals-operator.js";
@@ -115,6 +117,7 @@ const rules = {
   "prefer-bigint-id": preferBigintId,
   "prefer-as-for-column-alias": preferAsForColumnAlias,
   "prefer-as-for-table-alias": preferAsForTableAlias,
+  "prefer-between-over-and": preferBetweenOverAnd,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
   "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
@@ -124,6 +127,7 @@ const rules = {
   "prefer-explicit-outer-join": preferExplicitOuterJoin,
   "prefer-fk-not-valid": preferFkNotValid,
   "prefer-identity-over-serial": preferIdentityOverSerial,
+  "prefer-in-list-over-or": preferInListOverOr,
   "prefer-jsonb-over-json": preferJsonbOverJson,
   "prefer-keyword-case": preferKeywordCase,
   "prefer-not-equals-operator": preferNotEqualsOperator,
@@ -229,9 +233,11 @@ plugin.configs = {
       "postgresql/plpgsql-keyword-case": "warn",
       "postgresql/prefer-as-for-column-alias": "warn",
       "postgresql/prefer-as-for-table-alias": "warn",
+      "postgresql/prefer-between-over-and": "warn",
       "postgresql/prefer-current-timestamp-over-now": "warn",
       "postgresql/prefer-explicit-inner-join": "warn",
       "postgresql/prefer-explicit-outer-join": "warn",
+      "postgresql/prefer-in-list-over-or": "warn",
       "postgresql/prefer-keyword-case": "warn",
       "postgresql/prefer-not-equals-operator": "warn",
       "postgresql/require-trailing-semicolon": "warn",
