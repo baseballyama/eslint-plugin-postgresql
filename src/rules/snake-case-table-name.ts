@@ -12,24 +12,39 @@ const rule: Rule.RuleModule = {
       recommended: true,
     },
     fixable: undefined,
-    schema: [],
+    schema: [
+      {
+        type: "object",
+        properties: {
+          allow: {
+            type: "array",
+            items: { type: "string" },
+            uniqueItems: true,
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       notSnakeCase:
         'Table name `{{name}}` is not snake_case. PostgreSQL folds unquoted identifiers to lower case but preserves the case of quoted identifiers; mixing the two leads to `relation "BadName" does not exist` errors that are confusing to debug.',
     },
   },
   create(context) {
+    const option = (context.options[0] ?? {}) as { allow?: string[] };
+    const allow = new Set(option.allow ?? []);
     return {
       CreateStmt(node: Ast.CreateStmt) {
         const relation = node.relation as { relname?: unknown } | undefined;
         const name = relation?.relname;
-        if (typeof name === "string" && !SNAKE_CASE.test(name)) {
-          context.report({
-            node: node as unknown as Rule.Node,
-            messageId: "notSnakeCase",
-            data: { name },
-          });
-        }
+        if (typeof name !== "string") return;
+        if (allow.has(name)) return;
+        if (SNAKE_CASE.test(name)) return;
+        context.report({
+          node: node as unknown as Rule.Node,
+          messageId: "notSnakeCase",
+          data: { name },
+        });
       },
     };
   },

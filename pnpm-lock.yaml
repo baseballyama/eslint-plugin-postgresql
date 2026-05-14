@@ -15,8 +15,8 @@ importers:
         specifier: ^17.1.1
         version: 17.1.1(encoding@0.1.13)
       postgresql-eslint-parser:
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.5.0
+        version: 0.5.0
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^0.5.1
@@ -1768,8 +1768,8 @@ packages:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postgresql-eslint-parser@0.4.0:
-    resolution: {integrity: sha512-9HsJu0sh6y+mbwY9JkWohI7e9RMZbscyrfl7bg0LqnMxp+FD3AK2ScV28o2+ndz3gdrK/hZrCg10W8HbFlOCSQ==}
+  postgresql-eslint-parser@0.5.0:
+    resolution: {integrity: sha512-fADwFLvAB5jmZaxm3Efw19uYfjeNDnEORc/LtmkkuzhE90x40D6nKM0m8/wk0UzUAK37pNpqfTahuK23PwOdjA==}
     engines: {node: '>=22.0.0', pnpm: '>=10.14.0'}
 
   prelude-ls@1.2.1:
@@ -3852,7 +3852,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postgresql-eslint-parser@0.4.0:
+  postgresql-eslint-parser@0.5.0:
     dependencies:
       '@libpg-query/parser': 17.6.3
 

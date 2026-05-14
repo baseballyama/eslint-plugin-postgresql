@@ -21,6 +21,12 @@ const rule: Rule.RuleModule = {
         if (!Array.isArray(body)) return;
         const tokens = context.sourceCode.ast.tokens ?? [];
         for (const stmt of body) {
+          // Skip parse-error placeholders. Their range covers the whole
+          // file (or the trailing tail of it), and inserting `;` cannot
+          // turn malformed SQL into valid SQL — the rule would just
+          // accumulate one `;` per autofix pass.
+          const type = (stmt as { type?: unknown }).type;
+          if (type === "SQLParseError") continue;
           const range = (stmt as { range?: [number, number] }).range;
           const loc = (stmt as { loc?: AST.SourceLocation }).loc;
           if (!range || !loc) continue;

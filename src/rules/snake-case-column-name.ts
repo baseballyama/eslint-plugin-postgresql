@@ -12,23 +12,38 @@ const rule: Rule.RuleModule = {
       recommended: true,
     },
     fixable: undefined,
-    schema: [],
+    schema: [
+      {
+        type: "object",
+        properties: {
+          allow: {
+            type: "array",
+            items: { type: "string" },
+            uniqueItems: true,
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       notSnakeCase:
         "Column name `{{name}}` is not snake_case. PostgreSQL preserves the case of quoted identifiers; using a mixed-case quoted name forces every consumer to quote-match it.",
     },
   },
   create(context) {
+    const option = (context.options[0] ?? {}) as { allow?: string[] };
+    const allow = new Set(option.allow ?? []);
     return {
       ColumnDef(node: Ast.ColumnDef) {
         const name = node.colname;
-        if (typeof name === "string" && !SNAKE_CASE.test(name)) {
-          context.report({
-            node: node as unknown as Rule.Node,
-            messageId: "notSnakeCase",
-            data: { name },
-          });
-        }
+        if (typeof name !== "string") return;
+        if (allow.has(name)) return;
+        if (SNAKE_CASE.test(name)) return;
+        context.report({
+          node: node as unknown as Rule.Node,
+          messageId: "notSnakeCase",
+          data: { name },
+        });
       },
     };
   },

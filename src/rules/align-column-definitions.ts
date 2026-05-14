@@ -60,14 +60,32 @@ const rule: Rule.RuleModule = {
         // and shared-line layouts, where source surgery is unsafe.
         const slots: Slot[] = [];
         const seenLines = new Set<number>();
+        const tokens = sourceCode.ast.tokens ?? [];
         for (const elt of elts) {
           if (!isColumnDef(elt)) continue;
           const colRange = elt.range;
           const typeName = elt.typeName as
-            | { range?: [number, number] }
+            | {
+                range?: [number, number];
+                typmods?: { range?: [number, number] }[];
+              }
             | undefined;
-          const typeRange = typeName?.range;
-          if (!colRange || !typeRange) return;
+          const baseTypeRange = typeName?.range;
+          if (!colRange || !baseTypeRange) return;
+          // The parser's `typeName.range` covers only the bare type
+          // name. For parameterized types like `TIMESTAMP(3)` or
+          // `NUMERIC(10, 2)`, the modifier list lives in `typmods`; we
+          // extend the type span through the closing `)` so the rule
+          // sees the whole `TYPE(...)` as one alignment column.
+          let typeEnd = baseTypeRange[1];
+          const lastTypmod = typeName?.typmods?.at(-1);
+          if (lastTypmod?.range) {
+            const closingParen = tokens.find(
+              (t) => t.range[0] >= lastTypmod.range![1] && t.value === ")",
+            );
+            if (closingParen) typeEnd = closingParen.range[1];
+          }
+          const typeRange: [number, number] = [baseTypeRange[0], typeEnd];
           const constraints = Array.isArray(elt.constraints)
             ? elt.constraints.filter(isConstraint)
             : [];
