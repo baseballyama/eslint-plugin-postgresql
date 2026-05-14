@@ -26,6 +26,7 @@ import noSyntaxError from "./rules/no-syntax-error.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
+import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
@@ -63,6 +64,7 @@ const rules = {
   "no-truncate-cascade": noTruncateCascade,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
+  "prefer-fk-not-valid": preferFkNotValid,
   "prefer-identity-over-serial": preferIdentityOverSerial,
   "prefer-jsonb-over-json": preferJsonbOverJson,
   "prefer-text-over-varchar": preferTextOverVarchar,
@@ -119,6 +121,7 @@ plugin.configs = {
       "postgresql/no-syntax-error": "error",
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",
+      "postgresql/prefer-fk-not-valid": "warn",
       "postgresql/prefer-identity-over-serial": "warn",
       "postgresql/prefer-jsonb-over-json": "warn",
       "postgresql/prefer-text-over-varchar": "warn",

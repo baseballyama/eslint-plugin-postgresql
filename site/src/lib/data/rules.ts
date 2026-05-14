@@ -548,6 +548,24 @@ export const rules: RuleMeta[] = [
     incorrect: ["ALTER TABLE users ALTER COLUMN email DROP NOT NULL;"],
     correct: ["ALTER TABLE users ALTER COLUMN status DROP DEFAULT;"],
   },
+  {
+    name: "prefer-fk-not-valid",
+    description:
+      "Require `NOT VALID` when adding a foreign key so validation isn't done under ACCESS EXCLUSIVE.",
+    longDescription:
+      "Adding a foreign key normally validates every existing row under an `ACCESS EXCLUSIVE` lock that blocks writers. The safe pattern is to `ADD ... NOT VALID` (metadata-only) and then `VALIDATE CONSTRAINT` in a separate migration; `VALIDATE` only takes a `SHARE UPDATE EXCLUSIVE` lock.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "ALTER TABLE orders\n  ADD CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id);",
+    ],
+    correct: [
+      "ALTER TABLE orders\n  ADD CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;",
+      "ALTER TABLE orders VALIDATE CONSTRAINT orders_customer_fk;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
