@@ -981,6 +981,29 @@ CREATE TEMP TABLE staging (id int);
 CREATE TABLE staging (id int);
 ```
 
+### `postgresql/no-numeric-without-precision`
+
+Warns on `NUMERIC` (and the `DECIMAL` synonym) declared without an explicit precision and scale. Bare `NUMERIC` accepts unbounded magnitude — useful only if you really do mean "arbitrary precision," which is rarely the case in application schemas. Declare `NUMERIC(precision, scale)` so the column documents the value's domain.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE TABLE products (price numeric);
+CREATE TABLE products (price decimal);
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE products (price numeric(10, 2));
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

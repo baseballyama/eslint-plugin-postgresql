@@ -17,6 +17,7 @@ import noLeadingWildcardLike from "./rules/no-leading-wildcard-like.js";
 import noMoneyType from "./rules/no-money-type.js";
 import noNaturalJoin from "./rules/no-natural-join.js";
 import noNotInSubquery from "./rules/no-not-in-subquery.js";
+import noNumericWithoutPrecision from "./rules/no-numeric-without-precision.js";
 import noOrderByOrdinal from "./rules/no-order-by-ordinal.js";
 import noRenameColumn from "./rules/no-rename-column.js";
 import noRenameTable from "./rules/no-rename-table.js";
@@ -58,6 +59,7 @@ const rules = {
   "no-money-type": noMoneyType,
   "no-natural-join": noNaturalJoin,
   "no-not-in-subquery": noNotInSubquery,
+  "no-numeric-without-precision": noNumericWithoutPrecision,
   "no-order-by-ordinal": noOrderByOrdinal,
   "no-rename-column": noRenameColumn,
   "no-rename-table": noRenameTable,
@@ -120,6 +122,7 @@ plugin.configs = {
       "postgresql/no-money-type": "error",
       "postgresql/no-natural-join": "error",
       "postgresql/no-not-in-subquery": "error",
+      "postgresql/no-numeric-without-precision": "warn",
       "postgresql/no-order-by-ordinal": "warn",
       "postgresql/no-rename-column": "warn",
       "postgresql/no-rename-table": "warn",

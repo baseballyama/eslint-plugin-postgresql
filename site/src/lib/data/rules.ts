@@ -610,6 +610,22 @@ export const rules: RuleMeta[] = [
     incorrect: ["CREATE TEMP TABLE staging (id int);"],
     correct: ["CREATE TABLE staging (id int);"],
   },
+  {
+    name: "no-numeric-without-precision",
+    description:
+      "Require an explicit precision and scale on `NUMERIC` / `DECIMAL` columns.",
+    longDescription:
+      "Bare `NUMERIC` accepts unbounded magnitude — useful only if you really do mean 'arbitrary precision', which is rarely the case in application schemas. Declare `NUMERIC(precision, scale)` so the column documents its domain.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "schema",
+    incorrect: [
+      "CREATE TABLE products (price numeric);",
+      "CREATE TABLE products (price decimal);",
+    ],
+    correct: ["CREATE TABLE products (price numeric(10, 2));"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
