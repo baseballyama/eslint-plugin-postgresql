@@ -106,6 +106,22 @@
             {/each}
           </div>
         </div>
+
+        {#if rule.options && rule.options.length > 0}
+          <h2>Options</h2>
+          <dl class="options">
+            {#each rule.options as opt}
+              <dt>
+                <code>{opt.name}</code>
+                <span class="opt-type">{opt.type}</span>
+                {#if opt.default !== undefined}
+                  <span class="opt-default">default: <code>{String(opt.default)}</code></span>
+                {/if}
+              </dt>
+              <dd>{opt.description}</dd>
+            {/each}
+          </dl>
+        {/if}
       </div>
 
       <aside class="sidebar">
@@ -382,6 +398,44 @@
   }
   .src {
     font-size: 0.85rem;
+  }
+
+  .options {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .options dt {
+    font-family: var(--font-base);
+    font-size: 0.92rem;
+    color: var(--fg);
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+  .options dt code {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    background: var(--bg-soft);
+    padding: 0.05rem 0.35rem;
+    border-radius: 4px;
+  }
+  .opt-type {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--fg-faint);
+  }
+  .opt-default {
+    font-size: 0.78rem;
+    color: var(--fg-faint);
+  }
+  .opt-default code {
+    font-size: 0.78rem;
+  }
+  .options dd {
+    color: var(--fg-soft, var(--fg));
+    margin-bottom: 0.4rem;
+    line-height: 1.5;
   }
 
   .playground-section {
