@@ -1236,6 +1236,29 @@ REINDEX TABLE users;
 REINDEX TABLE CONCURRENTLY users;
 ```
 
+### `postgresql/no-create-role`
+
+Warns on `CREATE ROLE` / `CREATE USER` in versioned SQL. Roles and credentials belong in an operator-managed bootstrap (Terraform, Pulumi, a runbook with explicit approvals), not in application migrations that run automatically with whichever role the deploy uses. Granting privileges to existing roles is fine.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE ROLE app_writer LOGIN PASSWORD 'redacted';
+```
+
+✅ Correct:
+
+```sql
+-- Manage roles in a separate bootstrap workflow; grant privileges from migrations.
+GRANT SELECT ON users TO app_reader;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

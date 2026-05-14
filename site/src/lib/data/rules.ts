@@ -766,6 +766,18 @@ export const rules: RuleMeta[] = [
     incorrect: ["REINDEX TABLE users;"],
     correct: ["REINDEX TABLE CONCURRENTLY users;"],
   },
+  {
+    name: "no-create-role",
+    description: "Disallow `CREATE ROLE` / `CREATE USER` in versioned SQL.",
+    longDescription:
+      "Roles and credentials belong in an operator-managed bootstrap, not in application migrations that run automatically. Granting privileges to existing roles from a migration is fine.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "security",
+    incorrect: ["CREATE ROLE app_writer LOGIN PASSWORD 'redacted';"],
+    correct: ["GRANT SELECT ON users TO app_reader;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
