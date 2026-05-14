@@ -1,0 +1,6 @@
+CREATE OR REPLACE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';
+CREATE OR REPLACE PROCEDURE p() LANGUAGE SQL AS '';
+CREATE OR REPLACE VIEW v AS SELECT 1;
+-- Other CREATE statements are out of scope (TABLE doesn't support OR REPLACE).
+CREATE TABLE t (id integer);
+CREATE INDEX idx ON t (id);
