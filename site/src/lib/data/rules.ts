@@ -701,6 +701,19 @@ export const rules: RuleMeta[] = [
       "SELECT id FROM users ORDER BY created_at;",
     ],
   },
+  {
+    name: "no-vacuum-full",
+    description:
+      "Warn on `VACUUM FULL` — takes ACCESS EXCLUSIVE and rewrites the table.",
+    longDescription:
+      "`VACUUM FULL` takes `ACCESS EXCLUSIVE` and rewrites the whole table, making it unavailable for the duration. For shrinking a bloated table on a live database use `pg_repack` or `pg_squeeze`; a plain `VACUUM` is fine.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["VACUUM FULL users;"],
+    correct: ["VACUUM users;", "VACUUM ANALYZE users;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
