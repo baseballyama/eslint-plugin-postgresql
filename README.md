@@ -77,6 +77,24 @@ export default [
 ];
 ```
 
+### All preset (everything-on)
+
+`configs.all` enables every rule the plugin ships at `error`. It is
+deliberately noisy — useful for exploring what the plugin can catch, or
+for greenfield projects that want to audit and then disable rules they
+don't want. Not recommended for an existing codebase without overrides.
+
+```js
+import postgresql from "eslint-plugin-postgresql";
+
+export default [
+  {
+    files: ["**/*.sql"],
+    ...postgresql.configs.all,
+  },
+];
+```
+
 ## Rules
 
 Click a rule name to open its documentation page (examples, rationale, options).

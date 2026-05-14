@@ -223,6 +223,22 @@ plugin.configs = {
       "postgresql/require-trailing-semicolon": "warn",
     },
   } satisfies Linter.Config,
+  // Every rule the plugin ships, enabled at `error`. Built mechanically
+  // from `rules` so adding a new rule automatically opts it into `all`
+  // — see the matching invariant test in tests/index.test.ts.
+  all: {
+    files: ["**/*.sql"],
+    plugins: { postgresql: plugin },
+    languageOptions: {
+      parser: postgresqlParser,
+    },
+    rules: Object.fromEntries(
+      Object.keys(rules).map((name) => [
+        `postgresql/${name}`,
+        "error" as const,
+      ]),
+    ),
+  } satisfies Linter.Config,
 };
 
 export default plugin;

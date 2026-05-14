@@ -53,6 +53,38 @@ describe("eslint-plugin-postgresql", () => {
     }
   });
 
+  it("ships configs.all that enables every plugin rule at error", () => {
+    const all = plugin.configs?.["all"];
+    expect(all).toBeDefined();
+    if (!all || typeof all !== "object") return;
+
+    const plugins = (all as { plugins?: Record<string, unknown> }).plugins;
+    expect(plugins?.["postgresql"]).toBe(plugin);
+
+    const rules = (all as { rules?: Record<string, unknown> }).rules ?? {};
+    const referenced = Object.keys(rules)
+      .filter((k) => k.startsWith("postgresql/"))
+      .map((k) => k.slice("postgresql/".length));
+
+    // Every rule the plugin ships must appear in `all`. This is the
+    // invariant that lets us add a new rule without remembering to
+    // wire it into `all` separately — the test fails until you do.
+    const shipped = Object.keys(plugin.rules ?? {});
+    for (const ruleName of shipped) {
+      expect(
+        rules[`postgresql/${ruleName}`],
+        `all is missing rule "${ruleName}"`,
+      ).toBe("error");
+    }
+    // And `all` must not reference rules that don't exist.
+    for (const ruleName of referenced) {
+      expect(
+        plugin.rules?.[ruleName],
+        `all references unknown rule "${ruleName}"`,
+      ).toBeDefined();
+    }
+  });
+
   it("ships configs.stylistic that only references fixable rules", () => {
     const stylistic = plugin.configs?.["stylistic"];
     expect(stylistic).toBeDefined();
