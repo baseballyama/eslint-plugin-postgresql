@@ -23,6 +23,7 @@ import noRenameTable from "./rules/no-rename-table.js";
 import noSelectInto from "./rules/no-select-into.js";
 import noSelectStar from "./rules/no-select-star.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
+import noTemporaryTable from "./rules/no-temporary-table.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
@@ -63,6 +64,7 @@ const rules = {
   "no-select-into": noSelectInto,
   "no-select-star": noSelectStar,
   "no-syntax-error": noSyntaxError,
+  "no-temporary-table": noTemporaryTable,
   "no-truncate-cascade": noTruncateCascade,
   "no-unlogged-table": noUnloggedTable,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
@@ -123,6 +125,7 @@ plugin.configs = {
       "postgresql/no-rename-table": "warn",
       "postgresql/no-select-into": "warn",
       "postgresql/no-syntax-error": "error",
+      "postgresql/no-temporary-table": "warn",
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/no-unlogged-table": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",

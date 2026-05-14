@@ -598,6 +598,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["CREATE UNLOGGED TABLE session_cache (id text PRIMARY KEY);"],
     correct: ["CREATE TABLE session_cache (id text PRIMARY KEY);"],
   },
+  {
+    name: "no-temporary-table",
+    description:
+      "Warn on `CREATE TEMP / TEMPORARY TABLE` in versioned SQL.",
+    longDescription:
+      "Temporary tables exist only for the current session, so they almost never belong in versioned SQL. If session-scoped scratch storage is required, build it from application code.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["CREATE TEMP TABLE staging (id int);"],
+    correct: ["CREATE TABLE staging (id int);"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

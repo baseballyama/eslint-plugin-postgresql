@@ -959,6 +959,28 @@ CREATE UNLOGGED TABLE session_cache (id text PRIMARY KEY);
 CREATE TABLE session_cache (id text PRIMARY KEY);
 ```
 
+### `postgresql/no-temporary-table`
+
+Warns on `CREATE TEMP TABLE` / `CREATE TEMPORARY TABLE`. Temporary tables exist only for the current session and disappear when the connection closes — they almost never belong in versioned SQL. If session-scoped scratch storage is genuinely needed, build it from application code.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE TEMP TABLE staging (id int);
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE staging (id int);
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
