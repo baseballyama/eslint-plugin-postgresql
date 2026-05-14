@@ -32,6 +32,7 @@ import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
 import requireLimit from "./rules/require-limit.js";
+import requireNamedConstraint from "./rules/require-named-constraint.js";
 import requirePrimaryKey from "./rules/require-primary-key.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
@@ -70,6 +71,7 @@ const rules = {
   "prefer-text-over-varchar": preferTextOverVarchar,
   "prefer-timestamptz": preferTimestamptz,
   "require-limit": requireLimit,
+  "require-named-constraint": requireNamedConstraint,
   "require-primary-key": requirePrimaryKey,
   "require-where-in-delete": requireWhereInDelete,
   "require-where-in-update": requireWhereInUpdate,
@@ -127,6 +129,7 @@ plugin.configs = {
       "postgresql/prefer-text-over-varchar": "warn",
       "postgresql/prefer-timestamptz": "warn",
       "postgresql/require-limit": "warn",
+      "postgresql/require-named-constraint": "warn",
       "postgresql/require-primary-key": "warn",
       "postgresql/require-where-in-delete": "error",
       "postgresql/require-where-in-update": "error",

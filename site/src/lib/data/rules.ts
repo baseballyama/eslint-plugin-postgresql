@@ -566,6 +566,25 @@ export const rules: RuleMeta[] = [
       "ALTER TABLE orders VALIDATE CONSTRAINT orders_customer_fk;",
     ],
   },
+  {
+    name: "require-named-constraint",
+    description:
+      "Require explicit names on CHECK / UNIQUE / FK / EXCLUSION constraints.",
+    longDescription:
+      "PostgreSQL invents a name for unnamed constraints, but the generated name varies subtly across environments and migration tools, which makes later `DROP CONSTRAINT` / `ALTER CONSTRAINT` statements brittle. Column-level `NOT NULL` and `PRIMARY KEY` are allowed without explicit names.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "schema",
+    incorrect: [
+      "CREATE TABLE items (id int, code text, UNIQUE (code));",
+      "ALTER TABLE items ADD CHECK (length(code) > 0);",
+    ],
+    correct: [
+      "CREATE TABLE items (\n  id int,\n  code text,\n  CONSTRAINT items_code_unique UNIQUE (code)\n);",
+      "ALTER TABLE items ADD CONSTRAINT items_code_non_empty CHECK (length(code) > 0);",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
