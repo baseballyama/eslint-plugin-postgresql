@@ -1,0 +1,5 @@
+CREATE TABLE t (
+  id integer,
+  fid integer REFERENCES other(id) ON DELETE CASCADE
+);
+ALTER TABLE t ADD CONSTRAINT fk FOREIGN KEY (fid) REFERENCES other(id) ON DELETE CASCADE;
