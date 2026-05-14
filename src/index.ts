@@ -36,6 +36,8 @@ import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
 import preferBigintId from "./rules/prefer-bigint-id.js";
+import preferAsForColumnAlias from "./rules/prefer-as-for-column-alias.js";
+import preferAsForTableAlias from "./rules/prefer-as-for-table-alias.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
 import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
@@ -54,6 +56,7 @@ import requireLimit from "./rules/require-limit.js";
 import requireNamedConstraint from "./rules/require-named-constraint.js";
 import requirePrimaryKey from "./rules/require-primary-key.js";
 import requireSchemaQualifiedTable from "./rules/require-schema-qualified-table.js";
+import requireTrailingSemicolon from "./rules/require-trailing-semicolon.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
 import snakeCaseColumnName from "./rules/snake-case-column-name.js";
@@ -95,6 +98,8 @@ const rules = {
   "no-unlogged-table": noUnloggedTable,
   "no-vacuum-full": noVacuumFull,
   "prefer-bigint-id": preferBigintId,
+  "prefer-as-for-column-alias": preferAsForColumnAlias,
+  "prefer-as-for-table-alias": preferAsForTableAlias,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
   "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
@@ -113,6 +118,7 @@ const rules = {
   "require-named-constraint": requireNamedConstraint,
   "require-primary-key": requirePrimaryKey,
   "require-schema-qualified-table": requireSchemaQualifiedTable,
+  "require-trailing-semicolon": requireTrailingSemicolon,
   "require-where-in-delete": requireWhereInDelete,
   "require-where-in-update": requireWhereInUpdate,
   "snake-case-column-name": snakeCaseColumnName,
@@ -198,11 +204,14 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/prefer-as-for-column-alias": "warn",
+      "postgresql/prefer-as-for-table-alias": "warn",
       "postgresql/prefer-current-timestamp-over-now": "warn",
       "postgresql/prefer-explicit-inner-join": "warn",
       "postgresql/prefer-explicit-outer-join": "warn",
       "postgresql/prefer-keyword-case": "warn",
       "postgresql/prefer-not-equals-operator": "warn",
+      "postgresql/require-trailing-semicolon": "warn",
     },
   } satisfies Linter.Config,
 };
