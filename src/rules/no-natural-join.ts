@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -17,9 +18,12 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      JoinExpr(node: any) {
+      JoinExpr(node: Ast.JoinExpr) {
         if (node.isNatural) {
-          context.report({ node, messageId: "noNaturalJoin" });
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "noNaturalJoin",
+          });
         }
       },
     };

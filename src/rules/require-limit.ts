@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -17,15 +18,15 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      SelectStmt(node: any) {
-        // Check if this is a SELECT statement without LIMIT
-        // A SELECT statement has LIMIT if limitCount exists and limitOption is not LIMIT_OPTION_DEFAULT
+      SelectStmt(node: Ast.SelectStmt) {
+        // A SELECT has a LIMIT if `limitCount` is set and `limitOption`
+        // isn't the parser's default sentinel.
         const hasLimit =
-          node.limitCount && node.limitOption !== "LIMIT_OPTION_DEFAULT";
-
+          node.limitCount != null &&
+          node.limitOption !== "LIMIT_OPTION_DEFAULT";
         if (!hasLimit) {
           context.report({
-            node,
+            node: node as unknown as Rule.Node,
             messageId: "missingLimit",
           });
         }

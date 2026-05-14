@@ -1,13 +1,15 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
+import { isSubLink } from "../utils/ast.js";
 
-const isNotInSubquery = (node: any): boolean => {
+const isNotInSubquery = (node: Ast.BoolExprPG): boolean => {
   // The visitor key guarantees this is a BoolExpr; only check what
   // distinguishes `NOT IN (subquery)` from other `NOT (...)` shapes.
   if (node.boolop !== "NOT_EXPR") return false;
-  const args = Array.isArray(node.args) ? node.args : [];
-  if (args.length !== 1) return false;
+  const args = node.args;
+  if (!Array.isArray(args) || args.length !== 1) return false;
   const arg = args[0];
-  if (arg?.type !== "SubLink") return false;
+  if (!isSubLink(arg)) return false;
   if (arg.subLinkType !== "ANY_SUBLINK") return false;
   // `NOT IN (subq)` parses without an explicit operName.
   // `NOT (x = ANY(subq))` would set operName, so excluding it leaves only NOT IN.
@@ -35,9 +37,12 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      BoolExpr(node: any) {
+      BoolExpr(node: Ast.BoolExprPG) {
         if (isNotInSubquery(node)) {
-          context.report({ node, messageId: "noNotInSubquery" });
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "noNotInSubquery",
+          });
         }
       },
     };

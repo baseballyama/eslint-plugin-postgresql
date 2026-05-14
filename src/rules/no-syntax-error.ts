@@ -1,9 +1,5 @@
 import type { Rule } from "eslint";
 
-// NOTE: Currently using basic syntax validation due to module loading issues with postgresql-eslint-parser
-// TODO: Replace with proper postgresql-eslint-parser when the libpg-query import issue is resolved
-// import postgresqlParser from "postgresql-eslint-parser";
-
 const rule: Rule.RuleModule = {
   meta: {
     type: "problem",
@@ -20,12 +16,25 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      Program(node: any) {
-        for (const stmt of node.body) {
-          if (stmt.type === "SQLParseError") {
-            const errorMessage = stmt.error || "Unknown SQL parsing error";
+      // The parser's Program node carries SQLStatementNode | SQLParseError
+      // children, but ESLint's visitor type is the estree Program. Accept the
+      // ESLint shape and re-narrow each statement individually.
+      Program(node) {
+        const body = (node as { body?: unknown }).body;
+        if (!Array.isArray(body)) return;
+        for (const stmt of body) {
+          if (
+            stmt != null &&
+            typeof stmt === "object" &&
+            (stmt as { type?: unknown }).type === "SQLParseError"
+          ) {
+            const parseError = stmt as { error?: unknown };
+            const errorMessage =
+              typeof parseError.error === "string"
+                ? parseError.error
+                : "Unknown SQL parsing error";
             context.report({
-              node: stmt,
+              node: stmt as unknown as Rule.Node,
               messageId: "syntaxError",
               data: { message: errorMessage },
             });

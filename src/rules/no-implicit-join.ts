@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -18,12 +19,13 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      SelectStmt(node: any) {
-        const fromClause = Array.isArray(node?.fromClause)
-          ? node.fromClause
-          : [];
-        if (fromClause.length > 1) {
-          context.report({ node, messageId: "noImplicitJoin" });
+      SelectStmt(node: Ast.SelectStmt) {
+        const fromClause = node.fromClause;
+        if (Array.isArray(fromClause) && fromClause.length > 1) {
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "noImplicitJoin",
+          });
         }
       },
     };

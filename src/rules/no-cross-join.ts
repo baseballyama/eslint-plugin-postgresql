@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -17,14 +18,17 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      JoinExpr(node: any) {
+      JoinExpr(node: Ast.JoinExpr) {
         const isCrossJoin =
           node.jointype === "JOIN_INNER" &&
           !node.quals &&
           !node.usingClause &&
           !node.isNatural;
         if (isCrossJoin) {
-          context.report({ node, messageId: "noCrossJoin" });
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "noCrossJoin",
+          });
         }
       },
     };

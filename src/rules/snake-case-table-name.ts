@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const SNAKE_CASE = /^[a-z][a-z0-9_]*$/;
 
@@ -18,19 +19,17 @@ const rule: Rule.RuleModule = {
     },
   },
   create(context) {
-    const checkRelation = (relation: any, node: any) => {
-      const name = relation?.relname;
-      if (typeof name === "string" && !SNAKE_CASE.test(name)) {
-        context.report({
-          node,
-          messageId: "notSnakeCase",
-          data: { name },
-        });
-      }
-    };
     return {
-      CreateStmt(node: any) {
-        checkRelation(node?.relation, node);
+      CreateStmt(node: Ast.CreateStmt) {
+        const relation = node.relation as { relname?: unknown } | undefined;
+        const name = relation?.relname;
+        if (typeof name === "string" && !SNAKE_CASE.test(name)) {
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "notSnakeCase",
+            data: { name },
+          });
+        }
       },
     };
   },
