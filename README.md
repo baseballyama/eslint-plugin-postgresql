@@ -1168,6 +1168,29 @@ VACUUM users;
 -- Or: pg_repack --order-by from outside SQL.
 ```
 
+### `postgresql/no-drop-database`
+
+Errors on `DROP DATABASE`. The operation is catastrophic and irreversible, and database creation/deletion belongs in an explicit operator workflow — not in versioned SQL that runs unattended through a migration tool.
+
+**Type**: Problem  
+**Recommended**: ✅ Error  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+DROP DATABASE archive_2023;
+```
+
+✅ Correct:
+
+```sql
+-- Run DROP DATABASE manually from an operator console, with explicit confirmation.
+DROP TABLE archive;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
