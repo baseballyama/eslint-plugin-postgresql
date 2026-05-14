@@ -1,5 +1,11 @@
 import { browser } from "$app/environment";
-import type { Diagnostic, EnabledRules, LintRequest, LintResponse, ReadyMessage } from "./types";
+import type {
+  Diagnostic,
+  EnabledRules,
+  LintRequest,
+  LintResponse,
+  ReadyMessage,
+} from "./types";
 
 let worker: Worker | null = null;
 let nextId = 1;
@@ -10,7 +16,9 @@ let readyError: string | null = null;
 function ensureWorker(): Worker | null {
   if (!browser) return null;
   if (worker) return worker;
-  worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+  worker = new Worker(new URL("./worker.ts", import.meta.url), {
+    type: "module",
+  });
   ready = new Promise<void>((resolve, reject) => {
     const onMessage = (e: MessageEvent<ReadyMessage | LintResponse>) => {
       const data = e.data;
@@ -48,7 +56,10 @@ export interface LintResult {
   fatal?: string;
 }
 
-export async function lint(sql: string, enabled: EnabledRules): Promise<LintResult> {
+export async function lint(
+  sql: string,
+  enabled: EnabledRules,
+): Promise<LintResult> {
   const w = ensureWorker();
   if (!w) return { diagnostics: [], parseMs: 0, ruleMs: 0 };
   try {
@@ -64,7 +75,11 @@ export async function lint(sql: string, enabled: EnabledRules): Promise<LintResu
   const id = nextId++;
   return new Promise<LintResult>((resolve) => {
     pending.set(id, (resp) =>
-      resolve({ diagnostics: resp.diagnostics, parseMs: resp.parseMs, ruleMs: resp.ruleMs }),
+      resolve({
+        diagnostics: resp.diagnostics,
+        parseMs: resp.parseMs,
+        ruleMs: resp.ruleMs,
+      }),
     );
     // Svelte 5's `$state` returns Proxy-wrapped values. structuredClone (and
     // postMessage's clone algorithm) can't ferry proxies — flatten to a plain

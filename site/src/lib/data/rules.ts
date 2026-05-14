@@ -39,17 +39,15 @@ export const rules: RuleMeta[] = [
   },
   {
     name: "no-select-star",
-    description: "Disallow `SELECT *` (and `<alias>.*`) so result schemas stay stable.",
+    description:
+      "Disallow `SELECT *` (and `<alias>.*`) so result schemas stay stable.",
     longDescription:
       "Listing columns explicitly keeps the result schema stable when the table evolves — a new column won't silently appear in callers, and a removed column won't silently disappear. The aggregate form `count(*)` is unaffected.",
     type: "suggestion",
     recommended: "off",
     fixable: false,
     category: "style",
-    incorrect: [
-      "SELECT * FROM users;",
-      "SELECT u.* FROM users u;",
-    ],
+    incorrect: ["SELECT * FROM users;", "SELECT u.* FROM users u;"],
     correct: [
       "SELECT id, name FROM users;",
       "SELECT count(*) FROM users; -- aggregate star is fine",
@@ -92,10 +90,7 @@ export const rules: RuleMeta[] = [
     fixable: false,
     category: "safety",
     incorrect: ["DROP TABLE users CASCADE;"],
-    correct: [
-      "DROP TABLE users;",
-      "DROP TABLE users RESTRICT;",
-    ],
+    correct: ["DROP TABLE users;", "DROP TABLE users RESTRICT;"],
   },
   {
     name: "no-truncate-cascade",
@@ -107,10 +102,7 @@ export const rules: RuleMeta[] = [
     fixable: false,
     category: "safety",
     incorrect: ["TRUNCATE users CASCADE;"],
-    correct: [
-      "TRUNCATE users;",
-      "TRUNCATE users RESTRICT;",
-    ],
+    correct: ["TRUNCATE users;", "TRUNCATE users RESTRICT;"],
   },
   {
     name: "no-cross-join",

@@ -2,7 +2,11 @@
 <html lang="en" data-theme="auto">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="icon"
+      href="%sveltekit.assets%/favicon.svg"
+      type="image/svg+xml"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
@@ -18,7 +22,8 @@
       // Avoid theme flash. Read preference before paint.
       try {
         const raw = localStorage.getItem("theme");
-        const theme = raw === "light" || raw === "dark" || raw === "auto" ? raw : "auto";
+        const theme =
+          raw === "light" || raw === "dark" || raw === "auto" ? raw : "auto";
         document.documentElement.setAttribute("data-theme", theme);
       } catch {}
     </script>

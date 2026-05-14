@@ -37,7 +37,13 @@ self.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
 // inside an async IIFE keeps the patch hoisted ahead of the loader's WASM
 // fetch.
 const { parse: parseSql } = await import("libpg-query");
-import type { Diagnostic, EnabledRules, LintRequest, LintResponse, ReadyMessage } from "./types";
+import type {
+  Diagnostic,
+  EnabledRules,
+  LintRequest,
+  LintResponse,
+  ReadyMessage,
+} from "./types";
 
 // ---------------------------------------------------------------------------
 // Source mapping: libpg-query emits byte offsets, the editor wants line/col.
@@ -157,26 +163,45 @@ function isQuotedIdent(sql: string, byteOffset: number, name: string): boolean {
 const MESSAGES = {
   noSelectStar:
     "Avoid `SELECT *`; list the columns you need so the result schema does not silently change when the table does.",
-  missingLimit: "SELECT statement should include a LIMIT clause to prevent excessive data retrieval",
-  deleteWithoutWhere: "DELETE without WHERE will remove every row. Add a WHERE clause or use TRUNCATE explicitly.",
-  updateWithoutWhere: "UPDATE without WHERE will rewrite every row. Add a WHERE clause.",
-  dropCascade: "DROP TABLE ... CASCADE silently removes dependent objects. List dependents explicitly.",
-  truncateCascade: "TRUNCATE ... CASCADE empties tables referenced by foreign keys transitively.",
-  crossJoin: "Use `JOIN ... ON true` if you really mean a cartesian product, so the intent is explicit.",
-  naturalJoin: "NATURAL JOIN's join columns are implicit. Use JOIN ... USING (...) or JOIN ... ON ... .",
-  preferJsonb: "Prefer JSONB over JSON — supports GIN indexes and stores a parsed representation.",
+  missingLimit:
+    "SELECT statement should include a LIMIT clause to prevent excessive data retrieval",
+  deleteWithoutWhere:
+    "DELETE without WHERE will remove every row. Add a WHERE clause or use TRUNCATE explicitly.",
+  updateWithoutWhere:
+    "UPDATE without WHERE will rewrite every row. Add a WHERE clause.",
+  dropCascade:
+    "DROP TABLE ... CASCADE silently removes dependent objects. List dependents explicitly.",
+  truncateCascade:
+    "TRUNCATE ... CASCADE empties tables referenced by foreign keys transitively.",
+  crossJoin:
+    "Use `JOIN ... ON true` if you really mean a cartesian product, so the intent is explicit.",
+  naturalJoin:
+    "NATURAL JOIN's join columns are implicit. Use JOIN ... USING (...) or JOIN ... ON ... .",
+  preferJsonb:
+    "Prefer JSONB over JSON — supports GIN indexes and stores a parsed representation.",
   preferIdentity: "Prefer GENERATED ... AS IDENTITY over SERIAL/BIGSERIAL.",
-  missingPrimaryKey: "CREATE TABLE has no PRIMARY KEY. Tables without one break logical replication and most ORMs.",
-  preferText: "Prefer TEXT (with an optional CHECK constraint) over varchar(n).",
-  preferTimestamptz: "Prefer TIMESTAMPTZ over TIMESTAMP — `timestamp` is timezone-naive.",
-  noMoney: "The `money` type depends on the server's locale. Use NUMERIC plus a currency column.",
-  noChar: "Avoid CHAR(n) — PostgreSQL pads on write and trims on read. Use TEXT.",
-  noGrantPublic: "GRANT ... TO PUBLIC covers every current and future role. Name roles explicitly.",
-  preferConcurrently: "Prefer CREATE INDEX CONCURRENTLY in migrations to avoid blocking writers.",
-  notInSubquery: "NOT IN (subquery) returns no rows if the subquery yields NULL. Use NOT EXISTS.",
-  snakeTable: "Quoted mixed-case table names force every caller to quote-match. Use snake_case.",
-  snakeColumn: "Quoted mixed-case column names force every caller to quote-match. Use snake_case.",
-  implicitJoin: "Implicit (comma) join — the join condition is buried in WHERE. Use JOIN ... ON ... .",
+  missingPrimaryKey:
+    "CREATE TABLE has no PRIMARY KEY. Tables without one break logical replication and most ORMs.",
+  preferText:
+    "Prefer TEXT (with an optional CHECK constraint) over varchar(n).",
+  preferTimestamptz:
+    "Prefer TIMESTAMPTZ over TIMESTAMP — `timestamp` is timezone-naive.",
+  noMoney:
+    "The `money` type depends on the server's locale. Use NUMERIC plus a currency column.",
+  noChar:
+    "Avoid CHAR(n) — PostgreSQL pads on write and trims on read. Use TEXT.",
+  noGrantPublic:
+    "GRANT ... TO PUBLIC covers every current and future role. Name roles explicitly.",
+  preferConcurrently:
+    "Prefer CREATE INDEX CONCURRENTLY in migrations to avoid blocking writers.",
+  notInSubquery:
+    "NOT IN (subquery) returns no rows if the subquery yields NULL. Use NOT EXISTS.",
+  snakeTable:
+    "Quoted mixed-case table names force every caller to quote-match. Use snake_case.",
+  snakeColumn:
+    "Quoted mixed-case column names force every caller to quote-match. Use snake_case.",
+  implicitJoin:
+    "Implicit (comma) join — the join condition is buried in WHERE. Use JOIN ... ON ... .",
 } as const;
 
 interface Ctx {
@@ -194,7 +219,9 @@ function report(
   const sev = ctx.enabled[rule];
   if (!sev) return;
   const { line, column } =
-    typeof location === "number" ? ctx.source.toLineCol(location) : { line: 1, column: 1 };
+    typeof location === "number"
+      ? ctx.source.toLineCol(location)
+      : { line: 1, column: 1 };
   ctx.diagnostics.push({
     ruleId: rule,
     severity: sev,
@@ -228,13 +255,16 @@ function lintTree(parse: any, ctx: Ctx): void {
         }
         case "SelectStmt": {
           // require-limit
-          const hasLimit = body.limitCount && body.limitOption !== "LIMIT_OPTION_DEFAULT";
+          const hasLimit =
+            body.limitCount && body.limitOption !== "LIMIT_OPTION_DEFAULT";
           if (!hasLimit && (body.targetList || body.fromClause)) {
             report(ctx, "require-limit", "missingLimit", here);
           }
           // no-implicit-join: fromClause has 2+ entries that are not joins
           if (Array.isArray(body.fromClause) && body.fromClause.length > 1) {
-            const allBare = body.fromClause.every((e: any) => "RangeVar" in e || "RangeSubselect" in e);
+            const allBare = body.fromClause.every(
+              (e: any) => "RangeVar" in e || "RangeSubselect" in e,
+            );
             if (allBare) report(ctx, "no-implicit-join", "implicitJoin", here);
           }
           break;
@@ -252,7 +282,10 @@ function lintTree(parse: any, ctx: Ctx): void {
           break;
         }
         case "DropStmt": {
-          if (body.removeType === "OBJECT_TABLE" && body.behavior === "DROP_CASCADE") {
+          if (
+            body.removeType === "OBJECT_TABLE" &&
+            body.behavior === "DROP_CASCADE"
+          ) {
             report(ctx, "no-drop-table-cascade", "dropCascade", here);
           }
           break;
@@ -276,19 +309,32 @@ function lintTree(parse: any, ctx: Ctx): void {
           const t = typeName(body.typeName);
           if (!t) break;
           const lower = t.toLowerCase();
-          if (lower === "json") report(ctx, "prefer-jsonb-over-json", "preferJsonb", here);
-          if (["smallserial", "serial", "bigserial", "serial2", "serial4", "serial8"].includes(lower))
+          if (lower === "json")
+            report(ctx, "prefer-jsonb-over-json", "preferJsonb", here);
+          if (
+            [
+              "smallserial",
+              "serial",
+              "bigserial",
+              "serial2",
+              "serial4",
+              "serial8",
+            ].includes(lower)
+          )
             report(ctx, "prefer-identity-over-serial", "preferIdentity", here);
           if (lower === "varchar" && hasTypmods(body.typeName))
             report(ctx, "prefer-text-over-varchar", "preferText", here);
-          if (lower === "timestamp") report(ctx, "prefer-timestamptz", "preferTimestamptz", here);
+          if (lower === "timestamp")
+            report(ctx, "prefer-timestamptz", "preferTimestamptz", here);
           if (lower === "money") report(ctx, "no-money-type", "noMoney", here);
-          if (lower === "bpchar" || lower === "char") report(ctx, "no-char-type", "noChar", here);
+          if (lower === "bpchar" || lower === "char")
+            report(ctx, "no-char-type", "noChar", here);
 
           // snake-case-column-name
           if (body.colname && !isSnakeCase(body.colname)) {
             const col = body.colname as string;
-            const colLoc = typeof body.location === "number" ? body.location : here;
+            const colLoc =
+              typeof body.location === "number" ? body.location : here;
             if (isQuotedIdent(ctx.source.sql, colLoc, col)) {
               report(ctx, "snake-case-column-name", "snakeColumn", colLoc);
             }
@@ -316,7 +362,10 @@ function lintTree(parse: any, ctx: Ctx): void {
           // snake-case-table-name
           const relname: string | undefined = body.relation?.relname;
           if (relname && !isSnakeCase(relname)) {
-            const relLoc = typeof body.relation?.location === "number" ? body.relation.location : here;
+            const relLoc =
+              typeof body.relation?.location === "number"
+                ? body.relation.location
+                : here;
             if (isQuotedIdent(ctx.source.sql, relLoc, relname)) {
               report(ctx, "snake-case-table-name", "snakeTable", relLoc);
             }
@@ -331,13 +380,19 @@ function lintTree(parse: any, ctx: Ctx): void {
                 g.RoleSpec?.roletype === "ROLESPEC_PUBLIC" ||
                 (g.RoleSpec?.rolename ?? "").toLowerCase() === "public",
             );
-            if (hitsPublic) report(ctx, "no-grant-to-public", "noGrantPublic", here);
+            if (hitsPublic)
+              report(ctx, "no-grant-to-public", "noGrantPublic", here);
           }
           break;
         }
         case "IndexStmt": {
           if (body.concurrent !== true) {
-            report(ctx, "prefer-create-index-concurrently", "preferConcurrently", here);
+            report(
+              ctx,
+              "prefer-create-index-concurrently",
+              "preferConcurrently",
+              here,
+            );
           }
           break;
         }
@@ -430,7 +485,12 @@ self.addEventListener("message", async (e: MessageEvent<LintRequest>) => {
   const t2 = performance.now();
 
   // Stable order: by line then column then ruleId.
-  ctx.diagnostics.sort((a, b) => a.line - b.line || a.column - b.column || a.ruleId.localeCompare(b.ruleId));
+  ctx.diagnostics.sort(
+    (a, b) =>
+      a.line - b.line ||
+      a.column - b.column ||
+      a.ruleId.localeCompare(b.ruleId),
+  );
 
   const resp: LintResponse = {
     id: req.id,

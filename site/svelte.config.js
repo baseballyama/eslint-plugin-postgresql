@@ -5,7 +5,8 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 // domain is configured. `BASE_PATH` lets CI override it (set to "" for a
 // user/org pages site or a CNAME deployment).
 const base =
-  process.env.BASE_PATH ?? (process.env.NODE_ENV === "production" ? "/eslint-plugin-postgresql" : "");
+  process.env.BASE_PATH ??
+  (process.env.NODE_ENV === "production" ? "/eslint-plugin-postgresql" : "");
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
