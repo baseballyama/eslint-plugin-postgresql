@@ -1,0 +1,1 @@
+SELECT 1 WHERE x >= 1 AND x <= 10;
