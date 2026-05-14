@@ -1028,6 +1028,32 @@ CREATE TABLE shifts (id int, start_at timestamptz);
 CREATE TABLE jobs (id int, duration interval);
 ```
 
+### `postgresql/no-set-not-null`
+
+Warns on `ALTER TABLE ... ALTER COLUMN ... SET NOT NULL`. PostgreSQL has to scan the whole table to verify the column has no nulls, and it holds an `ACCESS EXCLUSIVE` lock for the duration. The production-safe pattern (PG ≥ 12) is to add a `CHECK (col IS NOT NULL) NOT VALID` constraint, `VALIDATE CONSTRAINT` separately (no exclusive lock), then `SET NOT NULL` — PG reuses the validated CHECK and skips the scan.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE users ALTER COLUMN email SET NOT NULL;
+```
+
+✅ Correct:
+
+```sql
+-- Phase 1: cheap metadata-only.
+ALTER TABLE users ADD CONSTRAINT users_email_not_null CHECK (email IS NOT NULL) NOT VALID;
+-- Phase 2 (separate migration): no exclusive lock, only scans uncommitted rows.
+ALTER TABLE users VALIDATE CONSTRAINT users_email_not_null;
+-- Phase 3 (optional): now `SET NOT NULL` is instant.
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
