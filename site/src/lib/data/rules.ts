@@ -480,6 +480,22 @@ export const rules: RuleMeta[] = [
       "SELECT count(*) FROM users WHERE active;",
     ],
   },
+  {
+    name: "no-alter-column-type",
+    description:
+      "Warn on `ALTER COLUMN ... TYPE` — can rewrite the table under ACCESS EXCLUSIVE.",
+    longDescription:
+      "PostgreSQL may need to rewrite every row (and every index) under an `ACCESS EXCLUSIVE` lock to change a column's type. For non-trivial tables, add a new column, dual-write, backfill, and swap — or wrap the conversion in a separate, scheduled migration.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE users ALTER COLUMN id TYPE bigint;"],
+    correct: [
+      "ALTER TABLE users ADD COLUMN id_new bigint;",
+      "ALTER TABLE users ALTER COLUMN status SET DEFAULT 'active';",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

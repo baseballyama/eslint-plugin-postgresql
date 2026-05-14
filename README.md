@@ -764,6 +764,30 @@ SELECT category, count(*) FROM items GROUP BY category HAVING count(*) > 1;
 SELECT count(*) FROM users WHERE active;
 ```
 
+### `postgresql/no-alter-column-type`
+
+Warns on `ALTER TABLE ... ALTER COLUMN ... TYPE ...`. PostgreSQL may need to rewrite every row (and every index) to change a column's type, all of it under an `ACCESS EXCLUSIVE` lock that blocks every other reader and writer. For non-trivial tables, add a new column, dual-write, backfill, and swap — or wrap the conversion in a separate, scheduled migration.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE users ALTER COLUMN id TYPE bigint;
+```
+
+✅ Correct:
+
+```sql
+-- Phase 1: add a new column, dual-write in app code.
+ALTER TABLE users ADD COLUMN id_new bigint;
+-- Phase 2 (later migration): backfill, swap, drop the old column.
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
