@@ -125,9 +125,9 @@ function walk(node: any, visit: (type: string, body: any) => void): void {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function typeName(typeName: any): string | undefined {
-  if (!typeName || typeof typeName !== "object") return undefined;
-  const names: any[] = typeName.names;
+function typeName(node: any): string | undefined {
+  if (!node || typeof node !== "object") return undefined;
+  const names: any[] = node.names;
   if (!Array.isArray(names) || names.length === 0) return undefined;
   // Each entry is { String: { sval: "..." } }; the unqualified name is the
   // last segment (lower segments are schema qualifiers like pg_catalog).
@@ -135,8 +135,8 @@ function typeName(typeName: any): string | undefined {
   return last?.String?.sval ?? last?.String?.str;
 }
 
-function hasTypmods(typeName: any): boolean {
-  return Array.isArray(typeName?.typmods) && typeName.typmods.length > 0;
+function hasTypmods(node: any): boolean {
+  return Array.isArray(node?.typmods) && node.typmods.length > 0;
 }
 
 const SNAKE = /^[a-z][a-z0-9_]*$/;
@@ -498,7 +498,6 @@ self.addEventListener("message", async (e: MessageEvent<LintRequest>) => {
     diagnostics: ctx.diagnostics,
     parseMs: t1 - t0,
     ruleMs: t2 - t1,
-    error: parseError ? undefined : undefined,
   };
   self.postMessage(resp);
 });

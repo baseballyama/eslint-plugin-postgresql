@@ -92,7 +92,6 @@ const KEYWORDS = new Set([
   "WHEN",
   "WHERE",
   "WITH",
-  "RETURNING",
 ]);
 
 const TYPES = new Set([

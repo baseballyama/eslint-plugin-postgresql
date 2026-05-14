@@ -4,10 +4,13 @@
   import Logo from "./Logo.svelte";
   import { createThemeStore, type Theme } from "$lib/theme.svelte";
 
+  // `trailingSlash: "always"` in +layout.ts is what GitHub Pages needs for
+  // static prerender — keep the nav targets in sync with the generated
+  // routes (`/rules/`, `/playground/`) so links resolve without a redirect.
   const items = [
     { href: "/", label: "Home" },
-    { href: "/rules", label: "Rules" },
-    { href: "/playground", label: "Playground" },
+    { href: "/rules/", label: "Rules" },
+    { href: "/playground/", label: "Playground" },
   ];
 
   const isActive = (href: string) => {
@@ -37,7 +40,7 @@
         <a
           class="link"
           class:active={isActive(item.href)}
-          href={`${base}${item.href === "/" ? "/" : item.href}`}
+          href={`${base}${item.href}`}
         >
           {item.label}
         </a>

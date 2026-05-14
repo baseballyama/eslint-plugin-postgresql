@@ -17,12 +17,14 @@
 
   interface Props {
     value: string;
-    onchange: (next: string) => void;
     /** 1-based line numbers that should get a severity marker in the gutter. */
     marked?: { line: number; severity: "error" | "warn" }[];
   }
 
-  let { value = $bindable(""), onchange, marked = [] }: Props = $props();
+  // `value` is the single source of truth: callers bind to it. The CodeMirror
+  // update listener writes back through the bindable, which propagates to the
+  // parent without a separate `onchange` callback.
+  let { value = $bindable(""), marked = [] }: Props = $props();
 
   let host: HTMLDivElement;
   let view: EditorView | null = null;
@@ -133,9 +135,7 @@
       keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       EditorView.updateListener.of((upd) => {
         if (upd.docChanged) {
-          const next = upd.state.doc.toString();
-          value = next;
-          onchange(next);
+          value = upd.state.doc.toString();
         }
       }),
     ];

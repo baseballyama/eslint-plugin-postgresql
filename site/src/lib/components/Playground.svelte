@@ -125,12 +125,13 @@ SELECT a.id FROM accounts a, transactions t WHERE a.id = t.account_id;
     return rest;
   }
 
-  let debounce: ReturnType<typeof setTimeout> | null = null;
   $effect(() => {
     void sql;
     void enabled;
-    if (debounce) clearTimeout(debounce);
-    debounce = setTimeout(run, 220);
+    const id = setTimeout(run, 220);
+    // Return a teardown so a pending lint cannot fire after the component
+    // unmounts or after sql/enabled change again before the timer elapses.
+    return () => clearTimeout(id);
   });
 
   async function run() {
@@ -206,7 +207,7 @@ SELECT a.id FROM accounts a, transactions t WHERE a.id = t.account_id;
 
   <div class="body">
     <div class="editor-wrap">
-      <Editor bind:value={sql} onchange={(v) => (sql = v)} marked={markedLines} />
+      <Editor bind:value={sql} marked={markedLines} />
     </div>
 
     <div class="panel">

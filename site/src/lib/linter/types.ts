@@ -24,7 +24,6 @@ export interface LintResponse {
   id: number;
   type: "lint";
   diagnostics: Diagnostic[];
-  error?: string;
   parseMs: number;
   ruleMs: number;
 }
