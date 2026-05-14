@@ -1,0 +1,3 @@
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x);
+SELECT * FROM t WHERE x IN (1, 2, 3);
+SELECT * FROM t WHERE x = 1;

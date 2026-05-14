@@ -1,0 +1,4 @@
+[
+  { "messageId": "preferCurrentTimestampOverLocal" },
+  { "messageId": "preferCurrentTimeOverLocal" }
+]

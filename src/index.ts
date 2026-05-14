@@ -16,6 +16,7 @@ import noDropNotNull from "./rules/no-drop-not-null.js";
 import noDropSchemaCascade from "./rules/no-drop-schema-cascade.js";
 import noDropTableCascade from "./rules/no-drop-table-cascade.js";
 import noEqualityWithNull from "./rules/no-equality-with-null.js";
+import noGrantAll from "./rules/no-grant-all.js";
 import noGrantToPublic from "./rules/no-grant-to-public.js";
 import noGroupByOrdinal from "./rules/no-group-by-ordinal.js";
 import noHavingWithoutGroupBy from "./rules/no-having-without-group-by.js";
@@ -59,6 +60,7 @@ import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over
 import preferDropIndexConcurrently from "./rules/prefer-drop-index-concurrently.js";
 import preferExplicitInnerJoin from "./rules/prefer-explicit-inner-join.js";
 import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
+import preferExistsOverInSubquery from "./rules/prefer-exists-over-in-subquery.js";
 import preferExplicitOuterJoin from "./rules/prefer-explicit-outer-join.js";
 import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
@@ -70,6 +72,7 @@ import preferReindexConcurrently from "./rules/prefer-reindex-concurrently.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
 import requireIfExists from "./rules/require-if-exists.js";
+import requireIndexOnFkColumn from "./rules/require-index-on-fk-column.js";
 import requireLimit from "./rules/require-limit.js";
 import requireNamedConstraint from "./rules/require-named-constraint.js";
 import requireOnDeleteAction from "./rules/require-on-delete-action.js";
@@ -97,6 +100,7 @@ const rules = {
   "no-drop-schema-cascade": noDropSchemaCascade,
   "no-drop-table-cascade": noDropTableCascade,
   "no-equality-with-null": noEqualityWithNull,
+  "no-grant-all": noGrantAll,
   "no-grant-to-public": noGrantToPublic,
   "no-group-by-ordinal": noGroupByOrdinal,
   "no-having-without-group-by": noHavingWithoutGroupBy,
@@ -140,6 +144,7 @@ const rules = {
   "prefer-drop-index-concurrently": preferDropIndexConcurrently,
   "prefer-explicit-inner-join": preferExplicitInnerJoin,
   "prefer-explicit-null-ordering": preferExplicitNullOrdering,
+  "prefer-exists-over-in-subquery": preferExistsOverInSubquery,
   "prefer-explicit-outer-join": preferExplicitOuterJoin,
   "prefer-fk-not-valid": preferFkNotValid,
   "prefer-identity-over-serial": preferIdentityOverSerial,
@@ -151,6 +156,7 @@ const rules = {
   "prefer-text-over-varchar": preferTextOverVarchar,
   "prefer-timestamptz": preferTimestamptz,
   "require-if-exists": requireIfExists,
+  "require-index-on-fk-column": requireIndexOnFkColumn,
   "require-limit": requireLimit,
   "require-named-constraint": requireNamedConstraint,
   "require-on-delete-action": requireOnDeleteAction,
@@ -197,6 +203,7 @@ plugin.configs = {
       "postgresql/no-drop-schema-cascade": "warn",
       "postgresql/no-drop-table-cascade": "warn",
       "postgresql/no-equality-with-null": "error",
+      "postgresql/no-grant-all": "warn",
       "postgresql/no-grant-to-public": "warn",
       "postgresql/no-group-by-ordinal": "warn",
       "postgresql/no-having-without-group-by": "error",
