@@ -15,17 +15,35 @@ const createRuleTester = () => {
   });
 };
 
+const readOptionsFor = (
+  folderPath: string,
+  baseName: string,
+): unknown[] | undefined => {
+  try {
+    return JSON.parse(
+      readFileSync(join(folderPath, `${baseName}-options.json`), "utf-8"),
+    );
+  } catch {
+    return undefined;
+  }
+};
+
 // Fixtureファイルを読み込む共通関数
 const readFixtureFiles = (
   folderPath: string,
-): Array<{ code: string; filename: string }> => {
+): Array<{ code: string; filename: string; options?: unknown[] }> => {
   const files = readdirSync(folderPath);
   return files
     .filter((file) => file.endsWith(".sql"))
-    .map((file) => ({
-      code: readFileSync(join(folderPath, file), "utf-8").trim(),
-      filename: file,
-    }));
+    .map((file) => {
+      const baseName = file.replace(".sql", "");
+      const options = readOptionsFor(folderPath, baseName);
+      return {
+        code: readFileSync(join(folderPath, file), "utf-8").trim(),
+        filename: file,
+        ...(options !== undefined ? { options } : {}),
+      };
+    });
 };
 
 // Invalid fixtureを読み込む共通関数
@@ -52,11 +70,14 @@ const readInvalidFixtures = (folderPath: string) => {
       output = undefined;
     }
 
+    const options = readOptionsFor(folderPath, baseName);
+
     return {
       code: readFileSync(join(folderPath, file), "utf-8").trim(),
       filename: file,
       errors,
       ...(output !== undefined ? { output } : {}),
+      ...(options !== undefined ? { options } : {}),
     };
   });
 };
