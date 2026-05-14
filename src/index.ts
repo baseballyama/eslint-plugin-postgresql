@@ -65,6 +65,7 @@ import preferNotEqualsOperator from "./rules/prefer-not-equals-operator.js";
 import preferReindexConcurrently from "./rules/prefer-reindex-concurrently.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
+import requireIfExists from "./rules/require-if-exists.js";
 import requireLimit from "./rules/require-limit.js";
 import requireNamedConstraint from "./rules/require-named-constraint.js";
 import requireOnDeleteAction from "./rules/require-on-delete-action.js";
@@ -141,6 +142,7 @@ const rules = {
   "prefer-reindex-concurrently": preferReindexConcurrently,
   "prefer-text-over-varchar": preferTextOverVarchar,
   "prefer-timestamptz": preferTimestamptz,
+  "require-if-exists": requireIfExists,
   "require-limit": requireLimit,
   "require-named-constraint": requireNamedConstraint,
   "require-on-delete-action": requireOnDeleteAction,
