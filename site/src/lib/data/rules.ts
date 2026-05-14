@@ -535,6 +535,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["ALTER TABLE users DROP COLUMN legacy_flag;"],
     correct: ["ALTER TABLE users ADD COLUMN status text;"],
   },
+  {
+    name: "no-drop-not-null",
+    description:
+      "Warn on `DROP NOT NULL` — surprises consumers that already assume non-null.",
+    longDescription:
+      "Relaxing the constraint lets the column store NULLs again. Every reader that already assumes the column is non-null (joins, COALESCE coverage, app-level types) silently breaks. Model the truly optional case explicitly instead.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE users ALTER COLUMN email DROP NOT NULL;"],
+    correct: ["ALTER TABLE users ALTER COLUMN status DROP DEFAULT;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
