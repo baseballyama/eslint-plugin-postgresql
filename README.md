@@ -1098,6 +1098,30 @@ CREATE TABLE users (id bigint PRIMARY KEY);
 CREATE TABLE app.users (id bigint PRIMARY KEY);
 ```
 
+### `postgresql/prefer-explicit-null-ordering`
+
+Warns when an `ORDER BY` term specifies an explicit `ASC` / `DESC` / `USING` direction but no `NULLS FIRST` / `NULLS LAST`. PostgreSQL's defaults (NULLS LAST for ASC, NULLS FIRST for DESC) match the SQL spec but contradict every other major engine, and even within PG it is a common cause of surprise when nulls cluster at the "wrong" end of a result set.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT id FROM users ORDER BY created_at DESC;
+```
+
+✅ Correct:
+
+```sql
+SELECT id FROM users ORDER BY created_at DESC NULLS LAST;
+-- Plain ORDER BY without an explicit direction is not flagged.
+SELECT id FROM users ORDER BY created_at;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

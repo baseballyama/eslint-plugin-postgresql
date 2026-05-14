@@ -685,6 +685,22 @@ export const rules: RuleMeta[] = [
     incorrect: ["CREATE TABLE users (id bigint PRIMARY KEY);"],
     correct: ["CREATE TABLE app.users (id bigint PRIMARY KEY);"],
   },
+  {
+    name: "prefer-explicit-null-ordering",
+    description:
+      "Require `NULLS FIRST/LAST` when an explicit ORDER BY direction is used.",
+    longDescription:
+      "PostgreSQL's null-ordering defaults (NULLS LAST for ASC, NULLS FIRST for DESC) match the SQL spec but contradict every other major engine. Adding explicit `NULLS FIRST/LAST` removes the surprise and survives copy-paste into other databases.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "style",
+    incorrect: ["SELECT id FROM users ORDER BY created_at DESC;"],
+    correct: [
+      "SELECT id FROM users ORDER BY created_at DESC NULLS LAST;",
+      "SELECT id FROM users ORDER BY created_at;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
