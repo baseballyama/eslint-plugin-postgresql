@@ -496,6 +496,19 @@ export const rules: RuleMeta[] = [
       "ALTER TABLE users ALTER COLUMN status SET DEFAULT 'active';",
     ],
   },
+  {
+    name: "no-rename-column",
+    description:
+      "Warn on `RENAME COLUMN` — breaks deployed code reading the old name.",
+    longDescription:
+      "The rename completes atomically in the database, but every running app instance that still references the old name starts erroring the moment the migration runs. Use add → dual-write → backfill → drop across separate deploys.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE users RENAME COLUMN email_address TO email;"],
+    correct: ["ALTER TABLE users ADD COLUMN email text;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
