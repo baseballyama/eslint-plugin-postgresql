@@ -47,6 +47,7 @@ import preferAddConstraintNotValid from "./rules/prefer-add-constraint-not-valid
 import preferAsForColumnAlias from "./rules/prefer-as-for-column-alias.js";
 import preferAsForTableAlias from "./rules/prefer-as-for-table-alias.js";
 import preferBetweenOverAnd from "./rules/prefer-between-over-and.js";
+import preferCastOperator from "./rules/prefer-cast-operator.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
 import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
@@ -120,6 +121,7 @@ const rules = {
   "prefer-as-for-column-alias": preferAsForColumnAlias,
   "prefer-as-for-table-alias": preferAsForTableAlias,
   "prefer-between-over-and": preferBetweenOverAnd,
+  "prefer-cast-operator": preferCastOperator,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
   "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
@@ -237,6 +239,7 @@ plugin.configs = {
       "postgresql/prefer-as-for-column-alias": "warn",
       "postgresql/prefer-as-for-table-alias": "warn",
       "postgresql/prefer-between-over-and": "warn",
+      "postgresql/prefer-cast-operator": "warn",
       "postgresql/prefer-current-timestamp-over-now": "warn",
       "postgresql/prefer-explicit-inner-join": "warn",
       "postgresql/prefer-explicit-outer-join": "warn",
