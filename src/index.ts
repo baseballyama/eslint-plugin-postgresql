@@ -66,6 +66,7 @@ import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
 import requireLimit from "./rules/require-limit.js";
 import requireNamedConstraint from "./rules/require-named-constraint.js";
+import requireOnDeleteAction from "./rules/require-on-delete-action.js";
 import requirePrimaryKey from "./rules/require-primary-key.js";
 import requireSchemaQualifiedTable from "./rules/require-schema-qualified-table.js";
 import requireTrailingSemicolon from "./rules/require-trailing-semicolon.js";
@@ -140,6 +141,7 @@ const rules = {
   "prefer-timestamptz": preferTimestamptz,
   "require-limit": requireLimit,
   "require-named-constraint": requireNamedConstraint,
+  "require-on-delete-action": requireOnDeleteAction,
   "require-primary-key": requirePrimaryKey,
   "require-schema-qualified-table": requireSchemaQualifiedTable,
   "require-trailing-semicolon": requireTrailingSemicolon,
@@ -218,6 +220,7 @@ plugin.configs = {
       "postgresql/prefer-timestamptz": "warn",
       "postgresql/require-limit": "warn",
       "postgresql/require-named-constraint": "warn",
+      "postgresql/require-on-delete-action": "warn",
       "postgresql/require-primary-key": "warn",
       "postgresql/require-where-in-delete": "error",
       "postgresql/require-where-in-update": "error",

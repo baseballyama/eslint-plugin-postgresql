@@ -1,0 +1,4 @@
+CREATE TABLE t (
+  fid integer REFERENCES other(id)
+);
+ALTER TABLE t ADD CONSTRAINT fk FOREIGN KEY (fid) REFERENCES other(id);
