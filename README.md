@@ -642,6 +642,30 @@ FROM orders
 ORDER BY customer_id, created_at DESC;
 ```
 
+### `postgresql/no-leading-wildcard-like`
+
+Warns on `LIKE` / `ILIKE` patterns that begin with `%`. A pattern like `'%foo'` or `'%foo%'` cannot use a plain B-tree index and forces PostgreSQL into a sequential scan. If substring search is genuinely needed, use a `pg_trgm` GIN index, full-text search (`tsvector`), or rework the schema so the prefix is indexable.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT id FROM users WHERE email LIKE '%@example.com';
+SELECT id FROM users WHERE name ILIKE '%smith%';
+```
+
+✅ Correct:
+
+```sql
+SELECT id FROM users WHERE email LIKE 'admin@%';
+SELECT id FROM users WHERE email = 'admin@example.com';
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

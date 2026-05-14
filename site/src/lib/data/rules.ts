@@ -396,6 +396,25 @@ export const rules: RuleMeta[] = [
       "SELECT DISTINCT customer_id FROM orders;",
     ],
   },
+  {
+    name: "no-leading-wildcard-like",
+    description:
+      "Warn on `LIKE`/`ILIKE` patterns that begin with `%`; they force sequential scans.",
+    longDescription:
+      "A pattern like `'%foo'` or `'%foo%'` cannot use a plain B-tree index and forces PostgreSQL into a sequential scan. Use a `pg_trgm` GIN index or full-text search if substring matching is required.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "perf",
+    incorrect: [
+      "SELECT id FROM users WHERE email LIKE '%@example.com';",
+      "SELECT id FROM users WHERE name ILIKE '%smith%';",
+    ],
+    correct: [
+      "SELECT id FROM users WHERE email LIKE 'admin@%';",
+      "SELECT id FROM users WHERE email = 'admin@example.com';",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
