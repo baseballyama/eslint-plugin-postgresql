@@ -5,6 +5,7 @@ import noCharType from "./rules/no-char-type.js";
 import noCrossJoin from "./rules/no-cross-join.js";
 import noDropTableCascade from "./rules/no-drop-table-cascade.js";
 import noGrantToPublic from "./rules/no-grant-to-public.js";
+import noGroupByOrdinal from "./rules/no-group-by-ordinal.js";
 import noImplicitJoin from "./rules/no-implicit-join.js";
 import noMoneyType from "./rules/no-money-type.js";
 import noNaturalJoin from "./rules/no-natural-join.js";
@@ -30,6 +31,7 @@ const rules = {
   "no-cross-join": noCrossJoin,
   "no-drop-table-cascade": noDropTableCascade,
   "no-grant-to-public": noGrantToPublic,
+  "no-group-by-ordinal": noGroupByOrdinal,
   "no-implicit-join": noImplicitJoin,
   "no-money-type": noMoneyType,
   "no-natural-join": noNaturalJoin,
@@ -76,6 +78,7 @@ plugin.configs = {
       "postgresql/no-cross-join": "warn",
       "postgresql/no-drop-table-cascade": "warn",
       "postgresql/no-grant-to-public": "warn",
+      "postgresql/no-group-by-ordinal": "warn",
       "postgresql/no-implicit-join": "warn",
       "postgresql/no-money-type": "error",
       "postgresql/no-natural-join": "error",

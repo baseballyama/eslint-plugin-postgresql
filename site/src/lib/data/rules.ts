@@ -359,6 +359,25 @@ export const rules: RuleMeta[] = [
       "SELECT id, name AS display_name FROM users ORDER BY display_name;",
     ],
   },
+  {
+    name: "no-group-by-ordinal",
+    description:
+      "Disallow positional `GROUP BY` references (e.g., `GROUP BY 1`).",
+    longDescription:
+      "Same fragility as positional `ORDER BY`: reordering the SELECT list silently shifts the grouping to a different column, producing plausible-looking but wrong aggregates. Reference the column by name or by the grouping expression.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "style",
+    incorrect: [
+      "SELECT category, count(*) FROM items GROUP BY 1;",
+      "SELECT region, category, sum(amount) FROM sales GROUP BY 1, 2;",
+    ],
+    correct: [
+      "SELECT category, count(*) FROM items GROUP BY category;",
+      "SELECT region, category, sum(amount) FROM sales GROUP BY region, category;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
