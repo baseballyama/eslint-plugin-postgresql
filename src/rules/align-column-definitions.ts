@@ -2,10 +2,10 @@ import type { Rule } from "eslint";
 import type { Ast } from "postgresql-eslint-parser";
 import { isColumnDef, isConstraint } from "../utils/ast.js";
 
-// Minimum number of spaces to leave between adjacent fields when
+// Default minimum number of spaces between adjacent fields when
 // aligning. Two spaces matches the convention in the user-supplied
 // example and is comfortably wide enough to be visually distinct.
-const GAP = 2;
+const DEFAULT_GAP = 2;
 
 interface Slot {
   node: Ast.ColumnDef;
@@ -31,7 +31,15 @@ const rule: Rule.RuleModule = {
       recommended: false,
     },
     fixable: "code",
-    schema: [],
+    schema: [
+      {
+        type: "object",
+        properties: {
+          gap: { type: "integer", minimum: 1 },
+        },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       misaligned:
         "Column definitions in this CREATE TABLE are not vertically aligned.",
@@ -39,20 +47,21 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     const sourceCode = context.sourceCode;
+    const option = (context.options[0] ?? {}) as { gap?: number };
+    const gap = option.gap ?? DEFAULT_GAP;
     return {
       CreateStmt(node: Ast.CreateStmt) {
         const elts = node.tableElts;
-        if (!Array.isArray(elts) || elts.length < 2) return;
+        if (!Array.isArray(elts) || elts.length === 0) return;
 
-        // Only handle the simple case: every element in tableElts is a
-        // single-line ColumnDef. Table-level constraints, multi-line
-        // column definitions, and comma-sharing lines are out of scope —
-        // realigning them safely needs more careful source surgery than
-        // this rule does today.
+        // Table-level constraints (`PRIMARY KEY (a, b)`, `CHECK (...)`,
+        // etc.) are kept as-is — only ColumnDef rows are realigned. Walk
+        // every element so we still bail out on multi-line column defs
+        // and shared-line layouts, where source surgery is unsafe.
         const slots: Slot[] = [];
         const seenLines = new Set<number>();
         for (const elt of elts) {
-          if (!isColumnDef(elt)) return;
+          if (!isColumnDef(elt)) continue;
           const colRange = elt.range;
           const typeName = elt.typeName as
             | { range?: [number, number] }
@@ -109,8 +118,8 @@ const rule: Rule.RuleModule = {
             ? slot.typeText.padEnd(maxType)
             : slot.typeText;
           const expected = slot.constraintsText
-            ? `${namePart}${" ".repeat(GAP)}${typePart}${" ".repeat(GAP)}${slot.constraintsText}`
-            : `${namePart}${" ".repeat(GAP)}${typePart}`;
+            ? `${namePart}${" ".repeat(gap)}${typePart}${" ".repeat(gap)}${slot.constraintsText}`
+            : `${namePart}${" ".repeat(gap)}${typePart}`;
           const current = sourceCode
             .getText()
             .slice(slot.rewriteStart, slot.rewriteEnd);
