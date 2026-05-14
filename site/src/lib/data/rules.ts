@@ -585,6 +585,19 @@ export const rules: RuleMeta[] = [
       "ALTER TABLE items ADD CONSTRAINT items_code_non_empty CHECK (length(code) > 0);",
     ],
   },
+  {
+    name: "no-unlogged-table",
+    description:
+      "Warn on `CREATE UNLOGGED TABLE` — data is lost on crash and not replicated.",
+    longDescription:
+      "`UNLOGGED` tables skip WAL: truncated on crash, not replicated to standbys, not restored from base backups. If a cache-style table is genuinely what you want, document it and disable the rule on that file.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["CREATE UNLOGGED TABLE session_cache (id text PRIMARY KEY);"],
+    correct: ["CREATE TABLE session_cache (id text PRIMARY KEY);"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

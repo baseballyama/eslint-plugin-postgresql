@@ -24,6 +24,7 @@ import noSelectInto from "./rules/no-select-into.js";
 import noSelectStar from "./rules/no-select-star.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
+import noUnloggedTable from "./rules/no-unlogged-table.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
 import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
@@ -63,6 +64,7 @@ const rules = {
   "no-select-star": noSelectStar,
   "no-syntax-error": noSyntaxError,
   "no-truncate-cascade": noTruncateCascade,
+  "no-unlogged-table": noUnloggedTable,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
   "prefer-fk-not-valid": preferFkNotValid,
@@ -122,6 +124,7 @@ plugin.configs = {
       "postgresql/no-select-into": "warn",
       "postgresql/no-syntax-error": "error",
       "postgresql/no-truncate-cascade": "warn",
+      "postgresql/no-unlogged-table": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",
       "postgresql/prefer-fk-not-valid": "warn",
       "postgresql/prefer-identity-over-serial": "warn",

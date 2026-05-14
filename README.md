@@ -937,6 +937,28 @@ CREATE TABLE items (
 ALTER TABLE items ADD CONSTRAINT items_code_non_empty CHECK (length(code) > 0);
 ```
 
+### `postgresql/no-unlogged-table`
+
+Warns on `CREATE UNLOGGED TABLE`. Unlogged tables skip WAL: they are truncated on crash, not replicated to standbys, and not restored from base backups. If a cache-style table is genuinely what you want, document it explicitly and disable this rule for that file.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE UNLOGGED TABLE session_cache (id text PRIMARY KEY);
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE session_cache (id text PRIMARY KEY);
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
