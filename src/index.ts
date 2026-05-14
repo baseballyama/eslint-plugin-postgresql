@@ -15,6 +15,7 @@ import noDropDatabase from "./rules/no-drop-database.js";
 import noDropNotNull from "./rules/no-drop-not-null.js";
 import noDropSchemaCascade from "./rules/no-drop-schema-cascade.js";
 import noDropTableCascade from "./rules/no-drop-table-cascade.js";
+import noEqualityWithNull from "./rules/no-equality-with-null.js";
 import noGrantToPublic from "./rules/no-grant-to-public.js";
 import noGroupByOrdinal from "./rules/no-group-by-ordinal.js";
 import noHavingWithoutGroupBy from "./rules/no-having-without-group-by.js";
@@ -29,6 +30,7 @@ import noOrderByOrdinal from "./rules/no-order-by-ordinal.js";
 import noRenameColumn from "./rules/no-rename-column.js";
 import noRenameTable from "./rules/no-rename-table.js";
 import noRule from "./rules/no-rule.js";
+import noSecurityDefinerWithoutSearchPath from "./rules/no-security-definer-without-search-path.js";
 import noSelectInto from "./rules/no-select-into.js";
 import noSelectStar from "./rules/no-select-star.js";
 import noSetNotNull from "./rules/no-set-not-null.js";
@@ -40,6 +42,7 @@ import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnnecessaryQuotedIdentifier from "./rules/no-unnecessary-quoted-identifier.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import noUpdatePrimaryKey from "./rules/no-update-primary-key.js";
+import noUpdateWithoutFromBinding from "./rules/no-update-without-from-binding.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
 import noWithRecursiveWithoutLimit from "./rules/no-with-recursive-without-limit.js";
 import plpgsqlKeywordCase from "./rules/plpgsql-keyword-case.js";
@@ -93,6 +96,7 @@ const rules = {
   "no-drop-not-null": noDropNotNull,
   "no-drop-schema-cascade": noDropSchemaCascade,
   "no-drop-table-cascade": noDropTableCascade,
+  "no-equality-with-null": noEqualityWithNull,
   "no-grant-to-public": noGrantToPublic,
   "no-group-by-ordinal": noGroupByOrdinal,
   "no-having-without-group-by": noHavingWithoutGroupBy,
@@ -107,6 +111,7 @@ const rules = {
   "no-rename-column": noRenameColumn,
   "no-rename-table": noRenameTable,
   "no-rule": noRule,
+  "no-security-definer-without-search-path": noSecurityDefinerWithoutSearchPath,
   "no-select-into": noSelectInto,
   "no-select-star": noSelectStar,
   "no-set-not-null": noSetNotNull,
@@ -118,6 +123,7 @@ const rules = {
   "no-unnecessary-quoted-identifier": noUnnecessaryQuotedIdentifier,
   "no-unlogged-table": noUnloggedTable,
   "no-update-primary-key": noUpdatePrimaryKey,
+  "no-update-without-from-binding": noUpdateWithoutFromBinding,
   "no-vacuum-full": noVacuumFull,
   "no-with-recursive-without-limit": noWithRecursiveWithoutLimit,
   "plpgsql-keyword-case": plpgsqlKeywordCase,
@@ -190,6 +196,7 @@ plugin.configs = {
       "postgresql/no-drop-not-null": "warn",
       "postgresql/no-drop-schema-cascade": "warn",
       "postgresql/no-drop-table-cascade": "warn",
+      "postgresql/no-equality-with-null": "error",
       "postgresql/no-grant-to-public": "warn",
       "postgresql/no-group-by-ordinal": "warn",
       "postgresql/no-having-without-group-by": "error",
@@ -204,6 +211,7 @@ plugin.configs = {
       "postgresql/no-rename-column": "warn",
       "postgresql/no-rename-table": "warn",
       "postgresql/no-rule": "warn",
+      "postgresql/no-security-definer-without-search-path": "error",
       "postgresql/no-select-into": "warn",
       "postgresql/no-set-not-null": "warn",
       "postgresql/no-set-search-path": "warn",
@@ -213,6 +221,7 @@ plugin.configs = {
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/no-unlogged-table": "warn",
       "postgresql/no-update-primary-key": "error",
+      "postgresql/no-update-without-from-binding": "error",
       "postgresql/no-vacuum-full": "warn",
       "postgresql/no-with-recursive-without-limit": "error",
       "postgresql/prefer-add-constraint-not-valid": "warn",
