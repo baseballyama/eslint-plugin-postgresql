@@ -626,6 +626,25 @@ export const rules: RuleMeta[] = [
     ],
     correct: ["CREATE TABLE products (price numeric(10, 2));"],
   },
+  {
+    name: "no-time-type",
+    description:
+      "Disallow `TIME` / `TIMETZ` columns; they rarely model real values correctly.",
+    longDescription:
+      "`time` has no date so cannot disambiguate around DST transitions; `timetz` stores an offset that is meaningless without a date. Use `timestamptz` for points in time, `interval` for durations, or `text` if all you need is a display value.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "schema",
+    incorrect: [
+      "CREATE TABLE shifts (id int, start_at time);",
+      "CREATE TABLE shifts (id int, start_at timetz);",
+    ],
+    correct: [
+      "CREATE TABLE shifts (id int, start_at timestamptz);",
+      "CREATE TABLE jobs (id int, duration interval);",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

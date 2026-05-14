@@ -1004,6 +1004,30 @@ CREATE TABLE products (price decimal);
 CREATE TABLE products (price numeric(10, 2));
 ```
 
+### `postgresql/no-time-type`
+
+Warns on `TIME` and `TIME WITH TIME ZONE` (`timetz`) columns. `time` has no date and cannot disambiguate around DST transitions; `timetz` stores an offset that is meaningless without a date. Use `timestamptz` for points in time, `interval` for durations, or `text` if all you really need is a display value.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE TABLE shifts (id int, start_at time);
+CREATE TABLE shifts (id int, start_at timetz);
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE shifts (id int, start_at timestamptz);
+CREATE TABLE jobs (id int, duration interval);
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
