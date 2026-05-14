@@ -23,9 +23,11 @@ import noMoneyType from "./rules/no-money-type.js";
 import noNaturalJoin from "./rules/no-natural-join.js";
 import noNotInSubquery from "./rules/no-not-in-subquery.js";
 import noNumericWithoutPrecision from "./rules/no-numeric-without-precision.js";
+import noOnDeleteCascade from "./rules/no-on-delete-cascade.js";
 import noOrderByOrdinal from "./rules/no-order-by-ordinal.js";
 import noRenameColumn from "./rules/no-rename-column.js";
 import noRenameTable from "./rules/no-rename-table.js";
+import noRule from "./rules/no-rule.js";
 import noSelectInto from "./rules/no-select-into.js";
 import noSelectStar from "./rules/no-select-star.js";
 import noSetNotNull from "./rules/no-set-not-null.js";
@@ -37,13 +39,16 @@ import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnnecessaryQuotedIdentifier from "./rules/no-unnecessary-quoted-identifier.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
+import noWithRecursiveWithoutLimit from "./rules/no-with-recursive-without-limit.js";
 import plpgsqlKeywordCase from "./rules/plpgsql-keyword-case.js";
 import preferBigintId from "./rules/prefer-bigint-id.js";
+import preferAddConstraintNotValid from "./rules/prefer-add-constraint-not-valid.js";
 import preferAsForColumnAlias from "./rules/prefer-as-for-column-alias.js";
 import preferAsForTableAlias from "./rules/prefer-as-for-table-alias.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
 import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
+import preferDropIndexConcurrently from "./rules/prefer-drop-index-concurrently.js";
 import preferExplicitInnerJoin from "./rules/prefer-explicit-inner-join.js";
 import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
 import preferExplicitOuterJoin from "./rules/prefer-explicit-outer-join.js";
@@ -88,9 +93,11 @@ const rules = {
   "no-natural-join": noNaturalJoin,
   "no-not-in-subquery": noNotInSubquery,
   "no-numeric-without-precision": noNumericWithoutPrecision,
+  "no-on-delete-cascade": noOnDeleteCascade,
   "no-order-by-ordinal": noOrderByOrdinal,
   "no-rename-column": noRenameColumn,
   "no-rename-table": noRenameTable,
+  "no-rule": noRule,
   "no-select-into": noSelectInto,
   "no-select-star": noSelectStar,
   "no-set-not-null": noSetNotNull,
@@ -102,13 +109,16 @@ const rules = {
   "no-unnecessary-quoted-identifier": noUnnecessaryQuotedIdentifier,
   "no-unlogged-table": noUnloggedTable,
   "no-vacuum-full": noVacuumFull,
+  "no-with-recursive-without-limit": noWithRecursiveWithoutLimit,
   "plpgsql-keyword-case": plpgsqlKeywordCase,
+  "prefer-add-constraint-not-valid": preferAddConstraintNotValid,
   "prefer-bigint-id": preferBigintId,
   "prefer-as-for-column-alias": preferAsForColumnAlias,
   "prefer-as-for-table-alias": preferAsForTableAlias,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
   "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
+  "prefer-drop-index-concurrently": preferDropIndexConcurrently,
   "prefer-explicit-inner-join": preferExplicitInnerJoin,
   "prefer-explicit-null-ordering": preferExplicitNullOrdering,
   "prefer-explicit-outer-join": preferExplicitOuterJoin,
@@ -173,9 +183,11 @@ plugin.configs = {
       "postgresql/no-natural-join": "error",
       "postgresql/no-not-in-subquery": "error",
       "postgresql/no-numeric-without-precision": "warn",
+      "postgresql/no-on-delete-cascade": "warn",
       "postgresql/no-order-by-ordinal": "warn",
       "postgresql/no-rename-column": "warn",
       "postgresql/no-rename-table": "warn",
+      "postgresql/no-rule": "warn",
       "postgresql/no-select-into": "warn",
       "postgresql/no-set-not-null": "warn",
       "postgresql/no-set-search-path": "warn",
@@ -185,6 +197,8 @@ plugin.configs = {
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/no-unlogged-table": "warn",
       "postgresql/no-vacuum-full": "warn",
+      "postgresql/no-with-recursive-without-limit": "error",
+      "postgresql/prefer-add-constraint-not-valid": "warn",
       "postgresql/prefer-bigint-id": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",
       "postgresql/prefer-explicit-null-ordering": "warn",
