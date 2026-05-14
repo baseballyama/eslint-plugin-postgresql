@@ -16,6 +16,7 @@ import noMoneyType from "./rules/no-money-type.js";
 import noNaturalJoin from "./rules/no-natural-join.js";
 import noNotInSubquery from "./rules/no-not-in-subquery.js";
 import noOrderByOrdinal from "./rules/no-order-by-ordinal.js";
+import noRenameColumn from "./rules/no-rename-column.js";
 import noSelectInto from "./rules/no-select-into.js";
 import noSelectStar from "./rules/no-select-star.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
@@ -49,6 +50,7 @@ const rules = {
   "no-natural-join": noNaturalJoin,
   "no-not-in-subquery": noNotInSubquery,
   "no-order-by-ordinal": noOrderByOrdinal,
+  "no-rename-column": noRenameColumn,
   "no-select-into": noSelectInto,
   "no-select-star": noSelectStar,
   "no-syntax-error": noSyntaxError,
@@ -103,6 +105,7 @@ plugin.configs = {
       "postgresql/no-natural-join": "error",
       "postgresql/no-not-in-subquery": "error",
       "postgresql/no-order-by-ordinal": "warn",
+      "postgresql/no-rename-column": "warn",
       "postgresql/no-select-into": "warn",
       "postgresql/no-syntax-error": "error",
       "postgresql/no-truncate-cascade": "warn",

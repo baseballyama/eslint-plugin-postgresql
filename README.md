@@ -788,6 +788,30 @@ ALTER TABLE users ADD COLUMN id_new bigint;
 -- Phase 2 (later migration): backfill, swap, drop the old column.
 ```
 
+### `postgresql/no-rename-column`
+
+Warns on `ALTER TABLE ... RENAME COLUMN`. The rename completes atomically in the database, but every running app instance that still references the old name starts erroring the moment the migration runs. The safe pattern is add → dual-write → backfill → drop across separate deploys.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE users RENAME COLUMN email_address TO email;
+```
+
+✅ Correct:
+
+```sql
+-- Phase 1
+ALTER TABLE users ADD COLUMN email text;
+-- (Backfill, dual-write, drop old column in a later migration.)
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
