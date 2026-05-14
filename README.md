@@ -1214,6 +1214,28 @@ DROP SCHEMA staging;
 DROP SCHEMA staging RESTRICT;
 ```
 
+### `postgresql/prefer-reindex-concurrently`
+
+Warns on `REINDEX` without `CONCURRENTLY`. A non-concurrent `REINDEX TABLE` takes a `SHARE` lock that blocks writers for the duration; `REINDEX INDEX` takes an `ACCESS EXCLUSIVE` on the index. PG ≥ 12 introduced `REINDEX (...) CONCURRENTLY`, which builds a parallel index and swaps without blocking writers.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+REINDEX TABLE users;
+```
+
+✅ Correct:
+
+```sql
+REINDEX TABLE CONCURRENTLY users;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

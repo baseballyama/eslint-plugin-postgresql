@@ -40,6 +40,7 @@ import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js
 import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
+import preferReindexConcurrently from "./rules/prefer-reindex-concurrently.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
 import requireLimit from "./rules/require-limit.js";
@@ -91,6 +92,7 @@ const rules = {
   "prefer-fk-not-valid": preferFkNotValid,
   "prefer-identity-over-serial": preferIdentityOverSerial,
   "prefer-jsonb-over-json": preferJsonbOverJson,
+  "prefer-reindex-concurrently": preferReindexConcurrently,
   "prefer-text-over-varchar": preferTextOverVarchar,
   "prefer-timestamptz": preferTimestamptz,
   "require-limit": requireLimit,
@@ -161,6 +163,7 @@ plugin.configs = {
       "postgresql/prefer-fk-not-valid": "warn",
       "postgresql/prefer-identity-over-serial": "warn",
       "postgresql/prefer-jsonb-over-json": "warn",
+      "postgresql/prefer-reindex-concurrently": "warn",
       "postgresql/prefer-text-over-varchar": "warn",
       "postgresql/prefer-timestamptz": "warn",
       "postgresql/require-limit": "warn",

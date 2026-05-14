@@ -753,6 +753,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["DROP SCHEMA staging CASCADE;"],
     correct: ["DROP SCHEMA staging;", "DROP SCHEMA staging RESTRICT;"],
   },
+  {
+    name: "prefer-reindex-concurrently",
+    description:
+      "Require `REINDEX ... CONCURRENTLY`; plain `REINDEX` blocks writers.",
+    longDescription:
+      "Non-concurrent `REINDEX TABLE` takes a `SHARE` lock that blocks writers for the duration; `REINDEX INDEX` takes `ACCESS EXCLUSIVE`. PG ≥ 12 introduced `REINDEX (...) CONCURRENTLY`, which builds a parallel index and swaps without blocking writers.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "perf",
+    incorrect: ["REINDEX TABLE users;"],
+    correct: ["REINDEX TABLE CONCURRENTLY users;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
