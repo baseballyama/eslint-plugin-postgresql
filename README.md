@@ -835,6 +835,30 @@ CREATE TABLE users (id BIGINT PRIMARY KEY);
 -- Migrate writers, then drop the legacy table in a later deploy.
 ```
 
+### `postgresql/no-drop-column`
+
+Warns on `ALTER TABLE ... DROP COLUMN`. Every running app that still reads the column starts failing the moment the migration runs. The two-step pattern is: stop reading/writing the column in the application and deploy, then drop it in a follow-up migration.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE users DROP COLUMN legacy_flag;
+```
+
+✅ Correct:
+
+```sql
+-- Phase 1: remove every read/write of legacy_flag in the app.
+-- Phase 2 (separate deploy): then drop it.
+ALTER TABLE users ADD COLUMN status text;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

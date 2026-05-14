@@ -6,6 +6,7 @@ import noAlterColumnType from "./rules/no-alter-column-type.js";
 import noCharType from "./rules/no-char-type.js";
 import noCrossJoin from "./rules/no-cross-join.js";
 import noDistinctOnWithoutOrderBy from "./rules/no-distinct-on-without-order-by.js";
+import noDropColumn from "./rules/no-drop-column.js";
 import noDropTableCascade from "./rules/no-drop-table-cascade.js";
 import noGrantToPublic from "./rules/no-grant-to-public.js";
 import noGroupByOrdinal from "./rules/no-group-by-ordinal.js";
@@ -41,6 +42,7 @@ const rules = {
   "no-char-type": noCharType,
   "no-cross-join": noCrossJoin,
   "no-distinct-on-without-order-by": noDistinctOnWithoutOrderBy,
+  "no-drop-column": noDropColumn,
   "no-drop-table-cascade": noDropTableCascade,
   "no-grant-to-public": noGrantToPublic,
   "no-group-by-ordinal": noGroupByOrdinal,
@@ -97,6 +99,7 @@ plugin.configs = {
       "postgresql/no-char-type": "warn",
       "postgresql/no-cross-join": "warn",
       "postgresql/no-distinct-on-without-order-by": "error",
+      "postgresql/no-drop-column": "warn",
       "postgresql/no-drop-table-cascade": "warn",
       "postgresql/no-grant-to-public": "warn",
       "postgresql/no-group-by-ordinal": "warn",
