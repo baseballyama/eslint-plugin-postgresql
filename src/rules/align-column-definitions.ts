@@ -117,10 +117,21 @@ const rule: Rule.RuleModule = {
           if (seenLines.has(startLoc.line)) return;
           seenLines.add(startLoc.line);
 
-          const lineText = sourceCode.lines[startLoc.line - 1] ?? "";
-          // Reject lines that carry inline comments or any unexpected
-          // text in the rewrite span; we cannot safely reflow them.
-          if (lineText.includes("--") || lineText.includes("/*")) return;
+          // A `--` or `/* */` comment AFTER the rewrite range is fine —
+          // the rule only replaces [name..lastConstraint] and never
+          // touches the trailing comma or comment that follows.
+          // Reject only when a comment lives INSIDE the rewrite span
+          // (e.g. `id /* annotation */ ulid PRIMARY KEY`), since that
+          // text would be clobbered by the realigned line.
+          const rewriteSpanText = sourceCode
+            .getText()
+            .slice(colRange[0], rewriteEnd);
+          if (
+            rewriteSpanText.includes("--") ||
+            rewriteSpanText.includes("/*")
+          ) {
+            return;
+          }
 
           const typeText = sourceCode
             .getText()
