@@ -618,6 +618,30 @@ SELECT category, count(*) FROM items GROUP BY category;
 SELECT region, category, sum(amount) FROM sales GROUP BY region, category;
 ```
 
+### `postgresql/no-distinct-on-without-order-by`
+
+Errors on `SELECT DISTINCT ON (...)` queries that do not also specify `ORDER BY`. Without an explicit ordering PostgreSQL keeps an arbitrary row from each group, so the result depends on scan order and changes silently across plan or stats updates. Pair `DISTINCT ON` with an `ORDER BY` whose leading columns match the `DISTINCT ON` expressions so the surviving row is deterministic.
+
+**Type**: Problem  
+**Recommended**: ✅ Error  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT DISTINCT ON (customer_id) customer_id, amount FROM orders;
+```
+
+✅ Correct:
+
+```sql
+SELECT DISTINCT ON (customer_id) customer_id, amount
+FROM orders
+ORDER BY customer_id, created_at DESC;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
