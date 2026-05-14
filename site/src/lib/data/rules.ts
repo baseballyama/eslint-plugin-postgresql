@@ -778,6 +778,26 @@ export const rules: RuleMeta[] = [
     incorrect: ["CREATE ROLE app_writer LOGIN PASSWORD 'redacted';"],
     correct: ["GRANT SELECT ON users TO app_reader;"],
   },
+  {
+    name: "prefer-bigint-id",
+    description:
+      "Prefer `bigint` for primary-key `id` columns; `int` overflows at 2.1B rows.",
+    longDescription:
+      "An `int` primary key overflows at ~2.1 billion rows. Widening the type later requires a table rewrite under `ACCESS EXCLUSIVE`. Declare the primary key as `bigint GENERATED ALWAYS AS IDENTITY` from the start. UUID primary keys and non-PK `id` columns are not flagged.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "schema",
+    incorrect: [
+      "CREATE TABLE users (id int PRIMARY KEY, name text);",
+      "CREATE TABLE users (id serial PRIMARY KEY, name text);",
+      "CREATE TABLE users (id int, name text, PRIMARY KEY (id));",
+    ],
+    correct: [
+      "CREATE TABLE users (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, name text);",
+      "CREATE TABLE users (id uuid PRIMARY KEY, name text);",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

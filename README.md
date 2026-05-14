@@ -1259,6 +1259,33 @@ CREATE ROLE app_writer LOGIN PASSWORD 'redacted';
 GRANT SELECT ON users TO app_reader;
 ```
 
+### `postgresql/prefer-bigint-id`
+
+Warns when an `id` column declared as a primary key uses `int`, `smallint`, `serial`, or `smallserial`. `int` primary keys overflow at 2.1 billion rows — a soft cap that tables with even moderate write traffic eventually hit. Widening the type later requires a table rewrite under `ACCESS EXCLUSIVE`. Declare the primary key as `bigint GENERATED ALWAYS AS IDENTITY` from the start. UUID primary keys are unaffected.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE TABLE users (id int PRIMARY KEY, name text);
+CREATE TABLE users (id serial PRIMARY KEY, name text);
+CREATE TABLE users (id int, name text, PRIMARY KEY (id));
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE users (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, name text);
+CREATE TABLE users (id uuid PRIMARY KEY, name text);
+-- An int `id` column that is NOT a primary key is also fine.
+CREATE TABLE event_count (id int, count int);
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

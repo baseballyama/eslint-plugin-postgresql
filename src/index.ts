@@ -35,6 +35,7 @@ import noTimeType from "./rules/no-time-type.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
+import preferBigintId from "./rules/prefer-bigint-id.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
 import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
@@ -88,6 +89,7 @@ const rules = {
   "no-truncate-cascade": noTruncateCascade,
   "no-unlogged-table": noUnloggedTable,
   "no-vacuum-full": noVacuumFull,
+  "prefer-bigint-id": preferBigintId,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
   "prefer-explicit-null-ordering": preferExplicitNullOrdering,
@@ -161,6 +163,7 @@ plugin.configs = {
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/no-unlogged-table": "warn",
       "postgresql/no-vacuum-full": "warn",
+      "postgresql/prefer-bigint-id": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",
       "postgresql/prefer-explicit-null-ordering": "warn",
       "postgresql/prefer-fk-not-valid": "warn",
