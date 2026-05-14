@@ -10,6 +10,7 @@ import noDistinctOnWithoutOrderBy from "./rules/no-distinct-on-without-order-by.
 import noDropColumn from "./rules/no-drop-column.js";
 import noDropDatabase from "./rules/no-drop-database.js";
 import noDropNotNull from "./rules/no-drop-not-null.js";
+import noDropSchemaCascade from "./rules/no-drop-schema-cascade.js";
 import noDropTableCascade from "./rules/no-drop-table-cascade.js";
 import noGrantToPublic from "./rules/no-grant-to-public.js";
 import noGroupByOrdinal from "./rules/no-group-by-ordinal.js";
@@ -60,6 +61,7 @@ const rules = {
   "no-drop-column": noDropColumn,
   "no-drop-database": noDropDatabase,
   "no-drop-not-null": noDropNotNull,
+  "no-drop-schema-cascade": noDropSchemaCascade,
   "no-drop-table-cascade": noDropTableCascade,
   "no-grant-to-public": noGrantToPublic,
   "no-group-by-ordinal": noGroupByOrdinal,
@@ -131,6 +133,7 @@ plugin.configs = {
       "postgresql/no-drop-column": "warn",
       "postgresql/no-drop-database": "error",
       "postgresql/no-drop-not-null": "warn",
+      "postgresql/no-drop-schema-cascade": "warn",
       "postgresql/no-drop-table-cascade": "warn",
       "postgresql/no-grant-to-public": "warn",
       "postgresql/no-group-by-ordinal": "warn",
