@@ -714,6 +714,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["VACUUM FULL users;"],
     correct: ["VACUUM users;", "VACUUM ANALYZE users;"],
   },
+  {
+    name: "no-cluster",
+    description:
+      "Warn on `CLUSTER` — ACCESS EXCLUSIVE lock, and PG doesn't maintain the order.",
+    longDescription:
+      "`CLUSTER` takes `ACCESS EXCLUSIVE` and rewrites the whole table just like `VACUUM FULL`. PostgreSQL does not keep rows clustered as you continue to write, so every subsequent `CLUSTER` must rewrite everything again. Use `pg_repack --order-by` for online clustering.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["CLUSTER users USING users_pkey;"],
+    correct: ["VACUUM users;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
