@@ -32,6 +32,7 @@ import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
+import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
 import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
@@ -78,6 +79,7 @@ const rules = {
   "no-unlogged-table": noUnloggedTable,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
+  "prefer-explicit-null-ordering": preferExplicitNullOrdering,
   "prefer-fk-not-valid": preferFkNotValid,
   "prefer-identity-over-serial": preferIdentityOverSerial,
   "prefer-jsonb-over-json": preferJsonbOverJson,
@@ -143,6 +145,7 @@ plugin.configs = {
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/no-unlogged-table": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",
+      "postgresql/prefer-explicit-null-ordering": "warn",
       "postgresql/prefer-fk-not-valid": "warn",
       "postgresql/prefer-identity-over-serial": "warn",
       "postgresql/prefer-jsonb-over-json": "warn",
