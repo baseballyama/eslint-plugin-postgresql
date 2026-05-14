@@ -3,6 +3,7 @@ import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
 import noCharType from "./rules/no-char-type.js";
 import noCrossJoin from "./rules/no-cross-join.js";
+import noDistinctOnWithoutOrderBy from "./rules/no-distinct-on-without-order-by.js";
 import noDropTableCascade from "./rules/no-drop-table-cascade.js";
 import noGrantToPublic from "./rules/no-grant-to-public.js";
 import noGroupByOrdinal from "./rules/no-group-by-ordinal.js";
@@ -29,6 +30,7 @@ import snakeCaseTableName from "./rules/snake-case-table-name.js";
 const rules = {
   "no-char-type": noCharType,
   "no-cross-join": noCrossJoin,
+  "no-distinct-on-without-order-by": noDistinctOnWithoutOrderBy,
   "no-drop-table-cascade": noDropTableCascade,
   "no-grant-to-public": noGrantToPublic,
   "no-group-by-ordinal": noGroupByOrdinal,
@@ -76,6 +78,7 @@ plugin.configs = {
     rules: {
       "postgresql/no-char-type": "warn",
       "postgresql/no-cross-join": "warn",
+      "postgresql/no-distinct-on-without-order-by": "error",
       "postgresql/no-drop-table-cascade": "warn",
       "postgresql/no-grant-to-public": "warn",
       "postgresql/no-group-by-ordinal": "warn",

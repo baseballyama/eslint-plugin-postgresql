@@ -378,6 +378,24 @@ export const rules: RuleMeta[] = [
       "SELECT region, category, sum(amount) FROM sales GROUP BY region, category;",
     ],
   },
+  {
+    name: "no-distinct-on-without-order-by",
+    description:
+      "Require ORDER BY alongside `SELECT DISTINCT ON (...)` so the surviving row is deterministic.",
+    longDescription:
+      "Without `ORDER BY`, PostgreSQL keeps an arbitrary row from each group of `DISTINCT ON` — the result depends on scan order and changes silently across plan or stats updates. Pair `DISTINCT ON` with an `ORDER BY` whose leading columns match.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "SELECT DISTINCT ON (customer_id) customer_id, amount FROM orders;",
+    ],
+    correct: [
+      "SELECT DISTINCT ON (customer_id) customer_id, amount\nFROM orders\nORDER BY customer_id, created_at DESC;",
+      "SELECT DISTINCT customer_id FROM orders;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
