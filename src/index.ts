@@ -3,6 +3,7 @@ import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
 import alignColumnDefinitions from "./rules/align-column-definitions.js";
 import alignValues from "./rules/align-values.js";
+import consistentCreateOrReplace from "./rules/consistent-create-or-replace.js";
 import noAddCheckConstraintWithoutNotValid from "./rules/no-add-check-constraint-without-not-valid.js";
 import noAddColumnNotNullWithoutDefault from "./rules/no-add-column-not-null-without-default.js";
 import noAddUniqueConstraintDirectly from "./rules/no-add-unique-constraint-directly.js";
@@ -58,7 +59,6 @@ import preferBetweenOverAnd from "./rules/prefer-between-over-and.js";
 import preferCastOperator from "./rules/prefer-cast-operator.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
-import preferCreateOrReplace from "./rules/prefer-create-or-replace.js";
 import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
 import preferDropIndexConcurrently from "./rules/prefer-drop-index-concurrently.js";
 import preferExplicitInnerJoin from "./rules/prefer-explicit-inner-join.js";
@@ -90,6 +90,7 @@ import snakeCaseTableName from "./rules/snake-case-table-name.js";
 const rules = {
   "align-column-definitions": alignColumnDefinitions,
   "align-values": alignValues,
+  "consistent-create-or-replace": consistentCreateOrReplace,
   "no-add-check-constraint-without-not-valid":
     noAddCheckConstraintWithoutNotValid,
   "no-add-column-not-null-without-default": noAddColumnNotNullWithoutDefault,
@@ -146,7 +147,6 @@ const rules = {
   "prefer-cast-operator": preferCastOperator,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
-  "prefer-create-or-replace": preferCreateOrReplace,
   "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
   "prefer-drop-index-concurrently": preferDropIndexConcurrently,
   "prefer-explicit-inner-join": preferExplicitInnerJoin,

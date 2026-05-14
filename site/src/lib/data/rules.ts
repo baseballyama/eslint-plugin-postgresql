@@ -1127,14 +1127,14 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-create-or-replace",
+    name: "consistent-create-or-replace",
     description:
-      "Prefer `CREATE OR REPLACE` for `FUNCTION` / `PROCEDURE` / `VIEW`.",
+      "Enforce a consistent stance on `CREATE OR REPLACE` for `FUNCTION` / `PROCEDURE` / `VIEW`.",
     longDescription:
-      "Without `OR REPLACE`, re-running a migration that already created the object fails. `CREATE OR REPLACE` is the standard idempotent form for the three object types that support it. `CREATE TABLE` / `CREATE INDEX` are out of scope (they don't support `OR REPLACE`).",
+      "Two valid stances exist: (a) always use `CREATE OR REPLACE` so re-running a migration is idempotent, or (b) never use it so unintended overwrites are surfaced as `relation already exists`. Pick one with the `style` option; the rule auto-fixes either way. `CREATE TABLE` / `CREATE INDEX` are out of scope (they don't support `OR REPLACE`).",
     type: "suggestion",
     recommended: "off",
-    fixable: false,
+    fixable: true,
     category: "safety",
     incorrect: [
       "CREATE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';",
@@ -1145,6 +1145,15 @@ export const rules: RuleMeta[] = [
       "CREATE OR REPLACE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';",
       "CREATE OR REPLACE PROCEDURE p() LANGUAGE SQL AS '';",
       "CREATE OR REPLACE VIEW v AS SELECT 1;",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "Which stance to enforce. `always` (default) requires `OR REPLACE` so re-running is idempotent. `never` forbids `OR REPLACE` so unintended overwrites are surfaced.",
+      },
     ],
   },
   {
