@@ -1,0 +1,2 @@
+SELECT * FROM t WHERE x IN (SELECT id FROM other);
+SELECT * FROM t WHERE x = ANY (SELECT id FROM other);
