@@ -522,6 +522,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["ALTER TABLE legacy_users RENAME TO users;"],
     correct: ["CREATE TABLE users (id BIGINT PRIMARY KEY);"],
   },
+  {
+    name: "no-drop-column",
+    description:
+      "Warn on `DROP COLUMN` — breaks every reader still referencing the column.",
+    longDescription:
+      "Every running app instance that still reads the column starts failing the moment the migration runs. The safe pattern is to stop reading/writing the column in the application, deploy, then drop it in a follow-up migration.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE users DROP COLUMN legacy_flag;"],
+    correct: ["ALTER TABLE users ADD COLUMN status text;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
