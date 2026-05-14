@@ -38,11 +38,15 @@ import noVacuumFull from "./rules/no-vacuum-full.js";
 import preferBigintId from "./rules/prefer-bigint-id.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCreateIndexConcurrently from "./rules/prefer-create-index-concurrently.js";
+import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
+import preferExplicitInnerJoin from "./rules/prefer-explicit-inner-join.js";
 import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
+import preferExplicitOuterJoin from "./rules/prefer-explicit-outer-join.js";
 import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
 import preferKeywordCase from "./rules/prefer-keyword-case.js";
+import preferNotEqualsOperator from "./rules/prefer-not-equals-operator.js";
 import preferReindexConcurrently from "./rules/prefer-reindex-concurrently.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
@@ -93,11 +97,15 @@ const rules = {
   "prefer-bigint-id": preferBigintId,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-create-index-concurrently": preferCreateIndexConcurrently,
+  "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
+  "prefer-explicit-inner-join": preferExplicitInnerJoin,
   "prefer-explicit-null-ordering": preferExplicitNullOrdering,
+  "prefer-explicit-outer-join": preferExplicitOuterJoin,
   "prefer-fk-not-valid": preferFkNotValid,
   "prefer-identity-over-serial": preferIdentityOverSerial,
   "prefer-jsonb-over-json": preferJsonbOverJson,
   "prefer-keyword-case": preferKeywordCase,
+  "prefer-not-equals-operator": preferNotEqualsOperator,
   "prefer-reindex-concurrently": preferReindexConcurrently,
   "prefer-text-over-varchar": preferTextOverVarchar,
   "prefer-timestamptz": preferTimestamptz,
@@ -190,7 +198,11 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/prefer-current-timestamp-over-now": "warn",
+      "postgresql/prefer-explicit-inner-join": "warn",
+      "postgresql/prefer-explicit-outer-join": "warn",
       "postgresql/prefer-keyword-case": "warn",
+      "postgresql/prefer-not-equals-operator": "warn",
     },
   } satisfies Linter.Config,
 };

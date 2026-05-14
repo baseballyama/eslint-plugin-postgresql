@@ -1,0 +1,1 @@
+INSERT INTO events (created_at) VALUES (CURRENT_TIMESTAMP);
