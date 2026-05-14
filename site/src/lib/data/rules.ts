@@ -448,6 +448,22 @@ export const rules: RuleMeta[] = [
       "CREATE TABLE archived_users AS SELECT id, name FROM users WHERE inactive;",
     ],
   },
+  {
+    name: "prefer-coalesce-over-case",
+    description:
+      "Flag `CASE WHEN x IS NULL THEN y ELSE x END` and recommend `COALESCE(x, y)`.",
+    longDescription:
+      "`COALESCE` is shorter, evaluates `x` once, and is the form every PostgreSQL planner optimizes directly. Also catches the mirrored `IS NOT NULL` form. Multi-arm CASEs that go beyond a single null-fallback are not flagged.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "style",
+    incorrect: [
+      "SELECT CASE WHEN nickname IS NULL THEN full_name ELSE nickname END FROM users;",
+      "SELECT CASE WHEN nickname IS NOT NULL THEN nickname ELSE full_name END FROM users;",
+    ],
+    correct: ["SELECT COALESCE(nickname, full_name) FROM users;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

@@ -712,6 +712,35 @@ SELECT id, name INTO archived_users FROM users WHERE inactive;
 CREATE TABLE archived_users AS SELECT id, name FROM users WHERE inactive;
 ```
 
+### `postgresql/prefer-coalesce-over-case`
+
+Flags the verbose `CASE WHEN x IS NULL THEN fallback ELSE x END` (and its `IS NOT NULL` mirror) and recommends `COALESCE(x, fallback)`. `COALESCE` is shorter, evaluates `x` once, and is the form every PostgreSQL planner optimizes directly.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT CASE WHEN nickname IS NULL THEN full_name ELSE nickname END FROM users;
+SELECT CASE WHEN nickname IS NOT NULL THEN nickname ELSE full_name END FROM users;
+```
+
+✅ Correct:
+
+```sql
+SELECT COALESCE(nickname, full_name) FROM users;
+-- Multi-arm CASE that isn't just a null fallback is not flagged.
+SELECT CASE
+  WHEN nickname IS NULL THEN full_name
+  WHEN length(nickname) = 0 THEN full_name
+  ELSE nickname
+END FROM users;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
