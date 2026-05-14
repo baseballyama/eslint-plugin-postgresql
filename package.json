@@ -33,6 +33,7 @@
     "build:js": "rolldown --config rolldown.config.js",
     "clean": "rm -rf dist",
     "create-rule": "node scripts/create-rule.js",
+    "generate-pg-keywords": "node scripts/generate-pg-keywords.js",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "type:check": "tsc --noEmit",
