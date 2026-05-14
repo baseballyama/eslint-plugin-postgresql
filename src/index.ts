@@ -37,6 +37,7 @@ import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnnecessaryQuotedIdentifier from "./rules/no-unnecessary-quoted-identifier.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
+import plpgsqlKeywordCase from "./rules/plpgsql-keyword-case.js";
 import preferBigintId from "./rules/prefer-bigint-id.js";
 import preferAsForColumnAlias from "./rules/prefer-as-for-column-alias.js";
 import preferAsForTableAlias from "./rules/prefer-as-for-table-alias.js";
@@ -101,6 +102,7 @@ const rules = {
   "no-unnecessary-quoted-identifier": noUnnecessaryQuotedIdentifier,
   "no-unlogged-table": noUnloggedTable,
   "no-vacuum-full": noVacuumFull,
+  "plpgsql-keyword-case": plpgsqlKeywordCase,
   "prefer-bigint-id": preferBigintId,
   "prefer-as-for-column-alias": preferAsForColumnAlias,
   "prefer-as-for-table-alias": preferAsForTableAlias,
@@ -210,6 +212,7 @@ plugin.configs = {
     rules: {
       "postgresql/align-column-definitions": "warn",
       "postgresql/no-unnecessary-quoted-identifier": "warn",
+      "postgresql/plpgsql-keyword-case": "warn",
       "postgresql/prefer-as-for-column-alias": "warn",
       "postgresql/prefer-as-for-table-alias": "warn",
       "postgresql/prefer-current-timestamp-over-now": "warn",
