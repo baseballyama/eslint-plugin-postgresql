@@ -1191,6 +1191,29 @@ DROP DATABASE archive_2023;
 DROP TABLE archive;
 ```
 
+### `postgresql/no-drop-schema-cascade`
+
+Warns on `DROP SCHEMA ... CASCADE`. The cascade silently removes every table, view, function, and sequence in the schema with no preview — the same anti-pattern as `DROP TABLE CASCADE`, but with a much larger blast radius. Either list the objects you actually want to drop, or drop the schema only when it is already empty.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+DROP SCHEMA staging CASCADE;
+```
+
+✅ Correct:
+
+```sql
+DROP SCHEMA staging;
+DROP SCHEMA staging RESTRICT;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

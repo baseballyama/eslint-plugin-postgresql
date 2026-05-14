@@ -740,6 +740,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["DROP DATABASE archive_2023;"],
     correct: ["DROP TABLE archive;"],
   },
+  {
+    name: "no-drop-schema-cascade",
+    description:
+      "Warn on `DROP SCHEMA ... CASCADE` — removes every object in the schema with no preview.",
+    longDescription:
+      "Same anti-pattern as `DROP TABLE CASCADE` but with a much larger blast radius. Either list the objects you actually want to drop, or drop the schema only when it is already empty.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["DROP SCHEMA staging CASCADE;"],
+    correct: ["DROP SCHEMA staging;", "DROP SCHEMA staging RESTRICT;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
