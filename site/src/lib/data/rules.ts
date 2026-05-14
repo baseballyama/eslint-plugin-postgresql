@@ -600,8 +600,7 @@ export const rules: RuleMeta[] = [
   },
   {
     name: "no-temporary-table",
-    description:
-      "Warn on `CREATE TEMP / TEMPORARY TABLE` in versioned SQL.",
+    description: "Warn on `CREATE TEMP / TEMPORARY TABLE` in versioned SQL.",
     longDescription:
       "Temporary tables exist only for the current session, so they almost never belong in versioned SQL. If session-scoped scratch storage is required, build it from application code.",
     type: "suggestion",
