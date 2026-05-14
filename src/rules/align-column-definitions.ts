@@ -136,10 +136,17 @@ const rule: Rule.RuleModule = {
           const typeText = sourceCode
             .getText()
             .slice(typeRange[0], typeRange[1]);
+          // Collapse runs of whitespace inside the constraint span so a
+          // misaligned input like `... IDENTITY        PRIMARY KEY` is
+          // normalized to single-space separation before re-emitting.
+          // Without this, the source-level alignment of the input
+          // bleeds back into the output even though the rule otherwise
+          // recomputes the column-to-column padding.
           const constraintsText = lastConstraint?.range
             ? sourceCode
                 .getText()
                 .slice(typeRange[1], lastConstraint.range[1])
+                .replace(/\s+/g, " ")
                 .trim()
             : "";
 

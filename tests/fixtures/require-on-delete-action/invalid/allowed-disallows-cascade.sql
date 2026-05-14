@@ -1,0 +1,1 @@
+ALTER TABLE child ADD FOREIGN KEY (parent_id) REFERENCES parent (id) ON DELETE CASCADE;

@@ -143,22 +143,33 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-jsonb-over-json",
-    description: "Prefer JSONB over JSON for indexability and parsed storage.",
+    name: "consistent-jsonb-over-json",
+    description:
+      "Enforce a consistent stance on `jsonb` vs `json` for column types.",
     longDescription:
-      "`jsonb` stores a parsed representation, supports GIN indexes, and is what application code almost always wants. `json` is only the right choice if you specifically need byte-exact round-tripping of input text.",
+      "`jsonb` stores a parsed representation, supports GIN indexes, and is what application code almost always wants. `json` is only the right choice if you specifically need byte-exact round-tripping of input text. Pick one direction with the `style` option.",
     type: "suggestion",
     recommended: "warn",
     fixable: false,
     category: "schema",
     incorrect: ["CREATE TABLE events (payload JSON);"],
     correct: ["CREATE TABLE events (payload JSONB);"],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `jsonb` over `json`. `never` requires `json` over `jsonb` for projects that rely on `json`'s preservation of key order, whitespace, and duplicate keys.",
+      },
+    ],
   },
   {
-    name: "prefer-identity-over-serial",
-    description: "Prefer GENERATED ... AS IDENTITY over SERIAL/BIGSERIAL.",
+    name: "consistent-identity-over-serial",
+    description:
+      "Enforce a consistent stance on `GENERATED ... AS IDENTITY` vs `SERIAL` / `BIGSERIAL`.",
     longDescription:
-      "Serial pseudo-types create a separately-owned sequence that does not round-trip cleanly through `pg_dump` and does not honor column-level privileges. `GENERATED ... AS IDENTITY` is the SQL-standard replacement and has been the PostgreSQL team's recommendation since version 10.",
+      "Serial pseudo-types create a separately-owned sequence that does not round-trip cleanly through `pg_dump` and does not honor column-level privileges. `GENERATED ... AS IDENTITY` is the SQL-standard replacement and has been the PostgreSQL team's recommendation since version 10. Pick one direction with the `style` option.",
     type: "suggestion",
     recommended: "warn",
     fixable: false,
@@ -168,6 +179,15 @@ export const rules: RuleMeta[] = [
       "CREATE TABLE t (id SERIAL);",
     ],
     correct: ["CREATE TABLE t (id BIGINT GENERATED ALWAYS AS IDENTITY);"],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires identity columns over serial pseudo-types. `never` requires the serial pseudo-types for projects that keep compatibility with tooling that does not understand identity columns.",
+      },
+    ],
   },
   {
     name: "require-primary-key",
@@ -185,10 +205,10 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-text-over-varchar",
-    description: "Prefer TEXT (+ optional CHECK) over varchar(n).",
+    name: "consistent-text-over-varchar",
+    description: "Enforce a consistent stance on `text` vs `varchar(n)`.",
     longDescription:
-      "PostgreSQL stores `text` and `varchar(n)` the same way. The length on `varchar(n)` is enforced by a per-table constraint that you cannot relax without rewriting the table. Use `text` with a `CHECK (length(col) <= N)` when you really need a cap.",
+      "PostgreSQL stores `text` and `varchar(n)` the same way. The length on `varchar(n)` is enforced by a per-table constraint that you cannot relax without rewriting the table. Use `text` with a `CHECK (length(col) <= N)` when you need a cap. Or invert the rule with the `style` option for projects that intentionally cap every string column at the type level.",
     type: "suggestion",
     recommended: "warn",
     fixable: false,
@@ -197,6 +217,15 @@ export const rules: RuleMeta[] = [
     correct: [
       "CREATE TABLE users (name TEXT);",
       "CREATE TABLE users (name TEXT CHECK (length(name) <= 255));",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `text` over `varchar(n)`. `never` requires `varchar(n)` (or another bounded string type) over `text`.",
+      },
     ],
   },
   {
@@ -595,11 +624,11 @@ export const rules: RuleMeta[] = [
     correct: ["ALTER TABLE users ALTER COLUMN status DROP DEFAULT;"],
   },
   {
-    name: "prefer-fk-not-valid",
+    name: "consistent-fk-not-valid",
     description:
-      "Require `NOT VALID` when adding a foreign key so validation isn't done under ACCESS EXCLUSIVE.",
+      "Enforce a consistent stance on `NOT VALID` for `ALTER TABLE ... ADD FOREIGN KEY`.",
     longDescription:
-      "Adding a foreign key normally validates every existing row under an `ACCESS EXCLUSIVE` lock that blocks writers. The safe pattern is to `ADD ... NOT VALID` (metadata-only) and then `VALIDATE CONSTRAINT` in a separate migration; `VALIDATE` only takes a `SHARE UPDATE EXCLUSIVE` lock.",
+      "Adding a foreign key normally validates every existing row under an `ACCESS EXCLUSIVE` lock that blocks writers. The safe pattern is to `ADD ... NOT VALID` (metadata-only) and then `VALIDATE CONSTRAINT` in a separate migration; `VALIDATE` only takes a `SHARE UPDATE EXCLUSIVE` lock. Some projects prefer the inverse — fail loudly at constraint-add time — and can flip this rule with the `style` option.",
     type: "problem",
     recommended: "warn",
     fixable: false,
@@ -610,6 +639,15 @@ export const rules: RuleMeta[] = [
     correct: [
       "ALTER TABLE orders\n  ADD CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) NOT VALID;",
       "ALTER TABLE orders VALIDATE CONSTRAINT orders_customer_fk;",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `NOT VALID` on `ADD CONSTRAINT ... FOREIGN KEY`. `never` forbids it — useful for projects that want the constraint to immediately reject existing violations rather than waiting on a follow-up `VALIDATE CONSTRAINT`.",
+      },
     ],
   },
   {
@@ -800,17 +838,25 @@ export const rules: RuleMeta[] = [
     correct: ["DROP SCHEMA staging;", "DROP SCHEMA staging RESTRICT;"],
   },
   {
-    name: "prefer-reindex-concurrently",
-    description:
-      "Require `REINDEX ... CONCURRENTLY`; plain `REINDEX` blocks writers.",
+    name: "consistent-reindex-concurrently",
+    description: "Enforce a consistent stance on `CONCURRENTLY` for `REINDEX`.",
     longDescription:
-      "Non-concurrent `REINDEX TABLE` takes a `SHARE` lock that blocks writers for the duration; `REINDEX INDEX` takes `ACCESS EXCLUSIVE`. PG ≥ 12 introduced `REINDEX (...) CONCURRENTLY`, which builds a parallel index and swaps without blocking writers.",
+      "Non-concurrent `REINDEX TABLE` takes a `SHARE` lock that blocks writers for the duration; `REINDEX INDEX` takes `ACCESS EXCLUSIVE`. PG ≥ 12 introduced `REINDEX (...) CONCURRENTLY`, which builds a parallel index and swaps without blocking writers. The `never` style is for migration tools that wrap each step in `BEGIN`/`COMMIT` — `CONCURRENTLY` cannot run inside a transaction.",
     type: "problem",
     recommended: "warn",
     fixable: false,
     category: "perf",
     incorrect: ["REINDEX TABLE users;"],
     correct: ["REINDEX TABLE CONCURRENTLY users;"],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `CONCURRENTLY`. `never` forbids it so each `REINDEX` can run inside a migration transaction.",
+      },
+    ],
   },
   {
     name: "no-create-role",
@@ -1080,22 +1126,33 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-as-for-column-alias",
-    description: "Require `AS` before column aliases in `SELECT`.",
+    name: "consistent-as-for-column-alias",
+    description:
+      "Enforce a consistent stance on the `AS` keyword before column aliases in `SELECT`.",
     longDescription:
-      "PostgreSQL allows `SELECT id user_id`, but the optional `AS` is the SQL-standard form and is far easier to read at a glance — without `AS`, an accidental missing comma silently turns a column into an alias of the previous one.",
+      "PostgreSQL allows `SELECT id user_id`, but the optional `AS` is the SQL-standard form and is far easier to read at a glance — without `AS`, an accidental missing comma silently turns a column into an alias of the previous one. Use the `style` option to enforce either direction.",
     type: "layout",
     recommended: "off",
     fixable: true,
     category: "style",
     incorrect: ["SELECT id user_id, name full_name FROM users;"],
     correct: ["SELECT id AS user_id, name AS full_name FROM users;"],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `AS` before column aliases. `never` forbids the keyword.",
+      },
+    ],
   },
   {
-    name: "prefer-as-for-table-alias",
-    description: "Require `AS` before table aliases (`FROM users AS u`).",
+    name: "consistent-as-for-table-alias",
+    description:
+      "Enforce a consistent stance on the `AS` keyword before table aliases.",
     longDescription:
-      "Same rationale as `prefer-as-for-column-alias`: explicit `AS` makes the alias unmistakable and helps human readers spot stray missing commas in the FROM list.",
+      "Same rationale as `consistent-as-for-column-alias`: explicit `AS` makes the alias unmistakable and helps human readers spot stray missing commas in the FROM list. Flip with the `style` option if your project prefers the bare form.",
     type: "layout",
     recommended: "off",
     fixable: true,
@@ -1105,20 +1162,39 @@ export const rules: RuleMeta[] = [
       "SELECT u.id FROM users AS u WHERE u.active = TRUE;",
       "SELECT u.id FROM users WHERE active = TRUE;",
     ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `AS` before table aliases. `never` forbids the keyword.",
+      },
+    ],
   },
   {
-    name: "prefer-between-over-and",
-    description: "Prefer `x BETWEEN a AND b` over `x >= a AND x <= b`.",
+    name: "consistent-between-over-and",
+    description:
+      "Enforce a consistent stance on `x BETWEEN a AND b` vs `x >= a AND x <= b`.",
     longDescription:
-      "`BETWEEN` is the SQL-standard inclusive-range form and is shorter to read. The rule only flags inclusive comparisons (`>=` / `<=`) where both bounds reference the same expression — strict inequalities are not equivalent to `BETWEEN` and are out of scope.",
+      "`BETWEEN` is the SQL-standard inclusive-range form and is shorter to read. The rule only flags inclusive comparisons (`>=` / `<=`) where both bounds reference the same expression — strict inequalities are not equivalent to `BETWEEN` and are out of scope. Flip with the `style` option for projects that prefer explicit comparisons.",
     type: "suggestion",
     recommended: "off",
-    fixable: false,
+    fixable: true,
     category: "style",
     incorrect: ["SELECT * FROM t WHERE x >= 1 AND x <= 10;"],
     correct: [
       "SELECT * FROM t WHERE x BETWEEN 1 AND 10;",
       "SELECT * FROM t WHERE x > 1 AND x < 10; -- strict bounds: out of scope",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) rewrites `>=` + `<=` pairs to `BETWEEN`. `never` rewrites `BETWEEN` back to explicit `>=` and `<=` comparisons.",
+      },
     ],
   },
   {
@@ -1196,10 +1272,11 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-drop-index-concurrently",
-    description: "Prefer `DROP INDEX CONCURRENTLY`.",
+    name: "consistent-drop-index-concurrently",
+    description:
+      "Enforce a consistent stance on `CONCURRENTLY` for `DROP INDEX`.",
     longDescription:
-      "Plain `DROP INDEX` takes an `ACCESS EXCLUSIVE` lock on the table. `DROP INDEX CONCURRENTLY` waits for current users instead. Non-index `DROP` statements are out of scope.",
+      "Plain `DROP INDEX` takes an `ACCESS EXCLUSIVE` lock on the table. `DROP INDEX CONCURRENTLY` waits for current users instead. The `never` style is for migration tools that wrap each step in `BEGIN`/`COMMIT` — concurrent drops cannot run inside a transaction. Non-index `DROP` statements are out of scope.",
     type: "suggestion",
     recommended: "off",
     fixable: false,
@@ -1209,12 +1286,22 @@ export const rules: RuleMeta[] = [
       "DROP INDEX CONCURRENTLY idx_users;",
       "DROP INDEX CONCURRENTLY IF EXISTS idx_orders;",
     ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `CONCURRENTLY`. `never` forbids it.",
+      },
+    ],
   },
   {
-    name: "prefer-explicit-inner-join",
-    description: "Require `INNER JOIN` instead of bare `JOIN`.",
+    name: "consistent-explicit-inner-join",
+    description:
+      "Enforce a consistent stance on the explicit `INNER` keyword in `INNER JOIN`.",
     longDescription:
-      "Bare `JOIN` means `INNER JOIN` in PostgreSQL, but it is the same word that introduces every other join type, so a misread is easy. `LEFT JOIN`, `RIGHT JOIN`, `FULL JOIN`, `CROSS JOIN`, and `NATURAL JOIN` are all out of scope.",
+      "Bare `JOIN` means `INNER JOIN` in PostgreSQL, but it is the same word that introduces every other join type, so a misread is easy. The `always` style requires the explicit `INNER`; the `never` style removes it. `LEFT JOIN`, `RIGHT JOIN`, `FULL JOIN`, `CROSS JOIN`, and `NATURAL JOIN` are out of scope.",
     type: "layout",
     recommended: "off",
     fixable: true,
@@ -1223,12 +1310,22 @@ export const rules: RuleMeta[] = [
     correct: [
       "SELECT u.id FROM users u INNER JOIN orders o ON o.user_id = u.id;",
     ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires `INNER JOIN`. `never` requires the bare `JOIN` form.",
+      },
+    ],
   },
   {
-    name: "prefer-explicit-outer-join",
-    description: "Require `OUTER` in `LEFT/RIGHT/FULL OUTER JOIN`.",
+    name: "consistent-explicit-outer-join",
+    description:
+      "Enforce a consistent stance on the explicit `OUTER` keyword in `LEFT/RIGHT/FULL OUTER JOIN`.",
     longDescription:
-      "PostgreSQL accepts `LEFT JOIN` as shorthand for `LEFT OUTER JOIN`. Spelling `OUTER` out makes the join shape unmistakable at a glance. `INNER JOIN` and `CROSS JOIN` are out of scope.",
+      "PostgreSQL accepts `LEFT JOIN` as shorthand for `LEFT OUTER JOIN`. The `always` style spells `OUTER` out so the join shape is unmistakable; the `never` style drops `OUTER`. `INNER JOIN` and `CROSS JOIN` are out of scope.",
     type: "layout",
     recommended: "off",
     fixable: true,
@@ -1241,6 +1338,15 @@ export const rules: RuleMeta[] = [
     correct: [
       "SELECT u.id FROM users u LEFT OUTER JOIN orders o ON o.user_id = u.id;",
       "SELECT u.id FROM users u FULL OUTER JOIN orders o ON o.user_id = u.id;",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) requires the explicit `OUTER`. `never` removes it.",
+      },
     ],
   },
   {
@@ -1331,7 +1437,7 @@ export const rules: RuleMeta[] = [
     description:
       "Require an explicit `ON DELETE` clause on every foreign-key constraint.",
     longDescription:
-      "Without `ON DELETE`, the default is `NO ACTION` — but it is rarely the deliberate choice. Forcing the author to write the action makes intent visible at the call site. Covers both inline `REFERENCES` and `ALTER TABLE ADD CONSTRAINT FOREIGN KEY`.",
+      "Without `ON DELETE`, the default is `NO ACTION` — but it is rarely the deliberate choice. Forcing the author to write the action makes intent visible at the call site. Covers both inline `REFERENCES` and `ALTER TABLE ADD CONSTRAINT FOREIGN KEY`. With the `allowed` option, the rule additionally fails when the action is not in an opt-in list.",
     type: "suggestion",
     recommended: "warn",
     fixable: false,
@@ -1343,6 +1449,14 @@ export const rules: RuleMeta[] = [
     correct: [
       "CREATE TABLE t (\n  fid integer REFERENCES other(id) ON DELETE RESTRICT\n);",
       "ALTER TABLE t ADD CONSTRAINT fk FOREIGN KEY (fid) REFERENCES other(id) ON DELETE SET NULL;",
+    ],
+    options: [
+      {
+        name: "allowed",
+        type: '("CASCADE" | "RESTRICT" | "NO ACTION" | "SET NULL" | "SET DEFAULT")[]',
+        description:
+          'When set, the rule additionally flags any `ON DELETE` whose action is not in this list. Use it to bake project-wide policy into the rule (e.g. `["RESTRICT", "NO ACTION"]` to forbid cascading deletes).',
+      },
     ],
   },
   {

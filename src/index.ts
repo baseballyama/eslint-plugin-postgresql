@@ -3,8 +3,19 @@ import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
 import alignColumnDefinitions from "./rules/align-column-definitions.js";
 import alignValues from "./rules/align-values.js";
+import consistentAsForColumnAlias from "./rules/consistent-as-for-column-alias.js";
+import consistentAsForTableAlias from "./rules/consistent-as-for-table-alias.js";
+import consistentBetweenOverAnd from "./rules/consistent-between-over-and.js";
 import consistentCreateIndexConcurrently from "./rules/consistent-create-index-concurrently.js";
 import consistentCreateOrReplace from "./rules/consistent-create-or-replace.js";
+import consistentDropIndexConcurrently from "./rules/consistent-drop-index-concurrently.js";
+import consistentExplicitInnerJoin from "./rules/consistent-explicit-inner-join.js";
+import consistentExplicitOuterJoin from "./rules/consistent-explicit-outer-join.js";
+import consistentFkNotValid from "./rules/consistent-fk-not-valid.js";
+import consistentIdentityOverSerial from "./rules/consistent-identity-over-serial.js";
+import consistentJsonbOverJson from "./rules/consistent-jsonb-over-json.js";
+import consistentReindexConcurrently from "./rules/consistent-reindex-concurrently.js";
+import consistentTextOverVarchar from "./rules/consistent-text-over-varchar.js";
 import consistentTimestamptz from "./rules/consistent-timestamptz.js";
 import noAddCheckConstraintWithoutNotValid from "./rules/no-add-check-constraint-without-not-valid.js";
 import noAddColumnNotNullWithoutDefault from "./rules/no-add-column-not-null-without-default.js";
@@ -55,25 +66,14 @@ import noWithRecursiveWithoutLimit from "./rules/no-with-recursive-without-limit
 import plpgsqlKeywordCase from "./rules/plpgsql-keyword-case.js";
 import preferBigintId from "./rules/prefer-bigint-id.js";
 import preferAddConstraintNotValid from "./rules/prefer-add-constraint-not-valid.js";
-import preferAsForColumnAlias from "./rules/prefer-as-for-column-alias.js";
-import preferAsForTableAlias from "./rules/prefer-as-for-table-alias.js";
-import preferBetweenOverAnd from "./rules/prefer-between-over-and.js";
 import preferCastOperator from "./rules/prefer-cast-operator.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
-import preferDropIndexConcurrently from "./rules/prefer-drop-index-concurrently.js";
-import preferExplicitInnerJoin from "./rules/prefer-explicit-inner-join.js";
 import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
 import preferExistsOverInSubquery from "./rules/prefer-exists-over-in-subquery.js";
-import preferExplicitOuterJoin from "./rules/prefer-explicit-outer-join.js";
-import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
-import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferInListOverOr from "./rules/prefer-in-list-over-or.js";
-import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
 import preferKeywordCase from "./rules/prefer-keyword-case.js";
 import preferNotEqualsOperator from "./rules/prefer-not-equals-operator.js";
-import preferReindexConcurrently from "./rules/prefer-reindex-concurrently.js";
-import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import requireIfExists from "./rules/require-if-exists.js";
 import requireIndexOnFkColumn from "./rules/require-index-on-fk-column.js";
 import requireLimit from "./rules/require-limit.js";
@@ -90,8 +90,19 @@ import snakeCaseTableName from "./rules/snake-case-table-name.js";
 const rules = {
   "align-column-definitions": alignColumnDefinitions,
   "align-values": alignValues,
+  "consistent-as-for-column-alias": consistentAsForColumnAlias,
+  "consistent-as-for-table-alias": consistentAsForTableAlias,
+  "consistent-between-over-and": consistentBetweenOverAnd,
   "consistent-create-index-concurrently": consistentCreateIndexConcurrently,
   "consistent-create-or-replace": consistentCreateOrReplace,
+  "consistent-drop-index-concurrently": consistentDropIndexConcurrently,
+  "consistent-explicit-inner-join": consistentExplicitInnerJoin,
+  "consistent-explicit-outer-join": consistentExplicitOuterJoin,
+  "consistent-fk-not-valid": consistentFkNotValid,
+  "consistent-identity-over-serial": consistentIdentityOverSerial,
+  "consistent-jsonb-over-json": consistentJsonbOverJson,
+  "consistent-reindex-concurrently": consistentReindexConcurrently,
+  "consistent-text-over-varchar": consistentTextOverVarchar,
   "consistent-timestamptz": consistentTimestamptz,
   "no-add-check-constraint-without-not-valid":
     noAddCheckConstraintWithoutNotValid,
@@ -143,25 +154,14 @@ const rules = {
   "plpgsql-keyword-case": plpgsqlKeywordCase,
   "prefer-add-constraint-not-valid": preferAddConstraintNotValid,
   "prefer-bigint-id": preferBigintId,
-  "prefer-as-for-column-alias": preferAsForColumnAlias,
-  "prefer-as-for-table-alias": preferAsForTableAlias,
-  "prefer-between-over-and": preferBetweenOverAnd,
   "prefer-cast-operator": preferCastOperator,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
-  "prefer-drop-index-concurrently": preferDropIndexConcurrently,
-  "prefer-explicit-inner-join": preferExplicitInnerJoin,
   "prefer-explicit-null-ordering": preferExplicitNullOrdering,
   "prefer-exists-over-in-subquery": preferExistsOverInSubquery,
-  "prefer-explicit-outer-join": preferExplicitOuterJoin,
-  "prefer-fk-not-valid": preferFkNotValid,
-  "prefer-identity-over-serial": preferIdentityOverSerial,
   "prefer-in-list-over-or": preferInListOverOr,
-  "prefer-jsonb-over-json": preferJsonbOverJson,
   "prefer-keyword-case": preferKeywordCase,
   "prefer-not-equals-operator": preferNotEqualsOperator,
-  "prefer-reindex-concurrently": preferReindexConcurrently,
-  "prefer-text-over-varchar": preferTextOverVarchar,
   "require-if-exists": requireIfExists,
   "require-index-on-fk-column": requireIndexOnFkColumn,
   "require-limit": requireLimit,
@@ -197,6 +197,11 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/consistent-fk-not-valid": "warn",
+      "postgresql/consistent-identity-over-serial": "warn",
+      "postgresql/consistent-jsonb-over-json": "warn",
+      "postgresql/consistent-reindex-concurrently": "warn",
+      "postgresql/consistent-text-over-varchar": "warn",
       "postgresql/consistent-timestamptz": "warn",
       "postgresql/no-add-check-constraint-without-not-valid": "error",
       "postgresql/no-add-column-not-null-without-default": "error",
@@ -246,11 +251,6 @@ plugin.configs = {
       "postgresql/prefer-bigint-id": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",
       "postgresql/prefer-explicit-null-ordering": "warn",
-      "postgresql/prefer-fk-not-valid": "warn",
-      "postgresql/prefer-identity-over-serial": "warn",
-      "postgresql/prefer-jsonb-over-json": "warn",
-      "postgresql/prefer-reindex-concurrently": "warn",
-      "postgresql/prefer-text-over-varchar": "warn",
       "postgresql/require-limit": "warn",
       "postgresql/require-named-constraint": "warn",
       "postgresql/require-on-delete-action": "warn",
@@ -270,15 +270,15 @@ plugin.configs = {
     rules: {
       "postgresql/align-column-definitions": "warn",
       "postgresql/align-values": "warn",
+      "postgresql/consistent-as-for-column-alias": "warn",
+      "postgresql/consistent-as-for-table-alias": "warn",
+      "postgresql/consistent-between-over-and": "warn",
+      "postgresql/consistent-explicit-inner-join": "warn",
+      "postgresql/consistent-explicit-outer-join": "warn",
       "postgresql/no-unnecessary-quoted-identifier": "warn",
       "postgresql/plpgsql-keyword-case": "warn",
-      "postgresql/prefer-as-for-column-alias": "warn",
-      "postgresql/prefer-as-for-table-alias": "warn",
-      "postgresql/prefer-between-over-and": "warn",
       "postgresql/prefer-cast-operator": "warn",
       "postgresql/prefer-current-timestamp-over-now": "warn",
-      "postgresql/prefer-explicit-inner-join": "warn",
-      "postgresql/prefer-explicit-outer-join": "warn",
       "postgresql/prefer-in-list-over-or": "warn",
       "postgresql/prefer-keyword-case": "warn",
       "postgresql/prefer-not-equals-operator": "warn",

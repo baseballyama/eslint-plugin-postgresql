@@ -10,6 +10,16 @@ interface MinimalToken {
   };
 }
 
+type Action = "CASCADE" | "RESTRICT" | "NO ACTION" | "SET NULL" | "SET DEFAULT";
+
+const ALL_ACTIONS: readonly Action[] = [
+  "CASCADE",
+  "RESTRICT",
+  "NO ACTION",
+  "SET NULL",
+  "SET DEFAULT",
+];
+
 // Walk tokens forward from `startIndex` until we leave the foreign-key
 // clause: a `,` or `;` at paren-depth 0, or a closing paren that
 // brings us below depth 0. Return the *index in `tokens`* of the
@@ -33,11 +43,11 @@ const findFkClauseEnd = (
   return tokens.length;
 };
 
-const hasOnDelete = (
+const findOnDelete = (
   tokens: readonly MinimalToken[],
   start: number,
   end: number,
-): boolean => {
+): number | null => {
   for (let i = start; i < end - 1; i++) {
     const a = tokens[i]!;
     const b = tokens[i + 1]!;
@@ -47,10 +57,37 @@ const hasOnDelete = (
       b.type === "Keyword" &&
       b.value.toUpperCase() === "DELETE"
     ) {
-      return true;
+      return i;
     }
   }
-  return false;
+  return null;
+};
+
+// Read the action keyword(s) immediately after `ON DELETE`. Returns
+// the action name (uppercased, with the two-word forms combined),
+// the start token index, and the end token index (inclusive of the
+// final action keyword).
+const readAction = (
+  tokens: readonly MinimalToken[],
+  onIdx: number,
+  end: number,
+): { action: Action; from: number; to: number } | null => {
+  const first = tokens[onIdx + 2];
+  if (!first || onIdx + 2 >= end) return null;
+  const a = first.value.toUpperCase();
+  const second = tokens[onIdx + 3];
+  const b = second ? second.value.toUpperCase() : null;
+  if (a === "CASCADE")
+    return { action: "CASCADE", from: onIdx + 2, to: onIdx + 2 };
+  if (a === "RESTRICT")
+    return { action: "RESTRICT", from: onIdx + 2, to: onIdx + 2 };
+  if (a === "NO" && b === "ACTION")
+    return { action: "NO ACTION", from: onIdx + 2, to: onIdx + 3 };
+  if (a === "SET" && b === "NULL")
+    return { action: "SET NULL", from: onIdx + 2, to: onIdx + 3 };
+  if (a === "SET" && b === "DEFAULT")
+    return { action: "SET DEFAULT", from: onIdx + 2, to: onIdx + 3 };
+  return null;
 };
 
 const rule: Rule.RuleModule = {
@@ -63,13 +100,29 @@ const rule: Rule.RuleModule = {
       recommended: false,
     },
     fixable: undefined,
-    schema: [],
+    schema: [
+      {
+        type: "object",
+        properties: {
+          allowed: {
+            type: "array",
+            items: { enum: [...ALL_ACTIONS] },
+            uniqueItems: true,
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     messages: {
       missingOnDelete:
         "Foreign-key constraint is missing an explicit `ON DELETE` clause; the implicit default is `NO ACTION`. Make the choice explicit so reviewers can see what happens to dependent rows.",
+      disallowedAction:
+        "`ON DELETE {{action}}` is not in the `allowed` list ({{allowedList}}). Either change the action or extend the rule's `allowed` option.",
     },
   },
   create(context) {
+    const option = (context.options[0] ?? {}) as { allowed?: Action[] };
+    const allowed = option.allowed;
     return {
       Constraint(node: { contype?: string; range?: [number, number] }) {
         if (node.contype !== "CONSTR_FOREIGN") return;
@@ -83,13 +136,30 @@ const rule: Rule.RuleModule = {
         const startIdx = tokens.findIndex((t) => t.range[0] >= node.range![0]);
         if (startIdx < 0) return;
         const endIdx = findFkClauseEnd(tokens, startIdx);
-        if (hasOnDelete(tokens, startIdx, endIdx)) return;
+        const onIdx = findOnDelete(tokens, startIdx, endIdx);
+        if (onIdx === null) {
+          context.report({
+            loc: {
+              start: tokens[startIdx]!.loc.start,
+              end: tokens[endIdx - 1]?.loc.end ?? tokens[startIdx]!.loc.end,
+            },
+            messageId: "missingOnDelete",
+          });
+          return;
+        }
+        if (allowed == null) return;
+        const act = readAction(tokens, onIdx, endIdx);
+        if (!act) return;
+        if (allowed.includes(act.action)) return;
+        const from = tokens[act.from]!;
+        const to = tokens[act.to]!;
         context.report({
-          loc: {
-            start: tokens[startIdx]!.loc.start,
-            end: tokens[endIdx - 1]?.loc.end ?? tokens[startIdx]!.loc.end,
+          loc: { start: from.loc.start, end: to.loc.end },
+          messageId: "disallowedAction",
+          data: {
+            action: act.action,
+            allowedList: allowed.join(", "),
           },
-          messageId: "missingOnDelete",
         });
       },
     };
