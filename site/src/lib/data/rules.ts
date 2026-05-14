@@ -464,6 +464,22 @@ export const rules: RuleMeta[] = [
     ],
     correct: ["SELECT COALESCE(nickname, full_name) FROM users;"],
   },
+  {
+    name: "no-having-without-group-by",
+    description:
+      "Disallow `HAVING` without `GROUP BY`; the predicate belongs in `WHERE`.",
+    longDescription:
+      "PostgreSQL accepts `HAVING` without `GROUP BY` and collapses the query to a single aggregate row over the whole table — almost never what the author meant. If the predicate is row-level, put it in `WHERE`. If it's aggregate-level, add a `GROUP BY`.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: ["SELECT count(*) FROM users HAVING count(*) > 1;"],
+    correct: [
+      "SELECT category, count(*) FROM items GROUP BY category HAVING count(*) > 1;",
+      "SELECT count(*) FROM users WHERE active;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));

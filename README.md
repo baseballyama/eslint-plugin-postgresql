@@ -741,6 +741,29 @@ SELECT CASE
 END FROM users;
 ```
 
+### `postgresql/no-having-without-group-by`
+
+Errors on a `HAVING` clause that has no accompanying `GROUP BY`. The query is then a single aggregate over the entire table, which is almost always a mistake (the predicate belongs in `WHERE`). PostgreSQL accepts the form, so the planner won't catch it for you.
+
+**Type**: Problem  
+**Recommended**: ✅ Error  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT count(*) FROM users HAVING count(*) > 1;
+```
+
+✅ Correct:
+
+```sql
+SELECT category, count(*) FROM items GROUP BY category HAVING count(*) > 1;
+SELECT count(*) FROM users WHERE active;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
