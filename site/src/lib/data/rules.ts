@@ -727,6 +727,19 @@ export const rules: RuleMeta[] = [
     incorrect: ["CLUSTER users USING users_pkey;"],
     correct: ["VACUUM users;"],
   },
+  {
+    name: "no-drop-database",
+    description:
+      "Error on `DROP DATABASE` — catastrophic and belongs to an operator workflow.",
+    longDescription:
+      "Database creation/deletion is not a normal migration step. The operation is catastrophic and irreversible; require it to be run from an operator console with explicit confirmation, not from versioned SQL.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: ["DROP DATABASE archive_2023;"],
+    correct: ["DROP TABLE archive;"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
