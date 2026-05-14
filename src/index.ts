@@ -25,6 +25,7 @@ import noSelectInto from "./rules/no-select-into.js";
 import noSelectStar from "./rules/no-select-star.js";
 import noSyntaxError from "./rules/no-syntax-error.js";
 import noTemporaryTable from "./rules/no-temporary-table.js";
+import noTimeType from "./rules/no-time-type.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
@@ -67,6 +68,7 @@ const rules = {
   "no-select-star": noSelectStar,
   "no-syntax-error": noSyntaxError,
   "no-temporary-table": noTemporaryTable,
+  "no-time-type": noTimeType,
   "no-truncate-cascade": noTruncateCascade,
   "no-unlogged-table": noUnloggedTable,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
@@ -129,6 +131,7 @@ plugin.configs = {
       "postgresql/no-select-into": "warn",
       "postgresql/no-syntax-error": "error",
       "postgresql/no-temporary-table": "warn",
+      "postgresql/no-time-type": "warn",
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/no-unlogged-table": "warn",
       "postgresql/prefer-coalesce-over-case": "warn",
