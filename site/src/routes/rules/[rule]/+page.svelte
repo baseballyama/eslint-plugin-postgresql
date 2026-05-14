@@ -18,6 +18,33 @@
   // example code as a real module import from this file.
   const PKG = "eslint-plugin-" + "postgresql";
   const sev = $derived(rule.recommended === "off" ? '"warn"' : `"${rule.recommended}"`);
+
+  function placeholderFor(type: string): string {
+    if (type.includes("[]")) return "[]";
+    if (type === "boolean") return "false";
+    if (type === "number") return "0";
+    return '""';
+  }
+  function optionLiteral(opt: { type: string; default?: unknown }): string {
+    return opt.default === undefined ? placeholderFor(opt.type) : String(opt.default);
+  }
+
+  const ruleEntryLines = $derived.by(() => {
+    const key = `"postgresql/${rule.name}"`;
+    if (!rule.options || rule.options.length === 0) {
+      return [`      ${key}: ${sev},`];
+    }
+    const opts = rule.options.map((o) => `          ${o.name}: ${optionLiteral(o)},`);
+    return [
+      `      ${key}: [`,
+      `        ${sev},`,
+      "        {",
+      ...opts,
+      "        },",
+      "      ],",
+    ];
+  });
+
   const configSnippet = $derived(
     [
       "// eslint.config.js",
@@ -27,13 +54,11 @@
       "  {",
       '    files: ["**/*.sql"],',
       "    languageOptions: {",
-      "      parser: postgresql.configs.recommended",
-      "        .languageOptions.parser,",
+      "      parser: postgresql.configs.recommended.languageOptions.parser,",
       "    },",
       "    plugins: { postgresql },",
       "    rules: {",
-      `      "postgresql/${rule.name}":`,
-      `        ${sev},`,
+      ...ruleEntryLines,
       "    },",
       "  },",
       "];",
@@ -48,7 +73,7 @@
 
 <article>
   <header class="rule-head">
-    <div class="shell">
+    <div class="shell-wide">
       <a class="back" href={`${base}/rules/`}>
         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
           <path
@@ -84,7 +109,7 @@
     </div>
   </header>
 
-  <section class="shell content">
+  <section class="shell-wide content">
     <div class="grid">
       <div class="prose">
         <h2>Why this matters</h2>
@@ -107,8 +132,11 @@
           </div>
         </div>
 
+        <h2>Configure it</h2>
+        <pre class="conf-code"><code>{@html highlightSql(configSnippet)}</code></pre>
+
+        <h2>Options</h2>
         {#if rule.options && rule.options.length > 0}
-          <h2>Options</h2>
           <dl class="options">
             {#each rule.options as opt}
               <dt>
@@ -121,15 +149,12 @@
               <dd>{opt.description}</dd>
             {/each}
           </dl>
+        {:else}
+          <p class="no-options">This rule has no options.</p>
         {/if}
       </div>
 
       <aside class="sidebar">
-        <div class="side-card">
-          <h3>Configure it</h3>
-          <pre class="conf-code"><code>{@html highlightSql(configSnippet)}</code></pre>
-        </div>
-
         <div class="side-card">
           <h3>At a glance</h3>
           <dl>
@@ -153,7 +178,7 @@
     </div>
   </section>
 
-  <section class="shell playground-section">
+  <section class="shell-wide playground-section">
     <span class="eyebrow">Try this rule</span>
     <h2>Edit the SQL — only <code>{rule.name}</code> is enabled.</h2>
     <p class="muted">
@@ -170,7 +195,7 @@
     </div>
   </section>
 
-  <nav class="prev-next shell">
+  <nav class="prev-next shell-wide">
     {#if prev}
       <a class="prev-next-link" href={`${base}/rules/${prev.name}/`}>
         <span class="dir">← Previous</span>
@@ -271,7 +296,7 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 18rem;
+    grid-template-columns: minmax(0, 1fr) 15rem;
     gap: 2.4rem;
     align-items: start;
   }
@@ -364,12 +389,12 @@
     font-weight: 700;
   }
   .conf-code {
-    margin: 0;
-    padding: 0.7rem 0.85rem;
+    margin: 0 0 1.2rem;
+    padding: 1rem 1.1rem;
     background: var(--bg-code);
     border: 1px solid var(--rule);
     border-radius: 6px;
-    font-size: 0.76rem;
+    font-size: 0.85rem;
     line-height: 1.55;
     overflow-x: auto;
     color: var(--fg);
@@ -436,6 +461,10 @@
     color: var(--fg-soft, var(--fg));
     margin-bottom: 0.4rem;
     line-height: 1.5;
+  }
+  .no-options {
+    color: var(--fg-muted);
+    font-style: italic;
   }
 
   .playground-section {
