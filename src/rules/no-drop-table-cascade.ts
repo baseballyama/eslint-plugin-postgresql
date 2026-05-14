@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -18,7 +19,7 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      DropStmt(node: any) {
+      DropStmt(node: Ast.DropStmt) {
         // Scope to DROP TABLE only — the rule name promises that. Other DROP
         // ... CASCADE variants (schema, type, etc.) can be added as separate
         // rules if needed.
@@ -26,7 +27,10 @@ const rule: Rule.RuleModule = {
           node.behavior === "DROP_CASCADE" &&
           node.removeType === "OBJECT_TABLE"
         ) {
-          context.report({ node, messageId: "noCascade" });
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "noCascade",
+          });
         }
       },
     };

@@ -1,4 +1,6 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
+import { isAStar, isColumnRef, isResTarget } from "../utils/ast.js";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -18,18 +20,18 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      SelectStmt(node: any) {
+      SelectStmt(node: Ast.SelectStmt) {
         const targetList = node.targetList;
         if (!Array.isArray(targetList)) return;
         for (const target of targetList) {
-          const val = target?.val;
-          if (
-            val &&
-            val.type === "ColumnRef" &&
-            Array.isArray(val.fields) &&
-            val.fields.some((f: any) => f && f.type === "A_Star")
-          ) {
-            context.report({ node: target, messageId: "noSelectStar" });
+          if (!isResTarget(target)) continue;
+          const val = target.val;
+          if (!isColumnRef(val)) continue;
+          if (val.fields.some(isAStar)) {
+            context.report({
+              node: target as unknown as Rule.Node,
+              messageId: "noSelectStar",
+            });
           }
         }
       },

@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { TruncateStmt } from "../utils/ast.js";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -18,9 +19,12 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      TruncateStmt(node: any) {
+      TruncateStmt(node: TruncateStmt) {
         if (node.behavior === "DROP_CASCADE") {
-          context.report({ node, messageId: "noCascade" });
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "noCascade",
+          });
         }
       },
     };

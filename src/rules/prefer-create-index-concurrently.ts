@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -18,9 +19,13 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      IndexStmt(node: any) {
-        if (!node.concurrent) {
-          context.report({ node, messageId: "preferConcurrently" });
+      IndexStmt(node: Ast.IndexStmtPG) {
+        // `concurrent` lives behind the parser's index signature.
+        if (!node["concurrent"]) {
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "preferConcurrently",
+          });
         }
       },
     };

@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -17,9 +18,12 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      UpdateStmt(node: any) {
+      UpdateStmt(node: Ast.UpdateStmt) {
         if (!node.whereClause) {
-          context.report({ node, messageId: "missingWhere" });
+          context.report({
+            node: node as unknown as Rule.Node,
+            messageId: "missingWhere",
+          });
         }
       },
     };

@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -18,12 +19,22 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      GrantStmt(node: any) {
+      GrantStmt(node: Ast.GrantStmt) {
         if (!node.is_grant) return;
-        const grantees = Array.isArray(node.grantees) ? node.grantees : [];
+        // `grantees` is not in the upstream `GrantStmt` interface; the index
+        // signature on the parser type lets us reach it without `any`.
+        const grantees = node["grantees"];
+        if (!Array.isArray(grantees)) return;
         for (const g of grantees) {
-          if (g?.roletype === "ROLESPEC_PUBLIC") {
-            context.report({ node, messageId: "noPublic" });
+          if (
+            g != null &&
+            typeof g === "object" &&
+            (g as { roletype?: unknown }).roletype === "ROLESPEC_PUBLIC"
+          ) {
+            context.report({
+              node: node as unknown as Rule.Node,
+              messageId: "noPublic",
+            });
             return;
           }
         }

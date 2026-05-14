@@ -1,19 +1,29 @@
 import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
+import { isColumnDef, isConstraint } from "../utils/ast.js";
 
-const hasPrimaryKey = (tableElts: any[]): boolean => {
+const hasPrimaryKey = (
+  tableElts: ReadonlyArray<Ast.TableElement | unknown>,
+): boolean => {
   for (const elt of tableElts) {
-    if (!elt || typeof elt !== "object") continue;
-    // Table-level constraint: { type: "Constraint", contype: "CONSTR_PRIMARY" }
-    if (elt.type === "Constraint" && elt.contype === "CONSTR_PRIMARY") {
-      return true;
-    }
-    // Column-level: { type: "ColumnDef", constraints: [{ contype: "CONSTR_PRIMARY" }] }
     if (
-      elt.type === "ColumnDef" &&
-      Array.isArray(elt.constraints) &&
-      elt.constraints.some((c: any) => c?.contype === "CONSTR_PRIMARY")
+      isConstraint(elt) &&
+      (elt as Ast.Constraint).contype === "CONSTR_PRIMARY"
     ) {
       return true;
+    }
+    if (isColumnDef(elt)) {
+      const constraints = (elt as Ast.ColumnDef).constraints;
+      if (
+        Array.isArray(constraints) &&
+        constraints.some(
+          (c) =>
+            isConstraint(c) &&
+            (c as Ast.Constraint).contype === "CONSTR_PRIMARY",
+        )
+      ) {
+        return true;
+      }
     }
   }
   return false;
@@ -36,14 +46,20 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     return {
-      CreateStmt(node: any) {
-        const elts = Array.isArray(node?.tableElts) ? node.tableElts : [];
-        if (elts.length === 0) return; // no columns, e.g. CREATE TABLE ... PARTITION OF
+      CreateStmt(node: Ast.CreateStmt) {
+        const elts = node.tableElts;
+        // No tableElts means CREATE TABLE ... PARTITION OF or similar; skip.
+        if (!Array.isArray(elts) || elts.length === 0) return;
         if (!hasPrimaryKey(elts)) {
+          const relation = node.relation as { relname?: unknown } | undefined;
+          const relname =
+            typeof relation?.relname === "string"
+              ? relation.relname
+              : "<unknown>";
           context.report({
-            node,
+            node: node as unknown as Rule.Node,
             messageId: "missingPrimaryKey",
-            data: { table: node?.relation?.relname ?? "<unknown>" },
+            data: { table: relname },
           });
         }
       },
