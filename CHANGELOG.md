@@ -1,5 +1,38 @@
 # eslint-plugin-postgresql
 
+## 0.9.0
+
+### Minor Changes
+
+- [#158](https://github.com/baseballyama/eslint-plugin-postgresql/pull/158) [`6678ff4`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/6678ff4cc52ad4d848292fdb26cdc6b70e796f8b) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `postgresql/prefer-create-or-replace` (off by default; opt in via
+  `configs.all` or per project). Requires `CREATE FUNCTION`,
+  `CREATE PROCEDURE`, and `CREATE VIEW` to use the `OR REPLACE` form so
+  re-running a migration on a database that already defined the object
+  does not abort with `... already exists`.
+
+  Auto-fixable: inserts ` OR REPLACE` after the `CREATE` keyword.
+
+- [#157](https://github.com/baseballyama/eslint-plugin-postgresql/pull/157) [`0472fe6`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/0472fe68e81bb5d4d20efc99f718926805000734) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `postgresql/require-if-exists` (off by default; opt in via
+  `configs.all` or per project). Requires every top-level `DROP`
+  statement to include `IF EXISTS`, so re-running a migration on a
+  database that already lost the object does not abort with `ERROR:
+table "foo" does not exist`.
+
+  Auto-fixable: inserts ` IF EXISTS` after the object-kind keyword
+  (`DROP TABLE foo;` → `DROP TABLE IF EXISTS foo;`). Covers `DropStmt`
+  (table, index, function, trigger, schema, ...), `DropdbStmt`,
+  `DropRoleStmt`, and `DropSubscriptionStmt`.
+
+### Patch Changes
+
+- [#155](https://github.com/baseballyama/eslint-plugin-postgresql/pull/155) [`cc32edb`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/cc32edbe84014834a4d5d879a77baa0a15441179) Thanks [@baseballyama](https://github.com/baseballyama)! - `align-column-definitions` now realigns column rows that carry a
+  trailing `--` or `/* */` comment after the constraints (e.g.
+  `id ulid PRIMARY KEY, -- the surrogate key`). Previously the rule
+  bailed on the whole table when any line had a comment, even when the
+  comment was safely outside the rewrite range. Inline comments
+  _inside_ a column's name/type/constraints span are still skipped
+  (rewriting them would clobber the comment text).
+
 ## 0.8.0
 
 ### Minor Changes
