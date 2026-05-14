@@ -1,5 +1,22 @@
 # eslint-plugin-postgresql
 
+## 0.13.0
+
+### Minor Changes
+
+- [#172](https://github.com/baseballyama/eslint-plugin-postgresql/pull/172) [`33e9a9f`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/33e9a9f09510d7497d1601becae99359252f3392) Thanks [@baseballyama](https://github.com/baseballyama)! - **BREAKING**: Renamed `prefer-timestamptz` to `consistent-timestamptz` and added a `style` option so users can enforce either stance with a single rule. The `style` option accepts:
+  - `"always"` (default): require `timestamptz` over `timestamp` so the database anchors everything to UTC at storage time. This is the original behavior of `prefer-timestamptz`.
+  - `"never"`: require `timestamp` over `timestamptz` — useful for projects that treat every timestamp as UTC at the application layer and want to avoid the implicit per-session `TimeZone` conversions `timestamptz` performs.
+
+  Migration:
+
+  ```diff
+  - "postgresql/prefer-timestamptz": "warn"
+  + "postgresql/consistent-timestamptz": ["warn", { "style": "always" }]
+  ```
+
+  `configs.recommended` continues to enable the rule at `warn` with the `always` default, so users on the recommended preset are unaffected. The `messageId` `preferTimestamptz` is preserved for the `always` style; the new `unexpectedTimestamptz` covers the `never` style.
+
 ## 0.12.0
 
 ### Minor Changes
