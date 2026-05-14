@@ -9,6 +9,13 @@
 export type Severity = "error" | "warn" | "off";
 export type RuleType = "problem" | "suggestion" | "layout";
 
+export interface RuleOption {
+  name: string;
+  type: string;
+  default?: unknown;
+  description: string;
+}
+
 export interface RuleMeta {
   name: string;
   description: string;
@@ -19,6 +26,7 @@ export interface RuleMeta {
   category: "syntax" | "safety" | "schema" | "perf" | "style" | "security";
   incorrect: string[];
   correct: string[];
+  options?: RuleOption[];
 }
 
 export const rules: RuleMeta[] = [
@@ -294,6 +302,15 @@ export const rules: RuleMeta[] = [
       "CREATE TABLE user_accounts (id INT PRIMARY KEY);",
       "CREATE TABLE UserAccounts (id INT PRIMARY KEY); -- folded to useraccounts",
     ],
+    options: [
+      {
+        name: "allow",
+        type: "string[]",
+        default: "[]",
+        description:
+          "Identifiers to exempt from the rule. Useful for tables that must keep an external name (e.g. `KEYWORDS`, vendor schemas).",
+      },
+    ],
   },
   {
     name: "snake-case-column-name",
@@ -308,6 +325,15 @@ export const rules: RuleMeta[] = [
     correct: [
       "CREATE TABLE t (camel_col INT);",
       "CREATE TABLE t (CamelCol INT); -- folded to camelcol",
+    ],
+    options: [
+      {
+        name: "allow",
+        type: "string[]",
+        default: "[]",
+        description:
+          "Column names to exempt from the rule (e.g. `id`, `createdAt` for an existing schema mid-migration).",
+      },
     ],
   },
   {
@@ -796,6 +822,610 @@ export const rules: RuleMeta[] = [
     correct: [
       "CREATE TABLE users (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, name text);",
       "CREATE TABLE users (id uuid PRIMARY KEY, name text);",
+    ],
+  },
+  {
+    name: "align-column-definitions",
+    description: "Align column definitions vertically inside `CREATE TABLE`.",
+    longDescription:
+      "Aligns the name, type, and constraint columns of every `ColumnDef` row inside a `CREATE TABLE`. Multi-line column definitions and shared-line layouts are skipped because source surgery is unsafe in those shapes.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: [
+      `CREATE TABLE t (\n  a TEXT NOT NULL,\n  b non_blank_text_64[] NOT NULL,\n  c INTEGER NOT NULL\n);`,
+    ],
+    correct: [
+      `CREATE TABLE t (\n  a  TEXT                  NOT NULL,\n  b  non_blank_text_64[]   NOT NULL,\n  c  INTEGER               NOT NULL\n);`,
+    ],
+    options: [
+      {
+        name: "gap",
+        type: "integer (>= 1)",
+        default: 2,
+        description: "Number of spaces to leave between aligned columns.",
+      },
+    ],
+  },
+  {
+    name: "align-values",
+    description:
+      "Align column values vertically inside multi-row `INSERT ... VALUES`.",
+    longDescription:
+      "Each tuple position is padded so that values share a consistent width across rows. Single-row `VALUES` lists are skipped — the rule only kicks in when there are multiple rows to align.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: [
+      `INSERT INTO t (a, b, c) VALUES\n  ('GPT-5',                 1.25, CURRENT_TIMESTAMP),\n  ('Claude',                5,    CURRENT_TIMESTAMP),\n  ('Haiku',                 1,    CURRENT_TIMESTAMP);`,
+    ],
+    correct: [
+      `INSERT INTO t (a, b, c) VALUES\n  ('GPT-5',  1.25, CURRENT_TIMESTAMP),\n  ('Claude', 5,    CURRENT_TIMESTAMP);`,
+    ],
+    options: [
+      {
+        name: "gap",
+        type: "integer (>= 1)",
+        default: 1,
+        description:
+          "Minimum number of spaces between aligned tuple positions.",
+      },
+    ],
+  },
+  {
+    name: "no-equality-with-null",
+    description:
+      "Disallow `x = NULL` / `x <> NULL`; use `IS NULL` / `IS NOT NULL`.",
+    longDescription:
+      "Comparing with `NULL` using `=`, `<>`, or `!=` always returns NULL (not true), so the predicate silently filters every row. Use the three-valued-logic-aware `IS NULL` / `IS NOT NULL` instead.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "SELECT * FROM t WHERE x = NULL;",
+      "SELECT * FROM t WHERE x <> NULL;",
+      "SELECT * FROM t WHERE NULL = x;",
+    ],
+    correct: [
+      "SELECT * FROM t WHERE x IS NULL;",
+      "SELECT * FROM t WHERE x IS NOT NULL;",
+    ],
+  },
+  {
+    name: "no-on-delete-cascade",
+    description: "Disallow `ON DELETE CASCADE` on foreign keys.",
+    longDescription:
+      "`ON DELETE CASCADE` makes a single `DELETE` quietly recurse through dependent tables. Prefer `RESTRICT` / `NO ACTION` / `SET NULL` and explicit deletion code paths so deletions are visible at the call site.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "CREATE TABLE t (\n  fid integer REFERENCES other(id) ON DELETE CASCADE\n);",
+      "ALTER TABLE t ADD CONSTRAINT fk FOREIGN KEY (fid) REFERENCES other(id) ON DELETE CASCADE;",
+    ],
+    correct: [
+      "CREATE TABLE t (\n  fid integer REFERENCES other(id) ON DELETE RESTRICT\n);",
+      "ALTER TABLE t ADD CONSTRAINT fk FOREIGN KEY (fid) REFERENCES other(id) ON DELETE NO ACTION;",
+    ],
+  },
+  {
+    name: "no-rule",
+    description:
+      "Disallow `CREATE RULE`; it is effectively deprecated in favor of triggers and updatable views.",
+    longDescription:
+      "`CREATE RULE` rewrites the query tree at planning time, which interacts poorly with prepared statements, COPY, and partitioning. The PostgreSQL community considers the rule system effectively deprecated; use a trigger or an updatable view instead.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: ["CREATE RULE noop AS ON UPDATE TO t DO INSTEAD NOTHING;"],
+    correct: [
+      "CREATE TRIGGER t_trg BEFORE UPDATE ON t FOR EACH ROW EXECUTE FUNCTION t_trg_fn();",
+      "CREATE VIEW v AS SELECT * FROM t;",
+    ],
+  },
+  {
+    name: "no-security-definer-without-search-path",
+    description:
+      "Disallow `SECURITY DEFINER` functions without an explicit `SET search_path`.",
+    longDescription:
+      "A `SECURITY DEFINER` function runs with the owner's privileges. If the caller controls `search_path`, they can shadow built-ins (e.g. `pg_catalog.lower`) with their own functions and execute code as the owner — a recurring CVE pattern. Pin `search_path` (e.g. `SET search_path = pg_catalog, pg_temp`) on every `SECURITY DEFINER` function. `SECURITY INVOKER` (the default) is out of scope.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "security",
+    incorrect: [
+      "CREATE FUNCTION fn() RETURNS void\nLANGUAGE plpgsql\nSECURITY DEFINER\nAS $$ BEGIN END $$;",
+    ],
+    correct: [
+      "CREATE FUNCTION fn() RETURNS void\nLANGUAGE plpgsql\nSECURITY DEFINER\nSET search_path = pg_catalog, pg_temp\nAS $$ BEGIN END $$;",
+    ],
+  },
+  {
+    name: "no-unnecessary-quoted-identifier",
+    description:
+      'Disallow `"..."` around identifiers that don\'t need quoting.',
+    longDescription:
+      "Quoting identifiers that don't require it (no reserved-word collision, no mixed case, no embedded characters) just adds noise. PostgreSQL folds bare identifiers to lower case but preserves quoted ones, so quoted identifiers also force every consumer to quote-match the name. Reserved words, mixed-case identifiers, and identifiers containing special characters are left alone.",
+    type: "suggestion",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: ['SELECT "id", "name" FROM "users" WHERE "active" = TRUE;'],
+    correct: [
+      "SELECT id, name FROM users WHERE active = TRUE;",
+      'SELECT "select" FROM users; -- reserved keyword: must stay quoted',
+      'SELECT "MyColumn" FROM "MyTable"; -- mixed case: must stay quoted',
+    ],
+  },
+  {
+    name: "no-update-primary-key",
+    description: "Disallow `UPDATE` on primary-key columns (heuristic).",
+    longDescription:
+      "Primary keys are intended to be immutable: foreign-key references and external systems may hold the old value. By default the rule treats `id` and `<table>_id` as primary-key columns; override with `pkColumnNames` for non-conventional schemas.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: ["UPDATE users SET id = 5 WHERE id = 1;"],
+    correct: [
+      "UPDATE users SET name = 'foo' WHERE id = 1;",
+      "UPDATE orders SET total = 100, status = 'paid' WHERE id = 2;",
+    ],
+    options: [
+      {
+        name: "pkColumnNames",
+        type: "string[]",
+        default: '["id"]',
+        description:
+          "Explicit list of primary-key column names. Replaces the default. The `<table>_id` heuristic still applies in addition.",
+      },
+    ],
+  },
+  {
+    name: "no-update-without-from-binding",
+    description:
+      "Disallow `UPDATE ... FROM` without a `WHERE` (Cartesian product).",
+    longDescription:
+      "An `UPDATE ... FROM other_table` without a `WHERE` joins every row of the target with every row of the source, then keeps the last assignment per target row. The result is almost never what the author meant. Plain `UPDATE` (no `FROM`) is out of scope — see `require-where-in-update`.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: ["UPDATE t SET x = u.x FROM u;"],
+    correct: ["UPDATE t SET x = u.x FROM u WHERE t.id = u.t_id;"],
+  },
+  {
+    name: "no-with-recursive-without-limit",
+    description: "Disallow `WITH RECURSIVE` without an outer `LIMIT`.",
+    longDescription:
+      "A `WITH RECURSIVE` query without a terminating `LIMIT` can run unbounded if a join condition is wrong or a base case is missing. Adding an outer `LIMIT` puts a hard ceiling on the rows produced.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      `WITH RECURSIVE r AS (\n  SELECT 1 AS n\n  UNION ALL\n  SELECT n + 1 FROM r\n) SELECT * FROM r;`,
+    ],
+    correct: [
+      `WITH RECURSIVE r AS (\n  SELECT 1 AS n\n  UNION ALL\n  SELECT n + 1 FROM r\n) SELECT * FROM r LIMIT 10;`,
+    ],
+  },
+  {
+    name: "plpgsql-keyword-case",
+    description:
+      "Enforce a consistent case for SQL/PL/pgSQL keywords inside PL/pgSQL bodies.",
+    longDescription:
+      "Applies only inside `LANGUAGE plpgsql` bodies (other languages are left alone). String literals, dollar-quoted strings, and comments are skipped.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: [
+      `CREATE FUNCTION foo() RETURNS void AS $$\ndeclare\n  user_count integer;\nbegin\n  if user_count is null then\n    raise notice 'hello';\n  end if;\nend;\n$$ LANGUAGE plpgsql;`,
+    ],
+    correct: [
+      `CREATE FUNCTION foo() RETURNS void AS $$\nDECLARE\n  user_count integer;\nBEGIN\n  IF user_count IS NULL THEN\n    RAISE NOTICE 'hello';\n  END IF;\nEND;\n$$ LANGUAGE plpgsql;`,
+    ],
+    options: [
+      {
+        name: "case",
+        type: '"upper" | "lower"',
+        default: '"upper"',
+        description: "Target case for PL/pgSQL keywords.",
+      },
+    ],
+  },
+  {
+    name: "prefer-add-constraint-not-valid",
+    description:
+      "Prefer `ADD CONSTRAINT ... NOT VALID` then `VALIDATE CONSTRAINT`.",
+    longDescription:
+      "Adding a `CHECK` or foreign-key constraint without `NOT VALID` validates every existing row inside an `ACCESS EXCLUSIVE` lock — fine on small tables, an outage on large ones. The two-step pattern (add `NOT VALID`, then `VALIDATE CONSTRAINT` in a separate transaction) holds only a `SHARE UPDATE EXCLUSIVE` lock during validation. `PRIMARY KEY`, `UNIQUE`, and `NOT NULL` are out of scope (they don't accept `NOT VALID`).",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "ALTER TABLE t ADD CONSTRAINT c_check CHECK (x > 0);",
+      "ALTER TABLE t ADD CONSTRAINT c_fk FOREIGN KEY (other_id) REFERENCES other(id);",
+    ],
+    correct: [
+      "ALTER TABLE t ADD CONSTRAINT c_check CHECK (x > 0) NOT VALID;",
+      "ALTER TABLE t ADD CONSTRAINT c_fk FOREIGN KEY (other_id) REFERENCES other(id) NOT VALID;",
+    ],
+  },
+  {
+    name: "prefer-as-for-column-alias",
+    description: "Require `AS` before column aliases in `SELECT`.",
+    longDescription:
+      "PostgreSQL allows `SELECT id user_id`, but the optional `AS` is the SQL-standard form and is far easier to read at a glance — without `AS`, an accidental missing comma silently turns a column into an alias of the previous one.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: ["SELECT id user_id, name full_name FROM users;"],
+    correct: ["SELECT id AS user_id, name AS full_name FROM users;"],
+  },
+  {
+    name: "prefer-as-for-table-alias",
+    description: "Require `AS` before table aliases (`FROM users AS u`).",
+    longDescription:
+      "Same rationale as `prefer-as-for-column-alias`: explicit `AS` makes the alias unmistakable and helps human readers spot stray missing commas in the FROM list.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: ["SELECT u.id FROM users u WHERE u.active = TRUE;"],
+    correct: [
+      "SELECT u.id FROM users AS u WHERE u.active = TRUE;",
+      "SELECT u.id FROM users WHERE active = TRUE;",
+    ],
+  },
+  {
+    name: "prefer-between-over-and",
+    description: "Prefer `x BETWEEN a AND b` over `x >= a AND x <= b`.",
+    longDescription:
+      "`BETWEEN` is the SQL-standard inclusive-range form and is shorter to read. The rule only flags inclusive comparisons (`>=` / `<=`) where both bounds reference the same expression — strict inequalities are not equivalent to `BETWEEN` and are out of scope.",
+    type: "suggestion",
+    recommended: "off",
+    fixable: false,
+    category: "style",
+    incorrect: ["SELECT * FROM t WHERE x >= 1 AND x <= 10;"],
+    correct: [
+      "SELECT * FROM t WHERE x BETWEEN 1 AND 10;",
+      "SELECT * FROM t WHERE x > 1 AND x < 10; -- strict bounds: out of scope",
+    ],
+  },
+  {
+    name: "prefer-cast-operator",
+    description:
+      "Enforce a single style for type casts (`x::int` or `CAST(x AS int)`).",
+    longDescription:
+      "PostgreSQL accepts both forms; this rule picks one and rewrites the other. Default is the operator form `x::int`. Switch with the `form` option.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: [
+      "SELECT CAST(x AS integer) FROM t;",
+      "SELECT CAST(x AS varchar(255)) FROM t;",
+    ],
+    correct: ["SELECT x::integer FROM t;", "SELECT x::numeric(10, 2) FROM t;"],
+    options: [
+      {
+        name: "form",
+        type: '"operator" | "function"',
+        default: '"operator"',
+        description:
+          "Which form of cast to enforce. `operator` rewrites `CAST(x AS T)` to `x::T`; `function` rewrites the other direction.",
+      },
+    ],
+  },
+  {
+    name: "prefer-create-or-replace",
+    description:
+      "Prefer `CREATE OR REPLACE` for `FUNCTION` / `PROCEDURE` / `VIEW`.",
+    longDescription:
+      "Without `OR REPLACE`, re-running a migration that already created the object fails. `CREATE OR REPLACE` is the standard idempotent form for the three object types that support it. `CREATE TABLE` / `CREATE INDEX` are out of scope (they don't support `OR REPLACE`).",
+    type: "suggestion",
+    recommended: "off",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "CREATE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';",
+      "CREATE PROCEDURE p() LANGUAGE SQL AS '';",
+      "CREATE VIEW v AS SELECT 1;",
+    ],
+    correct: [
+      "CREATE OR REPLACE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';",
+      "CREATE OR REPLACE PROCEDURE p() LANGUAGE SQL AS '';",
+      "CREATE OR REPLACE VIEW v AS SELECT 1;",
+    ],
+  },
+  {
+    name: "prefer-current-timestamp-over-now",
+    description:
+      "Prefer SQL-standard `CURRENT_TIMESTAMP` over `now()` / `LOCALTIMESTAMP`.",
+    longDescription:
+      "`CURRENT_TIMESTAMP` is portable across SQL engines, while `now()` is PostgreSQL-only. The rule also flags `LOCALTIMESTAMP` / `LOCALTIME` and rewrites them to `CURRENT_TIMESTAMP` / `CURRENT_TIME` — the `LOCAL*` variants return the timezone-naive `timestamp` / `time` types, which is rarely what application code actually wants.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: [
+      "INSERT INTO events (created_at) VALUES (now());",
+      "SELECT LOCALTIMESTAMP, LOCALTIME FROM t;",
+    ],
+    correct: [
+      "INSERT INTO events (created_at) VALUES (CURRENT_TIMESTAMP);",
+      "SELECT CURRENT_TIMESTAMP, CURRENT_TIME FROM t;",
+    ],
+  },
+  {
+    name: "prefer-drop-index-concurrently",
+    description: "Prefer `DROP INDEX CONCURRENTLY`.",
+    longDescription:
+      "Plain `DROP INDEX` takes an `ACCESS EXCLUSIVE` lock on the table. `DROP INDEX CONCURRENTLY` waits for current users instead. Non-index `DROP` statements are out of scope.",
+    type: "suggestion",
+    recommended: "off",
+    fixable: false,
+    category: "safety",
+    incorrect: ["DROP INDEX idx_users;"],
+    correct: [
+      "DROP INDEX CONCURRENTLY idx_users;",
+      "DROP INDEX CONCURRENTLY IF EXISTS idx_orders;",
+    ],
+  },
+  {
+    name: "prefer-explicit-inner-join",
+    description: "Require `INNER JOIN` instead of bare `JOIN`.",
+    longDescription:
+      "Bare `JOIN` means `INNER JOIN` in PostgreSQL, but it is the same word that introduces every other join type, so a misread is easy. `LEFT JOIN`, `RIGHT JOIN`, `FULL JOIN`, `CROSS JOIN`, and `NATURAL JOIN` are all out of scope.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: ["SELECT u.id FROM users u JOIN orders o ON o.user_id = u.id;"],
+    correct: [
+      "SELECT u.id FROM users u INNER JOIN orders o ON o.user_id = u.id;",
+    ],
+  },
+  {
+    name: "prefer-explicit-outer-join",
+    description: "Require `OUTER` in `LEFT/RIGHT/FULL OUTER JOIN`.",
+    longDescription:
+      "PostgreSQL accepts `LEFT JOIN` as shorthand for `LEFT OUTER JOIN`. Spelling `OUTER` out makes the join shape unmistakable at a glance. `INNER JOIN` and `CROSS JOIN` are out of scope.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: [
+      "SELECT u.id FROM users u LEFT JOIN orders o ON o.user_id = u.id;",
+      "SELECT u.id FROM users u RIGHT JOIN orders o ON o.user_id = u.id;",
+      "SELECT u.id FROM users u FULL JOIN orders o ON o.user_id = u.id;",
+    ],
+    correct: [
+      "SELECT u.id FROM users u LEFT OUTER JOIN orders o ON o.user_id = u.id;",
+      "SELECT u.id FROM users u FULL OUTER JOIN orders o ON o.user_id = u.id;",
+    ],
+  },
+  {
+    name: "prefer-in-list-over-or",
+    description: "Prefer `x IN (a, b, c)` over `x = a OR x = b OR x = c`.",
+    longDescription:
+      "`IN (...)` is shorter, easier to read, and gives the planner a single set instead of N disjunctions. The rule only collapses chains where every disjunct is an equality on the same left-hand side; mixed predicates are out of scope.",
+    type: "suggestion",
+    recommended: "off",
+    fixable: false,
+    category: "style",
+    incorrect: ["SELECT * FROM t WHERE x = 1 OR x = 2 OR x = 3;"],
+    correct: [
+      "SELECT * FROM t WHERE x IN (1, 2, 3);",
+      "SELECT * FROM t WHERE x = 1 OR y = 2; -- mixed lhs: not in scope",
+    ],
+  },
+  {
+    name: "prefer-keyword-case",
+    description: "Enforce a consistent case (upper or lower) for SQL keywords.",
+    longDescription:
+      "Operates on the SQL keyword tokens emitted by the parser; identifiers, string literals, and comments are left alone. The `types` option separately controls how built-in type names (`int`, `text`, `varchar`) are cased — defaulting to `skip` so user-defined type names like `ulid` (which the rule cannot touch) don't end up case-mismatched against built-ins.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: ["select id, name from users where active = true limit 10;"],
+    correct: ["SELECT id, name FROM users WHERE active = TRUE LIMIT 10;"],
+    options: [
+      {
+        name: "case",
+        type: '"upper" | "lower"',
+        default: '"upper"',
+        description: "Target case for SQL keywords.",
+      },
+      {
+        name: "types",
+        type: '"upper" | "lower" | "skip"',
+        default: '"skip"',
+        description:
+          "How to case built-in type names. `skip` leaves them as written so they don't case-mismatch against user-defined types the rule cannot touch.",
+      },
+    ],
+  },
+  {
+    name: "prefer-not-equals-operator",
+    description:
+      "Enforce a single style for the not-equal operator (`<>` or `!=`).",
+    longDescription:
+      "PostgreSQL accepts both spellings. Default target is the SQL-standard `<>`; switch with the `operator` option.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: ["SELECT id FROM users WHERE status != 'inactive';"],
+    correct: ["SELECT id FROM users WHERE status <> 'inactive';"],
+    options: [
+      {
+        name: "operator",
+        type: '"<>" | "!="',
+        default: '"<>"',
+        description: "Which not-equal spelling to enforce.",
+      },
+    ],
+  },
+  {
+    name: "require-if-exists",
+    description: "Require `IF EXISTS` on every `DROP` statement.",
+    longDescription:
+      "An `IF EXISTS` `DROP` is idempotent — re-running the migration after a partial run does not error. Covers `DROP TABLE`, `DROP INDEX`, `DROP FUNCTION`, `DROP TRIGGER`, `DROP DATABASE`, `DROP SCHEMA`, `DROP ROLE`. Other statements are out of scope.",
+    type: "suggestion",
+    recommended: "off",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "DROP TABLE foo;",
+      "DROP INDEX idx_foo;",
+      "DROP FUNCTION fn();",
+    ],
+    correct: [
+      "DROP TABLE IF EXISTS foo;",
+      "DROP INDEX IF EXISTS idx_foo;",
+      "DROP FUNCTION IF EXISTS fn();",
+    ],
+  },
+  {
+    name: "require-on-delete-action",
+    description:
+      "Require an explicit `ON DELETE` clause on every foreign-key constraint.",
+    longDescription:
+      "Without `ON DELETE`, the default is `NO ACTION` — but it is rarely the deliberate choice. Forcing the author to write the action makes intent visible at the call site. Covers both inline `REFERENCES` and `ALTER TABLE ADD CONSTRAINT FOREIGN KEY`.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "CREATE TABLE t (\n  fid integer REFERENCES other(id)\n);",
+      "ALTER TABLE t ADD CONSTRAINT fk FOREIGN KEY (fid) REFERENCES other(id);",
+    ],
+    correct: [
+      "CREATE TABLE t (\n  fid integer REFERENCES other(id) ON DELETE RESTRICT\n);",
+      "ALTER TABLE t ADD CONSTRAINT fk FOREIGN KEY (fid) REFERENCES other(id) ON DELETE SET NULL;",
+    ],
+  },
+  {
+    name: "require-trailing-semicolon",
+    description: "Require a trailing `;` after every top-level SQL statement.",
+    longDescription:
+      "Every top-level statement must end with `;`. The check is file-level: it inspects the trailing token of the source rather than the per-statement range, which avoids the libpg-query quirk where the last statement's `range[1]` can point mid-token.",
+    type: "layout",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: ["SELECT id FROM users"],
+    correct: ["SELECT id FROM users;"],
+  },
+  {
+    name: "no-add-check-constraint-without-not-valid",
+    description:
+      "Disallow `ADD CONSTRAINT CHECK` without `NOT VALID` (lock-heavy).",
+    longDescription:
+      "`ALTER TABLE t ADD CONSTRAINT c CHECK (...)` validates every existing row inside an `ACCESS EXCLUSIVE` lock. The two-step pattern (`ADD CONSTRAINT ... NOT VALID` then `VALIDATE CONSTRAINT` in a separate transaction) holds only `SHARE UPDATE EXCLUSIVE` during validation. Non-CHECK constraints are out of scope.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE t ADD CONSTRAINT c CHECK (x > 0);"],
+    correct: [
+      "ALTER TABLE t ADD CONSTRAINT c CHECK (x > 0) NOT VALID;\nALTER TABLE t VALIDATE CONSTRAINT c;",
+    ],
+  },
+  {
+    name: "no-add-unique-constraint-directly",
+    description:
+      "Disallow inline `ADD CONSTRAINT UNIQUE`; require `USING INDEX`.",
+    longDescription:
+      "`ALTER TABLE ... ADD CONSTRAINT ... UNIQUE (...)` builds the unique index inline under `ACCESS EXCLUSIVE`. The lock-friendly form is to build the index out-of-band with `CREATE UNIQUE INDEX CONCURRENTLY`, then promote it via `ADD CONSTRAINT ... UNIQUE USING INDEX <name>`. Non-UNIQUE constraints are out of scope.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE t ADD CONSTRAINT uq_t_email UNIQUE (email);"],
+    correct: [
+      "CREATE UNIQUE INDEX CONCURRENTLY idx_t_email ON t (email);\nALTER TABLE t ADD CONSTRAINT uq_t_email UNIQUE USING INDEX idx_t_email;",
+    ],
+  },
+  {
+    name: "no-volatile-default-on-add-column",
+    description:
+      "Disallow `ADD COLUMN ... DEFAULT <volatile>()` (forces full table rewrite).",
+    longDescription:
+      "PG10+ has a stable-default short-cut: `ADD COLUMN ... DEFAULT <constant or STABLE>` does not rewrite the table. A `VOLATILE` default forces a full table rewrite under `ACCESS EXCLUSIVE`. The rule curates the volatile-function list — `random`, `gen_random_uuid`, `uuid_generate_v1*`, `uuid_generate_v4`, `clock_timestamp`, `timeofday`. STABLE defaults like `now()` / `current_timestamp` are not flagged. One layer of `TypeCast` is unwrapped so `gen_random_uuid()::uuid` is detected.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "ALTER TABLE t ADD COLUMN x integer DEFAULT random();",
+      "ALTER TABLE t ADD COLUMN id uuid DEFAULT gen_random_uuid();",
+    ],
+    correct: [
+      "ALTER TABLE t ADD COLUMN x integer DEFAULT 1;",
+      "ALTER TABLE t ADD COLUMN z timestamptz DEFAULT now();",
+      "ALTER TABLE t ADD COLUMN id integer; -- no default at all is fine",
+    ],
+  },
+  {
+    name: "no-grant-all",
+    description: "Disallow `GRANT ALL` (list privileges explicitly).",
+    longDescription:
+      "`GRANT ALL` silently expands as new privileges are added to PostgreSQL — and to the object class — over time. List the privileges your callers actually need so the access surface is auditable. `REVOKE ALL` is the safe direction and is not flagged.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "security",
+    incorrect: ["GRANT ALL ON t TO u;", "GRANT ALL PRIVILEGES ON t TO PUBLIC;"],
+    correct: [
+      "GRANT SELECT ON t TO u;",
+      "GRANT SELECT, INSERT, UPDATE ON t TO u;",
+      "REVOKE ALL ON t FROM u; -- REVOKE ALL is the safe direction",
+    ],
+  },
+  {
+    name: "prefer-exists-over-in-subquery",
+    description: "Prefer `EXISTS (subquery)` over `column IN (subquery)`.",
+    longDescription:
+      "`column IN (subquery)` returns NULL whenever the subquery yields a NULL row, which silently filters every row from the outer query. `EXISTS (subquery)` returns a clean boolean and is typically planned more cheaply too. Literal `IN` lists (`x IN (1, 2, 3)`) are out of scope.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "perf",
+    incorrect: [
+      "SELECT * FROM t WHERE x IN (SELECT id FROM other);",
+      "SELECT * FROM t WHERE x = ANY (SELECT id FROM other);",
+    ],
+    correct: [
+      "SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x);",
+      "SELECT * FROM t WHERE x IN (1, 2, 3); -- literal list is out of scope",
+    ],
+  },
+  {
+    name: "require-index-on-fk-column",
+    description: "Require an index on every foreign-key column.",
+    longDescription:
+      "An unindexed foreign-key column makes parent-side `DELETE` / `UPDATE` perform a sequential scan of the child table to enforce the constraint. The check is cross-statement: it scans `CREATE TABLE`, `CREATE INDEX`, and `ALTER TABLE ADD CONSTRAINT` in the same file, and only requires an index whose leading column is the FK column. The PRIMARY KEY index already counts.",
+    type: "problem",
+    recommended: "warn",
+    fixable: false,
+    category: "perf",
+    incorrect: [
+      "CREATE TABLE t (\n  id integer PRIMARY KEY,\n  fid integer REFERENCES other(id)\n);\n-- No CREATE INDEX on t.fid in this file.",
+    ],
+    correct: [
+      "CREATE TABLE t (\n  id integer PRIMARY KEY,\n  fid integer REFERENCES other(id)\n);\nCREATE INDEX idx_t_fid ON t (fid);",
     ],
   },
 ];

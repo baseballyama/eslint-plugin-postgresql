@@ -1,5 +1,23 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import plugin from "../src/index.js";
+
+const docsCatalogPath = fileURLToPath(
+  new URL("../site/src/lib/data/rules.ts", import.meta.url),
+);
+
+const documentedRuleNames = (() => {
+  const src = readFileSync(docsCatalogPath, "utf8");
+  const names = new Set<string>();
+  // Top-level RuleMeta entries are indented exactly 4 spaces inside the
+  // `rules` array. Nested objects (option entries) are indented further,
+  // so anchoring on 4 spaces avoids picking up `name:` from `options[]`.
+  for (const m of src.matchAll(/^ {4}name:\s*"([^"]+)"/gm)) {
+    names.add(m[1]!);
+  }
+  return names;
+})();
 
 describe("eslint-plugin-postgresql", () => {
   it("exports a plugin object", () => {
@@ -83,6 +101,27 @@ describe("eslint-plugin-postgresql", () => {
         `all references unknown rule "${ruleName}"`,
       ).toBeDefined();
     }
+  });
+
+  it("documents every shipped rule in the docs site catalog", () => {
+    // Catches the drift class where a rule lands but the
+    // `site/src/lib/data/rules.ts` catalog is forgotten — this is exactly
+    // how rules ended up missing from the docs site historically.
+    const shipped = Object.keys(plugin.rules ?? {});
+    const undocumented = shipped.filter((n) => !documentedRuleNames.has(n));
+    expect(
+      undocumented,
+      `docs catalog (site/src/lib/data/rules.ts) is missing entries for: ${undocumented.join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it("docs site catalog only lists rules that actually ship", () => {
+    const shipped = new Set(Object.keys(plugin.rules ?? {}));
+    const stale = [...documentedRuleNames].filter((n) => !shipped.has(n));
+    expect(
+      stale,
+      `docs catalog references rules that do not exist in plugin.rules: ${stale.join(", ")}`,
+    ).toEqual([]);
   });
 
   it("ships configs.stylistic that only references fixable rules", () => {
