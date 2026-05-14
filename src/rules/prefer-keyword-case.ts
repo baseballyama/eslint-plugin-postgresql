@@ -1,31 +1,39 @@
 import type { Rule } from "eslint";
 
 type CaseStyle = "upper" | "lower";
+type TypeCaseStyle = CaseStyle | "skip";
 
 const DEFAULT_CASE: CaseStyle = "upper";
+const DEFAULT_TYPES: TypeCaseStyle = "skip";
 
-// Node `type`s whose `range` covers a position the rule must NOT
-// uppercase. The parser's tokenizer is context-free, so:
-//
-// - identifier positions (a column / table / constraint name) get
-//   tagged `Keyword` whenever the spelling collides with a SQL keyword
-//   (`trigger`, `user`, `order`, ...) — see #144.
-// - type-name positions accept both built-in type keywords and user-
-//   defined identifiers; uppercasing only the built-ins (`text` →
-//   `TEXT`) leaves the file with mixed casing in the same arg list
-//   alongside untouched user identifiers (`ulid`, ...) — see #145.
-//
-// `names` is libpg-query's representation for any qualified type
-// reference, including the single-identifier case.
-const IDENTIFIER_NODE_TYPES: ReadonlySet<string> = new Set([
+// Node types whose `range` covers a "general identifier" position —
+// a column / table / constraint name. The parser tokenizer is context-
+// free, so a column literally named `trigger` or `user` gets tagged
+// `Keyword`. These positions are always exempt from case-folding (#144).
+const GENERAL_IDENTIFIER_NODE_TYPES: ReadonlySet<string> = new Set([
   "ColumnDef",
   "RangeVar",
   "Constraint",
-  "names",
 ]);
 
-const collectIdentifierStarts = (program: unknown): Set<number> => {
-  const starts = new Set<number>();
+// Node types whose `range` covers a type-name position — function
+// signatures, column types, `CAST(... AS T)`, `x::T`. Tokens here can
+// be either built-in type keywords (`text`, `int`, ...) or user-
+// defined identifiers (`ulid`, custom enums, ...). `names` is libpg-
+// query's representation; `TypeName` shows up in some forms.
+const TYPE_NAME_NODE_TYPES: ReadonlySet<string> = new Set([
+  "names",
+  "TypeName",
+]);
+
+interface Positions {
+  generalIdentifierStarts: Set<number>;
+  typeNameStarts: Set<number>;
+}
+
+const collectPositions = (program: unknown): Positions => {
+  const generalIdentifierStarts = new Set<number>();
+  const typeNameStarts = new Set<number>();
   const visited = new WeakSet<object>();
   const visit = (node: unknown): void => {
     if (!node || typeof node !== "object") return;
@@ -36,13 +44,17 @@ const collectIdentifierStarts = (program: unknown): Set<number> => {
       return;
     }
     const obj = node as Record<string, unknown>;
-    if (
-      typeof obj["type"] === "string" &&
-      IDENTIFIER_NODE_TYPES.has(obj["type"])
-    ) {
+    const type = obj["type"];
+    if (typeof type === "string") {
       const range = obj["range"];
-      if (Array.isArray(range) && typeof range[0] === "number") {
-        starts.add(range[0]);
+      const start =
+        Array.isArray(range) && typeof range[0] === "number" ? range[0] : null;
+      if (start !== null) {
+        if (GENERAL_IDENTIFIER_NODE_TYPES.has(type)) {
+          generalIdentifierStarts.add(start);
+        } else if (TYPE_NAME_NODE_TYPES.has(type)) {
+          typeNameStarts.add(start);
+        }
       }
     }
     for (const [key, value] of Object.entries(obj)) {
@@ -51,8 +63,13 @@ const collectIdentifierStarts = (program: unknown): Set<number> => {
     }
   };
   visit(program);
-  return starts;
+  return { generalIdentifierStarts, typeNameStarts };
 };
+
+const transformer =
+  (style: CaseStyle) =>
+  (value: string): string =>
+    style === "upper" ? value.toUpperCase() : value.toLowerCase();
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -69,6 +86,7 @@ const rule: Rule.RuleModule = {
         type: "object",
         properties: {
           case: { enum: ["upper", "lower"] },
+          types: { enum: ["upper", "lower", "skip"] },
         },
         additionalProperties: false,
       },
@@ -81,28 +99,43 @@ const rule: Rule.RuleModule = {
     },
   },
   create(context) {
-    const option = (context.options[0] ?? {}) as { case?: CaseStyle };
+    const option = (context.options[0] ?? {}) as {
+      case?: CaseStyle;
+      types?: TypeCaseStyle;
+    };
     const target: CaseStyle = option.case ?? DEFAULT_CASE;
-    const expected = target === "upper" ? "expectedUpper" : "expectedLower";
-    const transform = (value: string) =>
-      target === "upper" ? value.toUpperCase() : value.toLowerCase();
+    const typesMode: TypeCaseStyle = option.types ?? DEFAULT_TYPES;
+    const transformGeneral = transformer(target);
+    const transformType = typesMode === "skip" ? null : transformer(typesMode);
 
     return {
       Program(node) {
         const tokens = context.sourceCode.ast.tokens ?? [];
-        const identifierStarts = collectIdentifierStarts(node);
+        const { generalIdentifierStarts, typeNameStarts } =
+          collectPositions(node);
         for (const token of tokens) {
           if (token.type !== "Keyword") continue;
-          // The tokenizer is context-free — a column literally named
-          // `trigger` is tagged Keyword too. Cross-reference with AST
-          // identifier positions and skip any Keyword token whose
-          // range starts where the parser placed an identifier.
-          if (identifierStarts.has(token.range[0])) continue;
-          const desired = transform(token.value);
+          if (generalIdentifierStarts.has(token.range[0])) continue;
+
+          let desired: string;
+          let messageId: "expectedUpper" | "expectedLower";
+          if (typeNameStarts.has(token.range[0])) {
+            // Type-name positions get cased only when the user explicitly
+            // opts in via `types`. Default `skip` leaves them alone, so
+            // `text` next to a user-defined `ulid` doesn't end up
+            // uppercased into a mixed-case arg list (#145).
+            if (transformType === null) continue;
+            desired = transformType(token.value);
+            messageId =
+              typesMode === "upper" ? "expectedUpper" : "expectedLower";
+          } else {
+            desired = transformGeneral(token.value);
+            messageId = target === "upper" ? "expectedUpper" : "expectedLower";
+          }
           if (token.value === desired) continue;
           context.report({
             loc: token.loc,
-            messageId: expected,
+            messageId,
             data: { actual: token.value, expected: desired },
             fix: (fixer) => fixer.replaceTextRange(token.range, desired),
           });
