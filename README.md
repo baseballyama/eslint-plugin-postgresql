@@ -1122,6 +1122,29 @@ SELECT id FROM users ORDER BY created_at DESC NULLS LAST;
 SELECT id FROM users ORDER BY created_at;
 ```
 
+### `postgresql/no-vacuum-full`
+
+Warns on `VACUUM FULL`. It takes an `ACCESS EXCLUSIVE` lock and rewrites the entire table, making the table unavailable for the duration. For shrinking a bloated table on a live database, use `pg_repack` or `pg_squeeze`; a plain `VACUUM` (no `FULL`) is fine and does not block readers or writers.
+
+**Type**: Problem  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+VACUUM FULL users;
+```
+
+✅ Correct:
+
+```sql
+VACUUM users;
+VACUUM ANALYZE users;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
