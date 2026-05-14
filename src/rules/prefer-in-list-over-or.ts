@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import { getFullSourceRange } from "../utils/ast.js";
 
 interface EqArg {
   // Range covering the right-hand side of an `lhs = rhs` term. Used to
@@ -7,29 +8,18 @@ interface EqArg {
 }
 
 interface EqExpr {
-  lexpr: { range: [number, number] };
-  rexpr: { range: [number, number] };
+  lexpr: unknown;
+  rexpr: unknown;
 }
 
 const isEquality = (node: unknown): node is EqExpr => {
   if (typeof node !== "object" || node === null) return false;
   const n = node as { type?: unknown };
   if (n.type !== "A_Expr") return false;
-  const expr = n as {
-    kind?: unknown;
-    name?: unknown;
-    lexpr?: { range?: unknown };
-    rexpr?: { range?: unknown };
-  };
+  const expr = n as { kind?: unknown; name?: unknown };
   if (expr.kind !== "AEXPR_OP") return false;
   if (!Array.isArray(expr.name) || expr.name.length !== 1) return false;
   if ((expr.name[0] as { sval?: unknown }).sval !== "=") return false;
-  if (!Array.isArray(expr.lexpr?.range) || expr.lexpr.range.length !== 2) {
-    return false;
-  }
-  if (!Array.isArray(expr.rexpr?.range) || expr.rexpr.range.length !== 2) {
-    return false;
-  }
   return true;
 };
 
@@ -68,14 +58,19 @@ const rule: Rule.RuleModule = {
         let chainEnd = -1;
         for (const arg of args) {
           if (!isEquality(arg)) return;
-          const lhsSrc = sourceCode
-            .getText()
-            .slice(arg.lexpr.range[0], arg.lexpr.range[1]);
+          // Compute true source ranges by walking descendants — the
+          // node's own `range` is partial for `TypeCast` (`'lit'::T`
+          // collapses to just `::`), which would corrupt the rewrite
+          // (#140).
+          const lhsR = getFullSourceRange(arg.lexpr);
+          const rhsR = getFullSourceRange(arg.rexpr);
+          if (!lhsR || !rhsR) return;
+          const lhsSrc = sourceCode.getText().slice(lhsR[0], lhsR[1]);
           if (lhsText === null) lhsText = lhsSrc;
           else if (lhsText !== lhsSrc) return;
-          eqArgs.push({ rhsRange: arg.rexpr.range });
-          if (arg.lexpr.range[0] < chainStart) chainStart = arg.lexpr.range[0];
-          if (arg.rexpr.range[1] > chainEnd) chainEnd = arg.rexpr.range[1];
+          eqArgs.push({ rhsRange: rhsR });
+          if (lhsR[0] < chainStart) chainStart = lhsR[0];
+          if (rhsR[1] > chainEnd) chainEnd = rhsR[1];
         }
         if (lhsText === null || chainEnd < 0) return;
 

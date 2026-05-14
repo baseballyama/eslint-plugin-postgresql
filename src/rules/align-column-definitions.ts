@@ -68,15 +68,20 @@ const rule: Rule.RuleModule = {
             | {
                 range?: [number, number];
                 typmods?: { range?: [number, number] }[];
+                arrayBounds?: unknown[];
               }
             | undefined;
           const baseTypeRange = typeName?.range;
           if (!colRange || !baseTypeRange) return;
           // The parser's `typeName.range` covers only the bare type
-          // name. For parameterized types like `TIMESTAMP(3)` or
-          // `NUMERIC(10, 2)`, the modifier list lives in `typmods`; we
-          // extend the type span through the closing `)` so the rule
-          // sees the whole `TYPE(...)` as one alignment column.
+          // name. Two postfix shapes need the type span extended:
+          // - `TYPE(precision)` — the modifiers live in `typmods`;
+          //   walk past the closing `)` after the last typmod.
+          // - `TYPE[]` (and `TYPE[][]`, `TYPE[3]`, ...) — the array
+          //   suffix is signaled by a non-empty `arrayBounds` array
+          //   but its individual entries do not carry usable ranges,
+          //   so walk forward token-by-token consuming `[ ... ]`
+          //   pairs as long as they are adjacent to the type.
           let typeEnd = baseTypeRange[1];
           const lastTypmod = typeName?.typmods?.at(-1);
           if (lastTypmod?.range) {
@@ -84,6 +89,19 @@ const rule: Rule.RuleModule = {
               (t) => t.range[0] >= lastTypmod.range![1] && t.value === ")",
             );
             if (closingParen) typeEnd = closingParen.range[1];
+          }
+          if (
+            Array.isArray(typeName?.arrayBounds) &&
+            typeName.arrayBounds.length > 0
+          ) {
+            // The parser tokenizer does not emit `[` / `]` as tokens,
+            // so consume array suffixes (`[]`, `[3]`, `[][2]`, ...)
+            // straight from the source text: eat any number of bracket
+            // groups starting at typeEnd, allowing digits inside.
+            const text = sourceCode.getText();
+            const bracketSuffix = /^(?:\[\d*\])+/;
+            const match = text.slice(typeEnd).match(bracketSuffix);
+            if (match) typeEnd += match[0].length;
           }
           const typeRange: [number, number] = [baseTypeRange[0], typeEnd];
           const constraints = Array.isArray(elt.constraints)

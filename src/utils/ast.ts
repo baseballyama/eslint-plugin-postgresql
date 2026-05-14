@@ -44,6 +44,48 @@ const isObjectWithType = <T extends string>(
 };
 
 /**
+ * Compute the full source range of an expression node by walking every
+ * descendant and taking the union of their `range` values. Useful when
+ * the node's own `range` is incomplete — e.g. `TypeCast.range` only
+ * covers the `CAST` keyword or the `::` operator, not the surrounding
+ * argument and type.
+ *
+ * Range values of `[0, 0]` (the parser's "no location" placeholder)
+ * are skipped so they do not drag the start position to 0.
+ */
+export const getFullSourceRange = (node: unknown): [number, number] | null => {
+  let min = Infinity;
+  let max = -1;
+  const seen = new WeakSet<object>();
+  const visit = (n: unknown): void => {
+    if (!n || typeof n !== "object") return;
+    if (seen.has(n)) return;
+    seen.add(n);
+    const range = (n as { range?: unknown }).range;
+    if (
+      Array.isArray(range) &&
+      typeof range[0] === "number" &&
+      typeof range[1] === "number" &&
+      range[0] !== 0
+    ) {
+      if (range[0] < min) min = range[0];
+      if (range[1] > max) max = range[1];
+    }
+    if (Array.isArray(n)) {
+      for (const item of n) visit(item);
+    } else {
+      for (const [key, value] of Object.entries(n as Record<string, unknown>)) {
+        if (key === "parent" || key === "range" || key === "loc") continue;
+        visit(value);
+      }
+    }
+  };
+  visit(node);
+  if (max < 0 || min === Infinity) return null;
+  return [min, max];
+};
+
+/**
  * Extract the unqualified PostgreSQL type name from a `ColumnDef.typeName`
  * value. The parser stores qualified names across numeric-string keys
  * ("0", "1", ...). The type name is at the highest-numbered segment;
