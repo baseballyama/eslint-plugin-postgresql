@@ -1,6 +1,7 @@
 import type { ESLint, Linter } from "eslint";
 import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
+import alignColumnDefinitions from "./rules/align-column-definitions.js";
 import noAddColumnNotNullWithoutDefault from "./rules/no-add-column-not-null-without-default.js";
 import noAlterColumnType from "./rules/no-alter-column-type.js";
 import noCharType from "./rules/no-char-type.js";
@@ -64,6 +65,7 @@ import snakeCaseColumnName from "./rules/snake-case-column-name.js";
 import snakeCaseTableName from "./rules/snake-case-table-name.js";
 
 const rules = {
+  "align-column-definitions": alignColumnDefinitions,
   "no-add-column-not-null-without-default": noAddColumnNotNullWithoutDefault,
   "no-alter-column-type": noAlterColumnType,
   "no-char-type": noCharType,
@@ -206,6 +208,7 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/align-column-definitions": "warn",
       "postgresql/no-unnecessary-quoted-identifier": "warn",
       "postgresql/prefer-as-for-column-alias": "warn",
       "postgresql/prefer-as-for-table-alias": "warn",

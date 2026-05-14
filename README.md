@@ -90,6 +90,7 @@ Click a rule name to open its documentation page (examples, rationale, options).
 
 | Rule                                                                                                                                           | Description                                                                | Recommended |
 | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | :---------: |
+| [align-column-definitions](https://baseballyama.github.io/eslint-plugin-postgresql/rules/align-column-definitions)                             | Align column definitions vertically inside `CREATE TABLE`                  |     🎨      |
 | [no-add-column-not-null-without-default](https://baseballyama.github.io/eslint-plugin-postgresql/rules/no-add-column-not-null-without-default) | Disallow `ADD COLUMN ... NOT NULL` without a `DEFAULT`                     |     ✅      |
 | [no-alter-column-type](https://baseballyama.github.io/eslint-plugin-postgresql/rules/no-alter-column-type)                                     | Disallow `ALTER COLUMN ... TYPE` (table rewrite under exclusive lock)      |     ⚠️      |
 | [no-char-type](https://baseballyama.github.io/eslint-plugin-postgresql/rules/no-char-type)                                                     | Disallow `char(n)` / `bpchar(n)` columns                                   |     ⚠️      |
