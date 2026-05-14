@@ -39,6 +39,7 @@ import noTimeType from "./rules/no-time-type.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
 import noUnnecessaryQuotedIdentifier from "./rules/no-unnecessary-quoted-identifier.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
+import noUpdatePrimaryKey from "./rules/no-update-primary-key.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
 import noWithRecursiveWithoutLimit from "./rules/no-with-recursive-without-limit.js";
 import plpgsqlKeywordCase from "./rules/plpgsql-keyword-case.js";
@@ -114,6 +115,7 @@ const rules = {
   "no-truncate-cascade": noTruncateCascade,
   "no-unnecessary-quoted-identifier": noUnnecessaryQuotedIdentifier,
   "no-unlogged-table": noUnloggedTable,
+  "no-update-primary-key": noUpdatePrimaryKey,
   "no-vacuum-full": noVacuumFull,
   "no-with-recursive-without-limit": noWithRecursiveWithoutLimit,
   "plpgsql-keyword-case": plpgsqlKeywordCase,
@@ -206,6 +208,7 @@ plugin.configs = {
       "postgresql/no-time-type": "warn",
       "postgresql/no-truncate-cascade": "warn",
       "postgresql/no-unlogged-table": "warn",
+      "postgresql/no-update-primary-key": "error",
       "postgresql/no-vacuum-full": "warn",
       "postgresql/no-with-recursive-without-limit": "error",
       "postgresql/prefer-add-constraint-not-valid": "warn",
