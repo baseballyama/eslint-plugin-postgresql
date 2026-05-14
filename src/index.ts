@@ -5,6 +5,7 @@ import noAddColumnNotNullWithoutDefault from "./rules/no-add-column-not-null-wit
 import noAlterColumnType from "./rules/no-alter-column-type.js";
 import noCharType from "./rules/no-char-type.js";
 import noCluster from "./rules/no-cluster.js";
+import noCreateRole from "./rules/no-create-role.js";
 import noCrossJoin from "./rules/no-cross-join.js";
 import noDistinctOnWithoutOrderBy from "./rules/no-distinct-on-without-order-by.js";
 import noDropColumn from "./rules/no-drop-column.js";
@@ -57,6 +58,7 @@ const rules = {
   "no-alter-column-type": noAlterColumnType,
   "no-char-type": noCharType,
   "no-cluster": noCluster,
+  "no-create-role": noCreateRole,
   "no-cross-join": noCrossJoin,
   "no-distinct-on-without-order-by": noDistinctOnWithoutOrderBy,
   "no-drop-column": noDropColumn,
@@ -130,6 +132,7 @@ plugin.configs = {
       "postgresql/no-alter-column-type": "warn",
       "postgresql/no-char-type": "warn",
       "postgresql/no-cluster": "warn",
+      "postgresql/no-create-role": "warn",
       "postgresql/no-cross-join": "warn",
       "postgresql/no-distinct-on-without-order-by": "error",
       "postgresql/no-drop-column": "warn",
