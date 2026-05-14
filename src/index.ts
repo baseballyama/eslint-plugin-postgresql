@@ -33,6 +33,7 @@ import noSyntaxError from "./rules/no-syntax-error.js";
 import noTemporaryTable from "./rules/no-temporary-table.js";
 import noTimeType from "./rules/no-time-type.js";
 import noTruncateCascade from "./rules/no-truncate-cascade.js";
+import noUnnecessaryQuotedIdentifier from "./rules/no-unnecessary-quoted-identifier.js";
 import noUnloggedTable from "./rules/no-unlogged-table.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
 import preferBigintId from "./rules/prefer-bigint-id.js";
@@ -95,6 +96,7 @@ const rules = {
   "no-temporary-table": noTemporaryTable,
   "no-time-type": noTimeType,
   "no-truncate-cascade": noTruncateCascade,
+  "no-unnecessary-quoted-identifier": noUnnecessaryQuotedIdentifier,
   "no-unlogged-table": noUnloggedTable,
   "no-vacuum-full": noVacuumFull,
   "prefer-bigint-id": preferBigintId,
@@ -204,6 +206,7 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/no-unnecessary-quoted-identifier": "warn",
       "postgresql/prefer-as-for-column-alias": "warn",
       "postgresql/prefer-as-for-table-alias": "warn",
       "postgresql/prefer-current-timestamp-over-now": "warn",
