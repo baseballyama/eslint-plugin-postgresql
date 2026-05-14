@@ -40,6 +40,7 @@ import preferTimestamptz from "./rules/prefer-timestamptz.js";
 import requireLimit from "./rules/require-limit.js";
 import requireNamedConstraint from "./rules/require-named-constraint.js";
 import requirePrimaryKey from "./rules/require-primary-key.js";
+import requireSchemaQualifiedTable from "./rules/require-schema-qualified-table.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
 import snakeCaseColumnName from "./rules/snake-case-column-name.js";
@@ -85,6 +86,7 @@ const rules = {
   "require-limit": requireLimit,
   "require-named-constraint": requireNamedConstraint,
   "require-primary-key": requirePrimaryKey,
+  "require-schema-qualified-table": requireSchemaQualifiedTable,
   "require-where-in-delete": requireWhereInDelete,
   "require-where-in-update": requireWhereInUpdate,
   "snake-case-column-name": snakeCaseColumnName,

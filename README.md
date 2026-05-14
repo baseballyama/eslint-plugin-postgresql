@@ -1076,6 +1076,28 @@ SET search_path TO audit, public;
 SELECT id FROM audit.events;
 ```
 
+### `postgresql/require-schema-qualified-table`
+
+Warns on `CREATE TABLE foo (...)` without a schema-qualified name. Without an explicit schema, the target depends on the current `search_path` and may land in an unintended schema. This rule is **off** by default in `configs.recommended` because many projects intentionally keep everything in `public`; enable it explicitly for codebases that organize by schema.
+
+**Type**: Suggestion  
+**Recommended**: ❌ Off by default  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+CREATE TABLE users (id bigint PRIMARY KEY);
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE app.users (id bigint PRIMARY KEY);
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

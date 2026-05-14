@@ -673,6 +673,18 @@ export const rules: RuleMeta[] = [
     incorrect: ["SET search_path TO audit, public;"],
     correct: ["SELECT id FROM audit.events;"],
   },
+  {
+    name: "require-schema-qualified-table",
+    description: "Require schema-qualified `CREATE TABLE` (off by default).",
+    longDescription:
+      "`CREATE TABLE foo` resolves through `search_path` and may land in an unintended schema. This rule is off by default in `configs.recommended` because many projects intentionally keep everything in `public`; enable it explicitly when you organize by schema.",
+    type: "suggestion",
+    recommended: "off",
+    fixable: false,
+    category: "schema",
+    incorrect: ["CREATE TABLE users (id bigint PRIMARY KEY);"],
+    correct: ["CREATE TABLE app.users (id bigint PRIMARY KEY);"],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
