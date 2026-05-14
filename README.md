@@ -666,6 +666,30 @@ SELECT id FROM users WHERE email LIKE 'admin@%';
 SELECT id FROM users WHERE email = 'admin@example.com';
 ```
 
+### `postgresql/no-add-column-not-null-without-default`
+
+Errors on `ALTER TABLE ... ADD COLUMN ... NOT NULL` that does not also specify a `DEFAULT`. On any non-empty table the migration aborts because every existing row needs a value for the new column. Either supply a `DEFAULT`, or add the column nullable, backfill, and `ALTER COLUMN ... SET NOT NULL` in a follow-up step.
+
+**Type**: Problem  
+**Recommended**: ✅ Error  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+ALTER TABLE users ADD COLUMN status text NOT NULL;
+```
+
+✅ Correct:
+
+```sql
+ALTER TABLE users ADD COLUMN status text NOT NULL DEFAULT 'active';
+ALTER TABLE users ADD COLUMN status text;
+ALTER TABLE users ADD COLUMN id bigint GENERATED ALWAYS AS IDENTITY NOT NULL;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

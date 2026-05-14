@@ -1,6 +1,7 @@
 import type { ESLint, Linter } from "eslint";
 import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
+import noAddColumnNotNullWithoutDefault from "./rules/no-add-column-not-null-without-default.js";
 import noCharType from "./rules/no-char-type.js";
 import noCrossJoin from "./rules/no-cross-join.js";
 import noDistinctOnWithoutOrderBy from "./rules/no-distinct-on-without-order-by.js";
@@ -29,6 +30,7 @@ import snakeCaseColumnName from "./rules/snake-case-column-name.js";
 import snakeCaseTableName from "./rules/snake-case-table-name.js";
 
 const rules = {
+  "no-add-column-not-null-without-default": noAddColumnNotNullWithoutDefault,
   "no-char-type": noCharType,
   "no-cross-join": noCrossJoin,
   "no-distinct-on-without-order-by": noDistinctOnWithoutOrderBy,
@@ -78,6 +80,7 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/no-add-column-not-null-without-default": "error",
       "postgresql/no-char-type": "warn",
       "postgresql/no-cross-join": "warn",
       "postgresql/no-distinct-on-without-order-by": "error",

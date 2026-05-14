@@ -415,6 +415,22 @@ export const rules: RuleMeta[] = [
       "SELECT id FROM users WHERE email = 'admin@example.com';",
     ],
   },
+  {
+    name: "no-add-column-not-null-without-default",
+    description:
+      "Error on `ADD COLUMN ... NOT NULL` without a `DEFAULT` — fails on non-empty tables.",
+    longDescription:
+      "On any table that already has rows, `ALTER TABLE ADD COLUMN ... NOT NULL` aborts because existing rows have no value for the new column. Supply a `DEFAULT`, or add the column nullable, backfill, then `SET NOT NULL`.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: ["ALTER TABLE users ADD COLUMN status text NOT NULL;"],
+    correct: [
+      "ALTER TABLE users ADD COLUMN status text NOT NULL DEFAULT 'active';",
+      "ALTER TABLE users ADD COLUMN status text;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
