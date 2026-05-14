@@ -690,6 +690,28 @@ ALTER TABLE users ADD COLUMN status text;
 ALTER TABLE users ADD COLUMN id bigint GENERATED ALWAYS AS IDENTITY NOT NULL;
 ```
 
+### `postgresql/no-select-into`
+
+Warns on `SELECT ... INTO target FROM ...`, which silently creates a new table named `target`. The syntax is confusable with PL/pgSQL's `SELECT INTO variable` (a row assignment, not a table creation) and is omitted from many SQL primers. Use `CREATE TABLE target AS SELECT ...` so the intent reads back.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT id, name INTO archived_users FROM users WHERE inactive;
+```
+
+✅ Correct:
+
+```sql
+CREATE TABLE archived_users AS SELECT id, name FROM users WHERE inactive;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example

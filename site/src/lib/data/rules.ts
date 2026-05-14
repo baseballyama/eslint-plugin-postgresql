@@ -431,6 +431,23 @@ export const rules: RuleMeta[] = [
       "ALTER TABLE users ADD COLUMN status text;",
     ],
   },
+  {
+    name: "no-select-into",
+    description:
+      "Disallow `SELECT ... INTO target FROM ...`; prefer `CREATE TABLE AS SELECT`.",
+    longDescription:
+      "`SELECT ... INTO target` silently creates a new table. The syntax is confusable with PL/pgSQL's `SELECT INTO variable` and is omitted from most SQL primers. `CREATE TABLE target AS SELECT ...` reads back as the intent.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "style",
+    incorrect: [
+      "SELECT id, name INTO archived_users FROM users WHERE inactive;",
+    ],
+    correct: [
+      "CREATE TABLE archived_users AS SELECT id, name FROM users WHERE inactive;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
