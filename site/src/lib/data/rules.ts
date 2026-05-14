@@ -340,6 +340,25 @@ export const rules: RuleMeta[] = [
       "SELECT name, email FROM users WHERE active = true LIMIT 50;",
     ],
   },
+  {
+    name: "no-order-by-ordinal",
+    description:
+      "Disallow positional `ORDER BY` references (e.g., `ORDER BY 1`).",
+    longDescription:
+      "`ORDER BY 1, 2` silently changes meaning when the SELECT list is reordered or a column is inserted. Worse, the intent is invisible at any callsite that consumes the query via a view or CTE. Reference columns by name or by an alias.",
+    type: "suggestion",
+    recommended: "warn",
+    fixable: false,
+    category: "style",
+    incorrect: [
+      "SELECT id, name FROM users ORDER BY 1;",
+      "SELECT id, name, email FROM users ORDER BY 1, 2 DESC;",
+    ],
+    correct: [
+      "SELECT id, name FROM users ORDER BY name;",
+      "SELECT id, name AS display_name FROM users ORDER BY display_name;",
+    ],
+  },
 ];
 
 export const ruleByName = new Map(rules.map((r) => [r.name, r]));
