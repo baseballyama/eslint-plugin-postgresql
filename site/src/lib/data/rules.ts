@@ -260,16 +260,26 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-create-index-concurrently",
-    description: "Prefer CREATE INDEX CONCURRENTLY in migrations.",
+    name: "consistent-create-index-concurrently",
+    description:
+      "Enforce a consistent stance on `CONCURRENTLY` for `CREATE INDEX`.",
     longDescription:
-      "A non-concurrent index build takes a `SHARE` lock on the target for the duration of the build — readers are fine, writers are blocked. Concurrent builds avoid the lock but cannot run inside a transaction. Off by default because the right answer depends on your migration framework.",
+      "Two valid stances exist: (a) always use `CREATE INDEX CONCURRENTLY` so the build avoids the table-level `SHARE` lock and doesn't block writers, or (b) never use it so each `CREATE INDEX` can run inside a migration transaction. Pick one with the `style` option. Off by default because the right answer depends on your migration framework.",
     type: "suggestion",
     recommended: "off",
     fixable: false,
     category: "perf",
     incorrect: ["CREATE INDEX idx_users_email ON users (email);"],
     correct: ["CREATE INDEX CONCURRENTLY idx_users_email ON users (email);"],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "Which stance to enforce. `always` (default) requires `CONCURRENTLY` so the build doesn't block writers. `never` forbids it so each `CREATE INDEX` can run inside a migration transaction.",
+      },
+    ],
   },
   {
     name: "no-not-in-subquery",
