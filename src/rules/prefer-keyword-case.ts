@@ -4,6 +4,48 @@ type CaseStyle = "upper" | "lower";
 
 const DEFAULT_CASE: CaseStyle = "upper";
 
+// Node `type`s whose `range` covers an identifier — a column / table /
+// constraint name. The parser's tokenizer classifies these as
+// `Keyword` whenever the spelling collides with a SQL keyword (e.g.
+// a column literally named `trigger` or `user`). We skip Keyword
+// tokens whose range matches one of these positions so the rule does
+// not rewrite identifier source as if it were a real keyword.
+const IDENTIFIER_NODE_TYPES: ReadonlySet<string> = new Set([
+  "ColumnDef",
+  "RangeVar",
+  "Constraint",
+]);
+
+const collectIdentifierStarts = (program: unknown): Set<number> => {
+  const starts = new Set<number>();
+  const visited = new WeakSet<object>();
+  const visit = (node: unknown): void => {
+    if (!node || typeof node !== "object") return;
+    if (visited.has(node)) return;
+    visited.add(node);
+    if (Array.isArray(node)) {
+      for (const item of node) visit(item);
+      return;
+    }
+    const obj = node as Record<string, unknown>;
+    if (
+      typeof obj["type"] === "string" &&
+      IDENTIFIER_NODE_TYPES.has(obj["type"])
+    ) {
+      const range = obj["range"];
+      if (Array.isArray(range) && typeof range[0] === "number") {
+        starts.add(range[0]);
+      }
+    }
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === "parent" || key === "range" || key === "loc") continue;
+      visit(value);
+    }
+  };
+  visit(program);
+  return starts;
+};
+
 const rule: Rule.RuleModule = {
   meta: {
     type: "layout",
@@ -38,10 +80,16 @@ const rule: Rule.RuleModule = {
       target === "upper" ? value.toUpperCase() : value.toLowerCase();
 
     return {
-      Program() {
+      Program(node) {
         const tokens = context.sourceCode.ast.tokens ?? [];
+        const identifierStarts = collectIdentifierStarts(node);
         for (const token of tokens) {
           if (token.type !== "Keyword") continue;
+          // The tokenizer is context-free — a column literally named
+          // `trigger` is tagged Keyword too. Cross-reference with AST
+          // identifier positions and skip any Keyword token whose
+          // range starts where the parser placed an identifier.
+          if (identifierStarts.has(token.range[0])) continue;
           const desired = transform(token.value);
           if (token.value === desired) continue;
           context.report({

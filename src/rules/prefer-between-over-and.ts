@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import { getFullSourceRange } from "../utils/ast.js";
 
 const opName = (node: unknown): string | null => {
   if (typeof node !== "object" || node === null) return null;
@@ -7,12 +8,6 @@ const opName = (node: unknown): string | null => {
   if (!Array.isArray(n.name) || n.name.length !== 1) return null;
   const sval = (n.name[0] as { sval?: unknown }).sval;
   return typeof sval === "string" ? sval : null;
-};
-
-const rangeOf = (node: unknown): [number, number] | null => {
-  if (typeof node !== "object" || node === null) return null;
-  const r = (node as { range?: unknown }).range;
-  return Array.isArray(r) && r.length === 2 ? (r as [number, number]) : null;
 };
 
 const rule: Rule.RuleModule = {
@@ -47,10 +42,15 @@ const rule: Rule.RuleModule = {
         const aRex = (a as { rexpr?: unknown }).rexpr;
         const bLex = (b as { lexpr?: unknown }).lexpr;
         const bRex = (b as { rexpr?: unknown }).rexpr;
-        const aLexR = rangeOf(aLex);
-        const aRexR = rangeOf(aRex);
-        const bLexR = rangeOf(bLex);
-        const bRexR = rangeOf(bRex);
+        // `getFullSourceRange` walks descendants to recover the true
+        // bounds of expressions whose own `range` is partial — most
+        // notably `TypeCast`, whose range covers only the `::` /
+        // `CAST` token. Without this, `'lit'::TIMESTAMPTZ` collapses
+        // to just `::` in the rewrite (#140).
+        const aLexR = getFullSourceRange(aLex);
+        const aRexR = getFullSourceRange(aRex);
+        const bLexR = getFullSourceRange(bLex);
+        const bRexR = getFullSourceRange(bRex);
         if (!aLexR || !aRexR || !bLexR || !bRexR) return;
 
         const aLexSrc = sourceCode.getText().slice(aLexR[0], aLexR[1]);
