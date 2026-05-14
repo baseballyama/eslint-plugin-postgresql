@@ -594,6 +594,30 @@ SELECT id, name FROM users ORDER BY name;
 SELECT id, name AS display_name FROM users ORDER BY display_name;
 ```
 
+### `postgresql/no-group-by-ordinal`
+
+Disallows positional `GROUP BY` references such as `GROUP BY 1, 2`. Same fragility as positional `ORDER BY`: reorder the SELECT list and the grouping silently shifts to a different column, often producing plausible-looking but wrong aggregates.
+
+**Type**: Suggestion  
+**Recommended**: ⚠️ Warn  
+**Fixable**: ❌ No
+
+#### Examples
+
+❌ Incorrect:
+
+```sql
+SELECT category, count(*) FROM items GROUP BY 1;
+SELECT region, category, sum(amount) FROM sales GROUP BY 1, 2;
+```
+
+✅ Correct:
+
+```sql
+SELECT category, count(*) FROM items GROUP BY category;
+SELECT region, category, sum(amount) FROM sales GROUP BY region, category;
+```
+
 ## Configuration Examples
 
 ### Project Usage Example
