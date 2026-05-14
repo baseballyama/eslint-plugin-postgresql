@@ -76,9 +76,14 @@ For a lint plugin, this translates concretely:
 
 - **One rule per concern.** Don't add `no-foo` and `prefer-not-foo` when one
   rule with an option covers it.
-- **`configs.recommended` is the canonical preset.** Don't add `configs.strict`
-  / `configs.loose` / `configs.all` just to expose different severity sets —
-  users can flip severities per rule themselves.
+- **`configs.recommended` is the canonical preset for correctness.** Don't add
+  `configs.strict` / `configs.loose` / `configs.all` just to expose different
+  severity sets — users can flip severities per rule themselves.
+- **`configs.stylistic` is the second preset, for layout / casing / formatting
+  rules only.** It exists because PostgreSQL formatters (`prettier-plugin-sql`,
+  `pg_format`) do not cover PL/pgSQL well, and because correctness and style
+  are genuinely orthogonal axes that users opt into independently. Stylistic
+  rules MUST be `fixable`. Do not split it further (no `stylistic-strict` etc).
 - **Options are a last resort.** Each option is a forever-supported branch. If
   you can't name a real user with a real need, don't add the option.
 

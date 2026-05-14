@@ -31,7 +31,9 @@ const readFixtureFiles = (
 // Invalid fixtureを読み込む共通関数
 const readInvalidFixtures = (folderPath: string) => {
   const files = readdirSync(folderPath);
-  const sqlFiles = files.filter((file) => file.endsWith(".sql"));
+  const sqlFiles = files.filter(
+    (file) => file.endsWith(".sql") && !file.endsWith(".expected.sql"),
+  );
 
   return sqlFiles.map((file) => {
     const baseName = file.replace(".sql", "");
@@ -41,10 +43,20 @@ const readInvalidFixtures = (folderPath: string) => {
     const expectedErrors = readFileSync(expectedErrorsPath, "utf-8");
     const errors = JSON.parse(expectedErrors);
 
+    const expectedOutputFile = `${baseName}-output.expected.sql`;
+    const expectedOutputPath = join(folderPath, expectedOutputFile);
+    let output: string | undefined;
+    try {
+      output = readFileSync(expectedOutputPath, "utf-8").trim();
+    } catch {
+      output = undefined;
+    }
+
     return {
       code: readFileSync(join(folderPath, file), "utf-8").trim(),
       filename: file,
       errors,
+      ...(output !== undefined ? { output } : {}),
     };
   });
 };

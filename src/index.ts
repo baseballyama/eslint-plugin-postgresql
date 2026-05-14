@@ -42,6 +42,7 @@ import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js
 import preferFkNotValid from "./rules/prefer-fk-not-valid.js";
 import preferIdentityOverSerial from "./rules/prefer-identity-over-serial.js";
 import preferJsonbOverJson from "./rules/prefer-jsonb-over-json.js";
+import preferKeywordCase from "./rules/prefer-keyword-case.js";
 import preferReindexConcurrently from "./rules/prefer-reindex-concurrently.js";
 import preferTextOverVarchar from "./rules/prefer-text-over-varchar.js";
 import preferTimestamptz from "./rules/prefer-timestamptz.js";
@@ -96,6 +97,7 @@ const rules = {
   "prefer-fk-not-valid": preferFkNotValid,
   "prefer-identity-over-serial": preferIdentityOverSerial,
   "prefer-jsonb-over-json": preferJsonbOverJson,
+  "prefer-keyword-case": preferKeywordCase,
   "prefer-reindex-concurrently": preferReindexConcurrently,
   "prefer-text-over-varchar": preferTextOverVarchar,
   "prefer-timestamptz": preferTimestamptz,
@@ -179,6 +181,16 @@ plugin.configs = {
       "postgresql/require-where-in-update": "error",
       "postgresql/snake-case-column-name": "warn",
       "postgresql/snake-case-table-name": "warn",
+    },
+  } satisfies Linter.Config,
+  stylistic: {
+    files: ["**/*.sql"],
+    plugins: { postgresql: plugin },
+    languageOptions: {
+      parser: postgresqlParser,
+    },
+    rules: {
+      "postgresql/prefer-keyword-case": "warn",
     },
   } satisfies Linter.Config,
 };

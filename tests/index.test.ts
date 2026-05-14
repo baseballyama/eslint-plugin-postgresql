@@ -52,4 +52,35 @@ describe("eslint-plugin-postgresql", () => {
       ).toBeDefined();
     }
   });
+
+  it("ships configs.stylistic that only references fixable rules", () => {
+    const stylistic = plugin.configs?.["stylistic"];
+    expect(stylistic).toBeDefined();
+    if (!stylistic || typeof stylistic !== "object") return;
+
+    const plugins = (stylistic as { plugins?: Record<string, unknown> })
+      .plugins;
+    expect(plugins?.["postgresql"]).toBe(plugin);
+
+    const rules = (stylistic as { rules?: Record<string, unknown> }).rules;
+    expect(rules).toBeDefined();
+    for (const key of Object.keys(rules ?? {})) {
+      expect(key.startsWith("postgresql/"), `${key} missing namespace`).toBe(
+        true,
+      );
+      const ruleName = key.slice("postgresql/".length);
+      const rule = plugin.rules?.[ruleName];
+      expect(
+        rule,
+        `stylistic references unknown rule "${ruleName}"`,
+      ).toBeDefined();
+      // Stylistic rules must be auto-fixable; this is the contract for
+      // anything that lives in this preset.
+      const meta = (rule as { meta?: { fixable?: unknown } }).meta;
+      expect(
+        meta?.fixable,
+        `stylistic rule "${ruleName}" must declare meta.fixable`,
+      ).toBeTruthy();
+    }
+  });
 });
