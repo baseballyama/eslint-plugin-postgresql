@@ -1,0 +1,1 @@
+ALTER TABLE t ADD CONSTRAINT uq_t_email UNIQUE (email);

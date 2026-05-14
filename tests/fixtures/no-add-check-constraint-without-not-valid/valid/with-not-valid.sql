@@ -1,0 +1,3 @@
+ALTER TABLE t ADD CONSTRAINT c CHECK (x > 0) NOT VALID;
+-- Non-CHECK constraints are out of scope.
+ALTER TABLE t ADD CONSTRAINT pk PRIMARY KEY (id);

@@ -3,7 +3,9 @@ import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
 import alignColumnDefinitions from "./rules/align-column-definitions.js";
 import alignValues from "./rules/align-values.js";
+import noAddCheckConstraintWithoutNotValid from "./rules/no-add-check-constraint-without-not-valid.js";
 import noAddColumnNotNullWithoutDefault from "./rules/no-add-column-not-null-without-default.js";
+import noAddUniqueConstraintDirectly from "./rules/no-add-unique-constraint-directly.js";
 import noAlterColumnType from "./rules/no-alter-column-type.js";
 import noCharType from "./rules/no-char-type.js";
 import noCluster from "./rules/no-cluster.js";
@@ -45,6 +47,7 @@ import noUnloggedTable from "./rules/no-unlogged-table.js";
 import noUpdatePrimaryKey from "./rules/no-update-primary-key.js";
 import noUpdateWithoutFromBinding from "./rules/no-update-without-from-binding.js";
 import noVacuumFull from "./rules/no-vacuum-full.js";
+import noVolatileDefaultOnAddColumn from "./rules/no-volatile-default-on-add-column.js";
 import noWithRecursiveWithoutLimit from "./rules/no-with-recursive-without-limit.js";
 import plpgsqlKeywordCase from "./rules/plpgsql-keyword-case.js";
 import preferBigintId from "./rules/prefer-bigint-id.js";
@@ -87,7 +90,10 @@ import snakeCaseTableName from "./rules/snake-case-table-name.js";
 const rules = {
   "align-column-definitions": alignColumnDefinitions,
   "align-values": alignValues,
+  "no-add-check-constraint-without-not-valid":
+    noAddCheckConstraintWithoutNotValid,
   "no-add-column-not-null-without-default": noAddColumnNotNullWithoutDefault,
+  "no-add-unique-constraint-directly": noAddUniqueConstraintDirectly,
   "no-alter-column-type": noAlterColumnType,
   "no-char-type": noCharType,
   "no-cluster": noCluster,
@@ -129,6 +135,7 @@ const rules = {
   "no-update-primary-key": noUpdatePrimaryKey,
   "no-update-without-from-binding": noUpdateWithoutFromBinding,
   "no-vacuum-full": noVacuumFull,
+  "no-volatile-default-on-add-column": noVolatileDefaultOnAddColumn,
   "no-with-recursive-without-limit": noWithRecursiveWithoutLimit,
   "plpgsql-keyword-case": plpgsqlKeywordCase,
   "prefer-add-constraint-not-valid": preferAddConstraintNotValid,
@@ -190,7 +197,9 @@ plugin.configs = {
       parser: postgresqlParser,
     },
     rules: {
+      "postgresql/no-add-check-constraint-without-not-valid": "error",
       "postgresql/no-add-column-not-null-without-default": "error",
+      "postgresql/no-add-unique-constraint-directly": "error",
       "postgresql/no-alter-column-type": "warn",
       "postgresql/no-char-type": "warn",
       "postgresql/no-cluster": "warn",
@@ -230,6 +239,7 @@ plugin.configs = {
       "postgresql/no-update-primary-key": "error",
       "postgresql/no-update-without-from-binding": "error",
       "postgresql/no-vacuum-full": "warn",
+      "postgresql/no-volatile-default-on-add-column": "error",
       "postgresql/no-with-recursive-without-limit": "error",
       "postgresql/prefer-add-constraint-not-valid": "warn",
       "postgresql/prefer-bigint-id": "warn",
