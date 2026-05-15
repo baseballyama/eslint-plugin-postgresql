@@ -75,6 +75,7 @@ import preferExistsOverInSubquery from "./rules/prefer-exists-over-in-subquery.j
 import preferInListOverOr from "./rules/prefer-in-list-over-or.js";
 import preferKeywordCase from "./rules/prefer-keyword-case.js";
 import preferNotEqualsOperator from "./rules/prefer-not-equals-operator.js";
+import requireFkIncludeColumns from "./rules/require-fk-include-columns.js";
 import requireIfExists from "./rules/require-if-exists.js";
 import requireIndexOnFkColumn from "./rules/require-index-on-fk-column.js";
 import requireLimit from "./rules/require-limit.js";
@@ -164,6 +165,7 @@ const rules = {
   "prefer-in-list-over-or": preferInListOverOr,
   "prefer-keyword-case": preferKeywordCase,
   "prefer-not-equals-operator": preferNotEqualsOperator,
+  "require-fk-include-columns": requireFkIncludeColumns,
   "require-if-exists": requireIfExists,
   "require-index-on-fk-column": requireIndexOnFkColumn,
   "require-limit": requireLimit,

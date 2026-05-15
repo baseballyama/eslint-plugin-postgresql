@@ -1586,6 +1586,45 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
+    name: "require-fk-include-columns",
+    description:
+      "Require every foreign-key constraint to include a configured set of columns.",
+    longDescription:
+      "Useful in multi-tenant schemas where every FK must carry the tenant key (e.g. `tenant_id`) so a child row cannot point at a parent row in a different tenant. The rule covers inline column-level FKs (`col integer REFERENCES other(id)`), table-level FKs inside `CREATE TABLE`, and `ALTER TABLE ADD CONSTRAINT ... FOREIGN KEY`. The `columns` option is required and lists the column names that every FK must include. `excludeTablePattern` and `excludeReferencedTablePattern` are regex strings for opting tables out — typically the tenant table itself (`tenants`) and global lookup tables.",
+    type: "problem",
+    recommended: "off",
+    fixable: false,
+    category: "schema",
+    incorrect: [
+      "CREATE TABLE orders (\n  tenant_id bigint NOT NULL,\n  id        bigserial PRIMARY KEY,\n  user_id   bigint REFERENCES users (id)\n);",
+      "ALTER TABLE orders\n  ADD CONSTRAINT orders_user_fk\n  FOREIGN KEY (user_id) REFERENCES users (id);",
+    ],
+    correct: [
+      "CREATE TABLE orders (\n  tenant_id bigint NOT NULL,\n  id        bigint NOT NULL,\n  user_id   bigint NOT NULL,\n  PRIMARY KEY (tenant_id, id),\n  FOREIGN KEY (tenant_id, user_id) REFERENCES users (tenant_id, id)\n);",
+      "ALTER TABLE orders\n  ADD CONSTRAINT orders_user_fk\n  FOREIGN KEY (tenant_id, user_id) REFERENCES users (tenant_id, id);",
+    ],
+    options: [
+      {
+        name: "columns",
+        type: "string[]",
+        description:
+          "Required. Column names that every foreign-key constraint must include in its referencing column list.",
+      },
+      {
+        name: "excludeTablePattern",
+        type: "string (regex)",
+        description:
+          "Skip the check for any table whose name matches this pattern. Useful for audit / log tables that intentionally fan in across tenants.",
+      },
+      {
+        name: "excludeReferencedTablePattern",
+        type: "string (regex)",
+        description:
+          "Skip the check for any FK whose referenced (`REFERENCES`) table matches this pattern. Typically used to exclude the tenant table itself and global lookup tables that are shared across tenants.",
+      },
+    ],
+  },
+  {
     name: "require-index-on-fk-column",
     description: "Require an index on every foreign-key column.",
     longDescription:
