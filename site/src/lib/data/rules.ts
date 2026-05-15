@@ -1625,6 +1625,43 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
+    name: "require-table-columns",
+    description:
+      "Require every `CREATE TABLE` to include a configured set of columns.",
+    longDescription:
+      "Useful for enforcing project-wide schema conventions — every table must carry the tenant key, audit columns (`created_at`, `created_by`, `updated_at`, `updated_by`), or any other set the project standardises on. The rule inspects every `CREATE TABLE` and reports one diagnostic per missing column. The `columns` option is required and lists the default required column names. `overrides` is an array of `{ pattern, columns }` entries — the first regex that matches the table name replaces the column list entirely (so an override of `[a, b]` does *not* require the default columns as well). `exclude` is a regex string for tables that should be skipped completely (e.g. audit / log tables, materialised views built via `CREATE TABLE AS`).",
+    type: "problem",
+    recommended: "off",
+    fixable: false,
+    category: "schema",
+    incorrect: [
+      "CREATE TABLE orders (\n  id         bigserial PRIMARY KEY,\n  created_at timestamptz NOT NULL DEFAULT current_timestamp,\n  updated_at timestamptz NOT NULL DEFAULT current_timestamp\n);",
+    ],
+    correct: [
+      "CREATE TABLE orders (\n  id         bigserial PRIMARY KEY,\n  tenant_id  bigint NOT NULL,\n  created_at timestamptz NOT NULL DEFAULT current_timestamp,\n  created_by bigint NOT NULL,\n  updated_at timestamptz NOT NULL DEFAULT current_timestamp,\n  updated_by bigint NOT NULL\n);",
+    ],
+    options: [
+      {
+        name: "columns",
+        type: "string[]",
+        description:
+          "Required. The default list of column names that every `CREATE TABLE` must declare.",
+      },
+      {
+        name: "overrides",
+        type: "{ pattern: string; columns: string[] }[]",
+        description:
+          "Per-table-pattern overrides. The first entry whose `pattern` regex matches the table name replaces the default `columns` list entirely. Use this for tables that legitimately need a different set (e.g. `^.+_temporal$` for append-only history tables that have no `updated_by`).",
+      },
+      {
+        name: "exclude",
+        type: "string (regex)",
+        description:
+          "Tables whose name matches this regex are skipped completely. Useful for audit / log tables that intentionally have a different schema.",
+      },
+    ],
+  },
+  {
     name: "require-index-on-fk-column",
     description: "Require an index on every foreign-key column.",
     longDescription:
