@@ -1,5 +1,11 @@
 # eslint-plugin-postgresql
 
+## 0.16.0
+
+### Minor Changes
+
+- [#178](https://github.com/baseballyama/eslint-plugin-postgresql/pull/178) [`938c332`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/938c33234fe3d65712a489720f54a879782bf2e5) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `require-fk-include-columns` rule that requires every foreign-key constraint to include a configured set of columns. The primary use case is multi-tenant schemas where every FK must carry the tenant key (e.g. `tenant_id`) so a child row cannot point at a parent row that lives in a different tenant. The rule inspects inline column-level FKs, table-level FKs in `CREATE TABLE`, and `ALTER TABLE ADD CONSTRAINT ... FOREIGN KEY`. Three options: `columns` (the required column names, mandatory), `excludeTablePattern` (regex; skip FKs on matching tables, e.g. audit / log tables), and `excludeReferencedTablePattern` (regex; skip FKs whose `REFERENCES` target matches, typically the tenant table itself and other global lookup tables). Off by default because the project-specific column list has no sensible default.
+
 ## 0.15.0
 
 ### Minor Changes
