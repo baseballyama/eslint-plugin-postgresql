@@ -556,6 +556,36 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
+    name: "no-identifier-too-long",
+    description:
+      "Disallow identifiers longer than PostgreSQL's `NAMEDATALEN - 1` limit (default 63 bytes).",
+    longDescription:
+      "PostgreSQL stores identifiers in a fixed-width `name` column whose size is `NAMEDATALEN` (64 by default). Anything longer than `NAMEDATALEN - 1` bytes is **silently truncated** at parse time, so the object is created under a different name than written. Every later `DROP CONSTRAINT` / `ALTER ... RENAME` / `\\d` that uses the original name then fails with `does not exist`. Bytes — not characters — count, so a 22-character CJK name is already over the limit.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "CREATE TABLE this_is_a_very_very_very_very_very_very_very_very_long_table (id bigserial PRIMARY KEY);",
+      "ALTER TABLE items\n  ADD CONSTRAINT items_code_check_that_is_unfortunately_far_too_long_for_postgresql CHECK (length(code) > 0);",
+      "CREATE INDEX an_index_name_that_exceeds_the_sixty_three_byte_postgres_limit ON items (code);",
+    ],
+    correct: [
+      "CREATE TABLE long_but_within_limit_table (id bigserial PRIMARY KEY);",
+      "ALTER TABLE items ADD CONSTRAINT items_code_non_empty CHECK (length(code) > 0);",
+      "CREATE INDEX items_code_idx ON items (code);",
+    ],
+    options: [
+      {
+        name: "max",
+        type: "integer",
+        default: 63,
+        description:
+          "Maximum identifier byte length. Override only if your PostgreSQL build raises `NAMEDATALEN` from the default 64.",
+      },
+    ],
+  },
+  {
     name: "no-alter-column-type",
     description:
       "Warn on `ALTER COLUMN ... TYPE` — can rewrite the table under ACCESS EXCLUSIVE.",

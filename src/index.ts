@@ -36,6 +36,7 @@ import noGrantAll from "./rules/no-grant-all.js";
 import noGrantToPublic from "./rules/no-grant-to-public.js";
 import noGroupByOrdinal from "./rules/no-group-by-ordinal.js";
 import noHavingWithoutGroupBy from "./rules/no-having-without-group-by.js";
+import noIdentifierTooLong from "./rules/no-identifier-too-long.js";
 import noImplicitJoin from "./rules/no-implicit-join.js";
 import noLeadingWildcardLike from "./rules/no-leading-wildcard-like.js";
 import noMoneyType from "./rules/no-money-type.js";
@@ -124,6 +125,7 @@ const rules = {
   "no-grant-to-public": noGrantToPublic,
   "no-group-by-ordinal": noGroupByOrdinal,
   "no-having-without-group-by": noHavingWithoutGroupBy,
+  "no-identifier-too-long": noIdentifierTooLong,
   "no-implicit-join": noImplicitJoin,
   "no-leading-wildcard-like": noLeadingWildcardLike,
   "no-money-type": noMoneyType,
@@ -222,6 +224,7 @@ plugin.configs = {
       "postgresql/no-grant-to-public": "warn",
       "postgresql/no-group-by-ordinal": "warn",
       "postgresql/no-having-without-group-by": "error",
+      "postgresql/no-identifier-too-long": "error",
       "postgresql/no-implicit-join": "warn",
       "postgresql/no-leading-wildcard-like": "warn",
       "postgresql/no-money-type": "error",

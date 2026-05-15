@@ -1,0 +1,1 @@
+CREATE VIEW aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS SELECT 1;
