@@ -83,6 +83,7 @@ import requireNamedConstraint from "./rules/require-named-constraint.js";
 import requireOnDeleteAction from "./rules/require-on-delete-action.js";
 import requirePrimaryKey from "./rules/require-primary-key.js";
 import requireSchemaQualifiedTable from "./rules/require-schema-qualified-table.js";
+import requireTableColumns from "./rules/require-table-columns.js";
 import requireTrailingSemicolon from "./rules/require-trailing-semicolon.js";
 import requireWhereInDelete from "./rules/require-where-in-delete.js";
 import requireWhereInUpdate from "./rules/require-where-in-update.js";
@@ -173,6 +174,7 @@ const rules = {
   "require-on-delete-action": requireOnDeleteAction,
   "require-primary-key": requirePrimaryKey,
   "require-schema-qualified-table": requireSchemaQualifiedTable,
+  "require-table-columns": requireTableColumns,
   "require-trailing-semicolon": requireTrailingSemicolon,
   "require-where-in-delete": requireWhereInDelete,
   "require-where-in-update": requireWhereInUpdate,
