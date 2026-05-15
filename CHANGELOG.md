@@ -1,5 +1,11 @@
 # eslint-plugin-postgresql
 
+## 0.17.0
+
+### Minor Changes
+
+- [#180](https://github.com/baseballyama/eslint-plugin-postgresql/pull/180) [`87fb31d`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/87fb31d1a10c61b7f7a3459a495a3f73d510bacf) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `require-table-columns` rule that requires every `CREATE TABLE` to declare a configured set of columns. Useful for enforcing project-wide schema conventions — e.g. every table must carry the tenant key plus the audit columns `created_at`, `created_by`, `updated_at`, `updated_by`. Three options: `columns` (the default required column names, mandatory), `overrides` (an array of `{ pattern, columns }` entries — the first regex match replaces the column list entirely, so an append-only `^.+_temporal$` table can require a smaller set), and `exclude` (a regex for tables to skip completely, e.g. audit / log tables). Off by default because the column list is project-specific and has no sensible default.
+
 ## 0.16.0
 
 ### Minor Changes
