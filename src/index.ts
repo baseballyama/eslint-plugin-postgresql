@@ -23,6 +23,7 @@ import noAddUniqueConstraintDirectly from "./rules/no-add-unique-constraint-dire
 import noAlterColumnType from "./rules/no-alter-column-type.js";
 import noCharType from "./rules/no-char-type.js";
 import noCluster from "./rules/no-cluster.js";
+import noCompositePrimaryKey from "./rules/no-composite-primary-key.js";
 import noCreateRole from "./rules/no-create-role.js";
 import noCrossJoin from "./rules/no-cross-join.js";
 import noDistinctOnWithoutOrderBy from "./rules/no-distinct-on-without-order-by.js";
@@ -114,6 +115,7 @@ const rules = {
   "no-alter-column-type": noAlterColumnType,
   "no-char-type": noCharType,
   "no-cluster": noCluster,
+  "no-composite-primary-key": noCompositePrimaryKey,
   "no-create-role": noCreateRole,
   "no-cross-join": noCrossJoin,
   "no-distinct-on-without-order-by": noDistinctOnWithoutOrderBy,

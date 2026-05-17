@@ -842,6 +842,23 @@ export const rules: RuleMeta[] = [
     correct: ["VACUUM users;"],
   },
   {
+    name: "no-composite-primary-key",
+    description: "Disallow composite (multi-column) PRIMARY KEY constraints.",
+    longDescription:
+      "A composite PRIMARY KEY couples a row's identity to multiple business columns. Every foreign-key reference must repeat that column set, ORMs frequently misbehave on multi-column keys, and changing the natural key later requires rewriting both the table and every referrer. Use a single surrogate key (e.g. `id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY` or a UUID) and enforce the natural uniqueness with a `UNIQUE` constraint on the same columns.",
+    type: "problem",
+    recommended: "off",
+    fixable: false,
+    category: "schema",
+    incorrect: [
+      "CREATE TABLE memberships (user_id bigint, group_id bigint, PRIMARY KEY (user_id, group_id));",
+      "ALTER TABLE memberships ADD CONSTRAINT memberships_pkey PRIMARY KEY (user_id, group_id);",
+    ],
+    correct: [
+      "CREATE TABLE memberships (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, user_id bigint NOT NULL, group_id bigint NOT NULL, UNIQUE (user_id, group_id));",
+    ],
+  },
+  {
     name: "no-drop-database",
     description:
       "Error on `DROP DATABASE` — catastrophic and belongs to an operator workflow.",
