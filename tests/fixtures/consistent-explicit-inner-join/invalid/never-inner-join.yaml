@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedInnerJoin
+    message: Omit the redundant `INNER`; use bare `JOIN` for inner joins.
+    line: 1
+    column: 20
+    endLine: 1
+    endColumn: 30
+output: SELECT a.id FROM a JOIN b ON a.id = b.id;

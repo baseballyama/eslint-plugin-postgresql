@@ -33,8 +33,8 @@ getting confused**, not for your own convenience.
 | `src/rules/*.ts`         | One file per rule. Export an ESLint rule object as default. |
 | `src/meta.ts`            | Package name / version pulled into the plugin meta.         |
 | `tests/*.test.ts`        | Vitest unit tests, one per rule plus an `index` smoke test. |
-| `tests/fixtures/<rule>/` | SQL fixtures + expected-output snapshots, snapshot-driven.  |
-| `tests/test-utils.ts`    | Shared test helpers (RuleTester wiring, fixture loader).    |
+| `tests/fixtures/<rule>/` | SQL fixtures + sibling `<basename>.yaml` snapshots.         |
+| `tests/test-utils.ts`    | Shared test helpers (linter wiring, YAML fixture loader).   |
 | `scripts/create-rule.js` | Scaffold a new rule + tests + fixture directory.            |
 | `dist/`                  | Build output (gitignored except for publish).               |
 | `.changeset/`            | Pending changesets — drive the release PR.                  |
@@ -197,10 +197,21 @@ that wires the fixture loader.
 1. **`tests/<rule>.test.ts`** — one-line file that calls
    `runRuleTest("<rule>", rule, "<description>")`; the helper auto-loads
    every `.sql` file under `tests/fixtures/<rule>/{valid,invalid}/`.
-2. **`tests/fixtures/<rule>/valid/*.sql`** — SQL the rule must accept.
+2. **`tests/fixtures/<rule>/valid/*.sql`** — SQL the rule must accept. An
+   optional sibling `<basename>.yaml` may declare `options:` when the rule
+   needs non-default options.
 3. **`tests/fixtures/<rule>/invalid/*.sql`** — SQL the rule must flag, paired
-   with `<basename>-errors.expected.json` listing the expected `messageId`s
-   (and optional positions).
+   with `<basename>.yaml` containing:
+   - `options:` — optional rule options array.
+   - `errors:` — list of expected reports. Each entry pins `messageId`,
+     `message`, `line`, `column`, and (when available) `endLine` / `endColumn`.
+   - `output:` — required. Either the autofixed SQL string, or `null` to
+     assert no fix is produced (also required for non-fixable rules).
+
+You don't write the `errors` / `output` payload by hand. Add the `.sql`
+fixture (and any `options`) and run `pnpm update-fixtures`; the test
+harness lints the fixture, materialises the YAML, and `pnpm format:fix`
+tidies it. Inspect the diff and commit it.
 
 A bug fix must include a new invalid fixture that fails on the parent commit.
 

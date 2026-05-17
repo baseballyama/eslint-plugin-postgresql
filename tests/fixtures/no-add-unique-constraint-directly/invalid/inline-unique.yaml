@@ -1,0 +1,8 @@
+errors:
+  - messageId: useIndexFirst
+    message: Build this UNIQUE constraint's index with `CREATE UNIQUE INDEX CONCURRENTLY` first, then promote it via `ALTER TABLE ... ADD CONSTRAINT ... UNIQUE USING INDEX <name>`. The inline form blocks writers under `ACCESS EXCLUSIVE` for the entire index build.
+    line: 1
+    column: 19
+    endLine: 1
+    endColumn: 29
+output: null

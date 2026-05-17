@@ -1,0 +1,4 @@
+options:
+  - allowed:
+      - RESTRICT
+      - NO ACTION

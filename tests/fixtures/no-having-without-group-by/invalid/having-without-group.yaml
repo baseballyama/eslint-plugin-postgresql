@@ -1,0 +1,8 @@
+errors:
+  - messageId: noHavingWithoutGroupBy
+    message: "`HAVING` without `GROUP BY` collapses the query to one aggregate row over the whole table. If that is intended, put the predicate in `WHERE`. Otherwise, add a `GROUP BY`."
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 47
+output: null

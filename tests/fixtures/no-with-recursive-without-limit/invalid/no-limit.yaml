@@ -1,0 +1,8 @@
+errors:
+  - messageId: noLimit
+    message: Add a `LIMIT` to a `WITH RECURSIVE` query so a buggy or accidentally-non-terminating recursion cannot run unboundedly.
+    line: 1
+    column: 16
+    endLine: 5
+    endColumn: 18
+output: null

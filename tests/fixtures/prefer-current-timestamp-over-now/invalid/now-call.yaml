@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferCurrentTimestamp
+    message: Use the SQL-standard `CURRENT_TIMESTAMP` instead of `now()`.
+    line: 1
+    column: 41
+    endLine: 1
+    endColumn: 46
+output: INSERT INTO events (created_at) VALUES (CURRENT_TIMESTAMP);

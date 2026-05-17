@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the table alias `u`.
+    line: 1
+    column: 24
+    endLine: 1
+    endColumn: 25
+output: SELECT u.id FROM users AS u WHERE u.active = TRUE;

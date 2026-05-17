@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedText
+    message: Use `varchar(n)` (or another bounded string type) instead of `text`. Useful for projects that intentionally cap every string column's length at the type level.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 21
+output: null

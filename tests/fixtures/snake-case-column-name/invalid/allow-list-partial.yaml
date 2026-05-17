@@ -1,0 +1,11 @@
+options:
+  - allow:
+      - userId
+errors:
+  - messageId: notSnakeCase
+    message: Column name `createdAt` is not snake_case. PostgreSQL preserves the case of quoted identifiers; using a mixed-case quoted name forces every consumer to quote-match it.
+    line: 3
+    column: 3
+    endLine: 3
+    endColumn: 14
+output: null

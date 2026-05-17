@@ -1,0 +1,8 @@
+errors:
+  - messageId: noRule
+    message: Avoid `CREATE RULE`. PostgreSQL's rule system has surprising semantics around row counts, RETURNING, and updatable views; use a trigger or an updatable view instead.
+    line: 1
+    column: 34
+    endLine: 1
+    endColumn: 35
+output: null

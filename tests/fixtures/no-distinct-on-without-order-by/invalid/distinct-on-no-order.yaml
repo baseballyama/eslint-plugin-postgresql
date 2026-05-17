@@ -1,0 +1,8 @@
+errors:
+  - messageId: noDistinctOnWithoutOrderBy
+    message: "`DISTINCT ON (...)` keeps an arbitrary row from each group unless `ORDER BY` is specified. Add an `ORDER BY` whose leading columns match the `DISTINCT ON` expressions."
+    line: 1
+    column: 21
+    endLine: 1
+    endColumn: 65
+output: null

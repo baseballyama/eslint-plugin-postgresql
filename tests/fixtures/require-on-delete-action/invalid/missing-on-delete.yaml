@@ -1,0 +1,14 @@
+errors:
+  - messageId: missingOnDelete
+    message: Foreign-key constraint is missing an explicit `ON DELETE` clause; the implicit default is `NO ACTION`. Make the choice explicit so reviewers can see what happens to dependent rows.
+    line: 2
+    column: 15
+    endLine: 2
+    endColumn: 35
+  - messageId: missingOnDelete
+    message: Foreign-key constraint is missing an explicit `ON DELETE` clause; the implicit default is `NO ACTION`. Make the choice explicit so reviewers can see what happens to dependent rows.
+    line: 4
+    column: 19
+    endLine: 4
+    endColumn: 71
+output: null

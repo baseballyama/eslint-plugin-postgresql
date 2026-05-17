@@ -1,0 +1,8 @@
+errors:
+  - messageId: noGroupByOrdinal
+    message: "`GROUP BY <position>` silently breaks when the SELECT list changes. Use the column name or the expression itself."
+    line: 1
+    column: 47
+    endLine: 1
+    endColumn: 48
+output: null

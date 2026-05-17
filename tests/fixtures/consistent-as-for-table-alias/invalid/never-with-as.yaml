@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedAs
+    message: Omit `AS` before the table alias `u`.
+    line: 1
+    column: 24
+    endLine: 1
+    endColumn: 26
+output: SELECT u.id FROM users u;

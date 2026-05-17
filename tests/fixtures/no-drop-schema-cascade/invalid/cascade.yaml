@@ -1,0 +1,8 @@
+errors:
+  - messageId: noDropSchemaCascade
+    message: "`DROP SCHEMA ... CASCADE` removes every table, view, function, and sequence in the schema with no preview. List the objects you actually want to drop instead, or drop the schema only when it's already empty."
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 1
+output: null

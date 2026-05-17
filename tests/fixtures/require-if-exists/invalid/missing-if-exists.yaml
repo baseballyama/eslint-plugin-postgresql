@@ -1,0 +1,30 @@
+errors:
+  - messageId: missingIfExists
+    message: Add `IF EXISTS` to this `DROP` so re-running the migration on a database that already lost the object does not abort.
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 11
+  - messageId: missingIfExists
+    message: Add `IF EXISTS` to this `DROP` so re-running the migration on a database that already lost the object does not abort.
+    line: 2
+    column: 1
+    endLine: 2
+    endColumn: 11
+  - messageId: missingIfExists
+    message: Add `IF EXISTS` to this `DROP` so re-running the migration on a database that already lost the object does not abort.
+    line: 3
+    column: 1
+    endLine: 3
+    endColumn: 14
+  - messageId: missingIfExists
+    message: Add `IF EXISTS` to this `DROP` so re-running the migration on a database that already lost the object does not abort.
+    line: 4
+    column: 1
+    endLine: 4
+    endColumn: 14
+output: |-
+  DROP TABLE IF EXISTS foo;
+  DROP INDEX IF EXISTS idx_foo;
+  DROP FUNCTION IF EXISTS fn();
+  DROP DATABASE IF EXISTS bar;

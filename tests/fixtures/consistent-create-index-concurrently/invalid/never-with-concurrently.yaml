@@ -1,0 +1,16 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedConcurrently
+    message: Avoid `CREATE INDEX CONCURRENTLY`. Concurrent index builds cannot run inside a transaction, so they conflict with migration tools that wrap each step in BEGIN/COMMIT; drop the keyword and use a plain `CREATE INDEX`.
+    line: 1
+    column: 46
+    endLine: 1
+    endColumn: 51
+  - messageId: unexpectedConcurrently
+    message: Avoid `CREATE INDEX CONCURRENTLY`. Concurrent index builds cannot run inside a transaction, so they conflict with migration tools that wrap each step in BEGIN/COMMIT; drop the keyword and use a plain `CREATE INDEX`.
+    line: 1
+    column: 60
+    endLine: 2
+    endColumn: 62
+output: null

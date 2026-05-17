@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferJsonb
+    message: Use `jsonb` instead of `json`. `jsonb` stores the parsed representation, supports indexing, and is what almost every application actually wants.
+    line: 1
+    column: 22
+    endLine: 1
+    endColumn: 29
+output: null

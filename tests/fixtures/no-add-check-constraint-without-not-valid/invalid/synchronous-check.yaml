@@ -1,0 +1,8 @@
+errors:
+  - messageId: checkNotValid
+    message: Add this CHECK constraint with `NOT VALID` and run `VALIDATE CONSTRAINT` separately, so the validating scan does not block writers under `ACCESS EXCLUSIVE`.
+    line: 1
+    column: 19
+    endLine: 1
+    endColumn: 44
+output: null

@@ -1,0 +1,23 @@
+errors:
+  - messageId: preferOuterJoin
+    message: Write `LEFT OUTER JOIN` explicitly instead of `LEFT JOIN`.
+    line: 1
+    column: 26
+    endLine: 1
+    endColumn: 35
+  - messageId: preferOuterJoin
+    message: Write `RIGHT OUTER JOIN` explicitly instead of `RIGHT JOIN`.
+    line: 2
+    column: 26
+    endLine: 2
+    endColumn: 36
+  - messageId: preferOuterJoin
+    message: Write `FULL OUTER JOIN` explicitly instead of `FULL JOIN`.
+    line: 3
+    column: 26
+    endLine: 3
+    endColumn: 35
+output: |-
+  SELECT u.id FROM users u LEFT OUTER JOIN orders o ON o.user_id = u.id;
+  SELECT u.id FROM users u RIGHT OUTER JOIN orders o ON o.user_id = u.id;
+  SELECT u.id FROM users u FULL OUTER JOIN orders o ON o.user_id = u.id;

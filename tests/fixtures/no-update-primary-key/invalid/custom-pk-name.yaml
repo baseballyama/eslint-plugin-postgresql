@@ -1,0 +1,11 @@
+options:
+  - pkColumnNames:
+      - uuid
+errors:
+  - messageId: noUpdatePk
+    message: Avoid `UPDATE` on the primary-key column `uuid`. Primary keys are intended to be immutable; FK references and external systems can hold the old value.
+    line: 1
+    column: 18
+    endLine: 1
+    endColumn: 22
+output: null

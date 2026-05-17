@@ -1,0 +1,8 @@
+errors:
+  - messageId: noChar
+    message: Avoid `char(n)`. PostgreSQL pads stored values to `n` with trailing spaces and trims on read, which surprises every comparison and round-trip. Use `text` instead.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 21
+output: null

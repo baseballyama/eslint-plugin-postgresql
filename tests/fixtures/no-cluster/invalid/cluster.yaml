@@ -1,0 +1,8 @@
+errors:
+  - messageId: noCluster
+    message: "`CLUSTER` takes `ACCESS EXCLUSIVE` and rewrites the entire table, just like `VACUUM FULL` — and PostgreSQL does not keep the rows clustered as you continue to write. Use `pg_repack --order-by` for online clustering, or build an index in the order you actually want to read."
+    line: 1
+    column: 9
+    endLine: 1
+    endColumn: 14
+output: null

@@ -1,0 +1,8 @@
+errors:
+  - messageId: missingSemicolon
+    message: Missing trailing `;` at the end of the file.
+    line: 1
+    column: 16
+    endLine: 1
+    endColumn: 21
+output: SELECT id FROM users;

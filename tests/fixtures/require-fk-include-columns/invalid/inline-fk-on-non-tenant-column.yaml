@@ -1,0 +1,11 @@
+options:
+  - columns:
+      - tenant_id
+errors:
+  - messageId: missingFkColumn
+    message: Foreign-key constraint on `orders` references `users` but does not include `tenant_id`. In a multi-tenant database every FK should carry the tenant key so a child row cannot point at a parent in a different tenant.
+    line: 6
+    column: 20
+    endLine: 6
+    endColumn: 30
+output: null

@@ -1,0 +1,8 @@
+errors:
+  - messageId: notSnakeCase
+    message: Column name `CamelCol` is not snake_case. PostgreSQL preserves the case of quoted identifiers; using a mixed-case quoted name forces every consumer to quote-match it.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 27
+output: null

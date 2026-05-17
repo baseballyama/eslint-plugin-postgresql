@@ -1,0 +1,14 @@
+errors:
+  - messageId: preferExists
+    message: Use `EXISTS (...)` instead of `IN (subquery)`. `IN` returns NULL when the subquery has any NULL row, which silently turns the row into a no-match; `EXISTS` is unambiguously boolean.
+    line: 1
+    column: 25
+    endLine: 1
+    endColumn: 27
+  - messageId: preferExists
+    message: Use `EXISTS (...)` instead of `IN (subquery)`. `IN` returns NULL when the subquery has any NULL row, which silently turns the row into a no-match; `EXISTS` is unambiguously boolean.
+    line: 2
+    column: 25
+    endLine: 2
+    endColumn: 26
+output: null

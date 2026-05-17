@@ -1,0 +1,14 @@
+errors:
+  - messageId: notValid
+    message: Add this constraint with `NOT VALID` and run `VALIDATE CONSTRAINT` separately, so the validating scan does not hold `ACCESS EXCLUSIVE` on the table.
+    line: 1
+    column: 19
+    endLine: 1
+    endColumn: 50
+  - messageId: notValid
+    message: Add this constraint with `NOT VALID` and run `VALIDATE CONSTRAINT` separately, so the validating scan does not hold `ACCESS EXCLUSIVE` on the table.
+    line: 2
+    column: 19
+    endLine: 2
+    endColumn: 74
+output: null

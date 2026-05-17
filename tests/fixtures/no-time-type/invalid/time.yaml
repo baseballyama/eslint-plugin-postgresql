@@ -1,0 +1,8 @@
+errors:
+  - messageId: noTimeType
+    message: "`TIME` and `TIME WITH TIME ZONE` rarely model anything correctly: `time` has no date so cannot disambiguate around DST, and `timetz` stores an offset that is meaningless without a date. Use `timestamptz` for points in time, `interval` for durations, or store an opaque `text` if all you need is a display value."
+    line: 1
+    column: 30
+    endLine: 1
+    endColumn: 38
+output: null

@@ -1,0 +1,23 @@
+errors:
+  - messageId: preferOrReplace
+    message: Use `CREATE OR REPLACE FUNCTION` so re-running this migration does not abort with `relation already exists`.
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 7
+  - messageId: preferOrReplace
+    message: Use `CREATE OR REPLACE PROCEDURE` so re-running this migration does not abort with `relation already exists`.
+    line: 2
+    column: 1
+    endLine: 2
+    endColumn: 7
+  - messageId: preferOrReplace
+    message: Use `CREATE OR REPLACE VIEW` so re-running this migration does not abort with `relation already exists`.
+    line: 3
+    column: 1
+    endLine: 3
+    endColumn: 7
+output: |-
+  CREATE OR REPLACE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';
+  CREATE OR REPLACE PROCEDURE p() LANGUAGE SQL AS '';
+  CREATE OR REPLACE VIEW v AS SELECT 1;

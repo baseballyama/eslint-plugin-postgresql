@@ -1,0 +1,8 @@
+errors:
+  - messageId: noNaturalJoin
+    message: Avoid `NATURAL JOIN`. The join columns are implicit — any future column with a matching name on both sides silently changes the result. Use `JOIN ... USING (...)` or `JOIN ... ON ...` and name the columns.
+    line: 1
+    column: 15
+    endLine: 1
+    endColumn: 31
+output: null

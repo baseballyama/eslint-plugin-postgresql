@@ -1,0 +1,4 @@
+options:
+  - columns:
+      - tenant_id
+    excludeReferencedTablePattern: ^tenants$

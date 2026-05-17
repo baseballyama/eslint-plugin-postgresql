@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedConcurrently
+    message: Avoid `DROP INDEX CONCURRENTLY`. Concurrent drops cannot run inside a transaction, so they conflict with migration tools that wrap each step in BEGIN/COMMIT.
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 1
+output: null

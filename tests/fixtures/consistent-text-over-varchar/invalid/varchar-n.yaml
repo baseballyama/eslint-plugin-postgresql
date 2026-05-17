@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferText
+    message: Use `text` instead of `varchar(n)`. PostgreSQL stores both the same way; the length cap is enforced by a constraint that you cannot relax without a full table rewrite. Move the limit into a CHECK constraint.
+    line: 1
+    column: 21
+    endLine: 1
+    endColumn: 25
+output: null

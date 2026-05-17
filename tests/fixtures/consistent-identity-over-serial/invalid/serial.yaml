@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferIdentity
+    message: Use `GENERATED ALWAYS AS IDENTITY` (SQL standard) instead of `serial`. The serial pseudo-types create a separately-owned sequence that breaks under pg_dump round-trips and does not honor column privileges.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 19
+output: null

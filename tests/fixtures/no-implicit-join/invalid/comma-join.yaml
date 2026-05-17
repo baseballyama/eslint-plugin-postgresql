@@ -1,0 +1,8 @@
+errors:
+  - messageId: noImplicitJoin
+    message: Comma-separated tables in `FROM` are an implicit cross join. Use explicit `JOIN ... ON ...` so the join condition lives next to the join.
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 37
+output: null

@@ -1,0 +1,12 @@
+errors:
+  - messageId: misaligned
+    message: "VALUES rows are not vertically aligned: column widths can shrink to fit the current rows."
+    line: 2
+    column: 4
+    endLine: 2
+    endColumn: 52
+output: |-
+  INSERT INTO t (a, b, c) VALUES
+    ('GPT-5',  1.25, CURRENT_TIMESTAMP),
+    ('Claude', 5,    CURRENT_TIMESTAMP),
+    ('Haiku',  1,    CURRENT_TIMESTAMP);

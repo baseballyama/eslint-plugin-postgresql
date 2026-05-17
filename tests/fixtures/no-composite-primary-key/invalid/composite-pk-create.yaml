@@ -1,0 +1,8 @@
+errors:
+  - messageId: noCompositePk
+    message: Composite PRIMARY KEY is not allowed. Use a single-column surrogate key (e.g. `id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY`) and enforce the natural key with a `UNIQUE` constraint. Composite primary keys complicate joins, ORM mapping, and foreign-key references.
+    line: 1
+    column: 42
+    endLine: 1
+    endColumn: 49
+output: null

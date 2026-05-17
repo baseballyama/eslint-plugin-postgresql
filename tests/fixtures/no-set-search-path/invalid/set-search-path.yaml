@@ -1,0 +1,8 @@
+errors:
+  - messageId: noSetSearchPath
+    message: "`SET search_path` makes name resolution depend on session state and is a known foot-gun for security-definer functions and CREATE statements. Qualify identifiers with their schema (`audit.events`, `public.users`) instead."
+    line: 1
+    column: 20
+    endLine: 1
+    endColumn: 33
+output: null

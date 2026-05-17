@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferBetween
+    message: Use `x BETWEEN 1 AND 10` instead of `>= ... AND <=`.
+    line: 1
+    column: 23
+    endLine: 1
+    endColumn: 41
+output: SELECT * FROM t WHERE x BETWEEN 1 AND 10;

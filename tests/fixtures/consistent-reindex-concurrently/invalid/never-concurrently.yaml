@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedReindexConcurrently
+    message: Avoid `REINDEX CONCURRENTLY`. Concurrent reindex cannot run inside a transaction; use plain `REINDEX` when the migration tool wraps each step in BEGIN/COMMIT.
+    line: 1
+    column: 15
+    endLine: 1
+    endColumn: 33
+output: null

@@ -1,0 +1,32 @@
+errors:
+  - messageId: expectedUpper
+    message: "SQL keyword 'select' should be uppercase: 'SELECT'."
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 7
+  - messageId: expectedUpper
+    message: "SQL keyword 'from' should be uppercase: 'FROM'."
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 21
+  - messageId: expectedUpper
+    message: "SQL keyword 'where' should be uppercase: 'WHERE'."
+    line: 1
+    column: 28
+    endLine: 1
+    endColumn: 33
+  - messageId: expectedUpper
+    message: "SQL keyword 'true' should be uppercase: 'TRUE'."
+    line: 1
+    column: 43
+    endLine: 1
+    endColumn: 47
+  - messageId: expectedUpper
+    message: "SQL keyword 'limit' should be uppercase: 'LIMIT'."
+    line: 1
+    column: 48
+    endLine: 1
+    endColumn: 53
+output: SELECT id, name FROM users WHERE active = TRUE LIMIT 10;

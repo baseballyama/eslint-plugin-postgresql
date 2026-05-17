@@ -120,10 +120,6 @@ console.log(`✅ Created fixture directories: ${fixturesDir}`);
 // 4. Create sample fixture files
 const validSamplePath = join(validDir, "example-valid.sql");
 const invalidSamplePath = join(invalidDir, "example-invalid.sql");
-const invalidErrorsPath = join(
-  invalidDir,
-  "example-invalid-errors.expected.json",
-);
 
 writeFileSync(
   validSamplePath,
@@ -141,17 +137,8 @@ SELECT * FROM users;
 `,
 );
 
-const errorExample = [
-  {
-    messageId: ruleName.replace(/-/g, "") + "Error",
-    line: 3,
-    column: 1,
-    endLine: 3,
-    endColumn: 20,
-  },
-];
-
-writeFileSync(invalidErrorsPath, JSON.stringify(errorExample, null, 2));
+// Sibling YAML metadata (errors / output / options) is generated on first run
+// via `pnpm update-fixtures` once the rule actually reports something.
 
 console.log(`✅ Created sample fixture files`);
 
@@ -163,12 +150,13 @@ console.log(`
   - ${testFilePath}
   - ${validSamplePath}
   - ${invalidSamplePath}
-  - ${invalidErrorsPath}
 
 📝 Next steps:
   1. Implement rule logic in ${ruleFilePath}
-  2. Add test cases to ${validDir}/ and ${invalidDir}/
-  3. Run \`npm test\` to execute tests
+  2. Add SQL fixtures under ${validDir}/ and ${invalidDir}/
+  3. Run \`pnpm update-fixtures\` to materialise the YAML metadata
+     (errors / output / options) for each invalid fixture, then
+     run \`pnpm test\` to verify.
 
 🚀 Happy coding!
 `);

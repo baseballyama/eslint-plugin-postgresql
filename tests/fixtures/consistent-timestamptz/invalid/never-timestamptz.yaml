@@ -1,0 +1,16 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedTimestamptz
+    message: Use `timestamp` instead of `timestamptz` (or `TIMESTAMP WITH TIME ZONE`). When the project treats every timestamp as UTC at the application layer, `timestamp` avoids the implicit conversions `timestamptz` performs against each session's `TimeZone` setting.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 27
+  - messageId: unexpectedTimestamptz
+    message: Use `timestamp` instead of `timestamptz` (or `TIMESTAMP WITH TIME ZONE`). When the project treats every timestamp as UTC at the application layer, `timestamp` avoids the implicit conversions `timestamptz` performs against each session's `TimeZone` setting.
+    line: 2
+    column: 17
+    endLine: 2
+    endColumn: 27
+output: null

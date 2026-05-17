@@ -1,0 +1,8 @@
+errors:
+  - messageId: noNumericWithoutPrecision
+    message: "`NUMERIC` / `DECIMAL` without precision accepts unbounded magnitude and rejects nothing — it's a missed opportunity to encode the column's domain. Declare `NUMERIC(precision, scale)`."
+    line: 1
+    column: 24
+    endLine: 1
+    endColumn: 29
+output: null

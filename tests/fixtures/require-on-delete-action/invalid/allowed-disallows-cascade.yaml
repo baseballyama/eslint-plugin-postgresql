@@ -1,0 +1,12 @@
+options:
+  - allowed:
+      - RESTRICT
+      - NO ACTION
+errors:
+  - messageId: disallowedAction
+    message: "`ON DELETE CASCADE` is not in the `allowed` list (RESTRICT, NO ACTION). Either change the action or extend the rule's `allowed` option."
+    line: 1
+    column: 80
+    endLine: 1
+    endColumn: 87
+output: null
