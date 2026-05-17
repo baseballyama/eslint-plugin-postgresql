@@ -23,7 +23,7 @@
     "@codemirror/commands": "^6.10.3",
     "@codemirror/lang-sql": "^6.10.0",
     "@codemirror/language": "^6.12.3",
-    "@codemirror/state": "^6.5.4",
+    "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.36.8",
     "@lezer/highlight": "^1.2.3",
     "libpg-query": "^17.1.1"
