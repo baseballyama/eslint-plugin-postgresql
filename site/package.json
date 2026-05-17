@@ -20,11 +20,11 @@
     "vite": "^5.4.11"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.7.1",
-    "@codemirror/lang-sql": "^6.8.0",
-    "@codemirror/language": "^6.10.8",
-    "@codemirror/state": "^6.5.1",
-    "@codemirror/view": "^6.36.2",
+    "@codemirror/commands": "^6.10.3",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/state": "^6.5.4",
+    "@codemirror/view": "^6.36.8",
     "@lezer/highlight": "^1.2.3",
     "libpg-query": "^17.1.1"
   }
