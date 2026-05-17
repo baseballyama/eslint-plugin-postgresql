@@ -1,0 +1,13 @@
+CREATE FUNCTION example() RETURNS void
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+  affected INTEGER;
+  state TEXT;
+BEGIN
+  UPDATE some_table SET x = 1;
+  GET DIAGNOSTICS affected = ROW_COUNT;
+  GET STACKED DIAGNOSTICS state = RETURNED_SQLSTATE;
+  RAISE NOTICE '%, %', affected, state;
+END;
+$$;
