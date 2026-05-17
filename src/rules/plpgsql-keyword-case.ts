@@ -15,6 +15,54 @@ const PLPGSQL = "plpgsql";
 // runs and reports those that match a known keyword.
 type SkipRange = readonly [number, number];
 
+// Identifiers that PostgreSQL only treats as keywords inside
+// `GET [STACKED] DIAGNOSTICS ... = <name>`. Everywhere else they are
+// ordinary identifiers (commonly used as variable names and as
+// `information_schema` column names), so we must not flag them.
+const DIAGNOSTIC_ITEM_NAMES: ReadonlySet<string> = new Set([
+  "row_count",
+  "pg_context",
+  "returned_sqlstate",
+  "column_name",
+  "constraint_name",
+  "pg_datatype_name",
+  "message_text",
+  "table_name",
+  "schema_name",
+  "pg_exception_detail",
+  "pg_exception_hint",
+  "pg_exception_context",
+]);
+
+// Find every `GET [STACKED] DIAGNOSTICS ... ;` span in the body so the
+// diagnostic item names inside are kept as keywords while the same
+// identifiers used elsewhere (variables, IS columns) are not.
+const findGetDiagnosticsRanges = (
+  source: string,
+  skip: SkipRange[],
+): SkipRange[] => {
+  const ranges: SkipRange[] = [];
+  const headRe = /\bget(\s+stacked)?\s+diagnostics\b/gi;
+  let m: RegExpExecArray | null;
+  while ((m = headRe.exec(source)) !== null) {
+    if (isInSkip(m.index, skip)) continue;
+    let end = m.index + m[0].length;
+    while (end < source.length) {
+      if (source[end] === ";" && !isInSkip(end, skip)) break;
+      end++;
+    }
+    ranges.push([m.index, end]);
+  }
+  return ranges;
+};
+
+const isInRange = (offset: number, ranges: SkipRange[]): boolean => {
+  for (const [s, e] of ranges) {
+    if (offset >= s && offset < e) return true;
+  }
+  return false;
+};
+
 const collectSkipRanges = (source: string): SkipRange[] => {
   const skip: SkipRange[] = [];
   for (let i = 0; i < source.length; i++) {
@@ -101,6 +149,7 @@ const rule: Rule.RuleModule = {
         if (!range) return;
         const source = node.source ?? "";
         const skip = collectSkipRanges(source);
+        const diagnosticsRanges = findGetDiagnosticsRanges(source, skip);
 
         const wordRe = /[a-zA-Z_][a-zA-Z0-9_]*/g;
         let match: RegExpExecArray | null;
@@ -110,6 +159,12 @@ const rule: Rule.RuleModule = {
           if (isInSkip(startInBody, skip)) continue;
           const lower = word.toLowerCase();
           if (!PLPGSQL_KEYWORDS.has(lower)) continue;
+          if (
+            DIAGNOSTIC_ITEM_NAMES.has(lower) &&
+            !isInRange(startInBody, diagnosticsRanges)
+          ) {
+            continue;
+          }
           const expected = transform(word);
           if (word === expected) continue;
           const absStart = range[0] + startInBody;
