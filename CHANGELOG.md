@@ -1,5 +1,11 @@
 # eslint-plugin-postgresql
 
+## 0.18.0
+
+### Minor Changes
+
+- [#182](https://github.com/baseballyama/eslint-plugin-postgresql/pull/182) [`a5860c2`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/a5860c228dcd036f5788115c354c6aa2cbd5c2de) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `no-composite-primary-key` rule that disallows composite (multi-column) PRIMARY KEY constraints, both as table-level constraints in `CREATE TABLE` and via `ALTER TABLE ... ADD CONSTRAINT ... PRIMARY KEY (...)`. Composite primary keys force every foreign-key reference to repeat the full column set, complicate ORM mapping, and make the natural key painful to change later. Use a single surrogate key (e.g. `id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY`) and enforce the natural uniqueness with a `UNIQUE` constraint instead. Off by default — composite keys are a valid design choice and the rule encodes a strong opinion projects must opt into.
+
 ## 0.17.0
 
 ### Minor Changes
