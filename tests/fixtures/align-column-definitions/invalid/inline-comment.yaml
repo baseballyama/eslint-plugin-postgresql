@@ -1,0 +1,12 @@
+errors:
+  - messageId: misaligned
+    message: Column definitions in this CREATE TABLE are not vertically aligned.
+    line: 2
+    column: 3
+    endLine: 2
+    endColumn: 18
+output: |-
+  CREATE TABLE foo (
+    id    ulid  PRIMARY KEY, -- the surrogate key
+    name  text  NOT NULL
+  );

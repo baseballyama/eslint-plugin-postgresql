@@ -1,0 +1,18 @@
+options:
+  - form: function
+errors:
+  - messageId: preferFunction
+    message: Use `CAST(<expr> AS type)` instead of the `::` operator.
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 18
+  - messageId: preferFunction
+    message: Use `CAST(<expr> AS type)` instead of the `::` operator.
+    line: 2
+    column: 8
+    endLine: 2
+    endColumn: 25
+output: |-
+  SELECT CAST(x AS integer) FROM t;
+  SELECT CAST(x AS numeric(10, 2)) FROM t;

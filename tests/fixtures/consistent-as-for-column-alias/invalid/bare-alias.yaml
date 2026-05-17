@@ -1,0 +1,14 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the column alias `user_id`.
+    line: 1
+    column: 11
+    endLine: 1
+    endColumn: 18
+  - messageId: preferAs
+    message: Use `AS` before the column alias `full_name`.
+    line: 1
+    column: 25
+    endLine: 1
+    endColumn: 34
+output: SELECT id AS user_id, name AS full_name FROM users;

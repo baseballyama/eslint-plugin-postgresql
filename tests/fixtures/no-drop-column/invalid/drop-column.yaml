@@ -1,0 +1,8 @@
+errors:
+  - messageId: noDropColumn
+    message: "`DROP COLUMN` breaks every running app that still references the column. Roll it out as a two-step migration: stop reading the column in the application, deploy, then drop it in a follow-up release."
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 1
+output: null

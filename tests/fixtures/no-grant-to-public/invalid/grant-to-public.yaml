@@ -1,0 +1,8 @@
+errors:
+  - messageId: noPublic
+    message: Avoid `GRANT ... TO PUBLIC`. The PUBLIC role covers every current and future role in the database, including ones added later for unrelated services. Name the role(s) you actually want to grant to.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 32
+output: null

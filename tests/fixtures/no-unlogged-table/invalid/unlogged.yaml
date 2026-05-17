@@ -1,0 +1,8 @@
+errors:
+  - messageId: noUnloggedTable
+    message: "`UNLOGGED` tables skip WAL: they are truncated on crash, not replicated to standbys, and not restored from base backups. If a cache table is what you want, document it explicitly and disable this rule for that file."
+    line: 1
+    column: 23
+    endLine: 1
+    endColumn: 53
+output: null

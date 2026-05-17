@@ -1,0 +1,26 @@
+errors:
+  - messageId: unnecessaryQuoting
+    message: The identifier `"id"` does not need quoting; `id` means the same thing.
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 12
+  - messageId: unnecessaryQuoting
+    message: The identifier `"name"` does not need quoting; `name` means the same thing.
+    line: 1
+    column: 14
+    endLine: 1
+    endColumn: 20
+  - messageId: unnecessaryQuoting
+    message: The identifier `"users"` does not need quoting; `users` means the same thing.
+    line: 1
+    column: 26
+    endLine: 1
+    endColumn: 33
+  - messageId: unnecessaryQuoting
+    message: The identifier `"active"` does not need quoting; `active` means the same thing.
+    line: 1
+    column: 40
+    endLine: 1
+    endColumn: 48
+output: SELECT id, name FROM users WHERE active = TRUE;

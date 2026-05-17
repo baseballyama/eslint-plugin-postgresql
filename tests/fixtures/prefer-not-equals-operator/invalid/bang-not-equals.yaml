@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferAngle
+    message: Use `<>` instead of `!=`.
+    line: 1
+    column: 35
+    endLine: 1
+    endColumn: 37
+output: SELECT id FROM users WHERE status <> 'inactive';

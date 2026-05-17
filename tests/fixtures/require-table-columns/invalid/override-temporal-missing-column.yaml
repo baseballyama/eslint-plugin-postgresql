@@ -1,0 +1,22 @@
+options:
+  - columns:
+      - tenant_id
+      - created_at
+      - created_by
+      - updated_at
+      - updated_by
+    overrides:
+      - pattern: ^.+_temporal$
+        columns:
+          - tenant_id
+          - created_at
+          - created_by
+          - updated_at
+errors:
+  - messageId: missingColumn
+    message: "`CREATE TABLE orders_temporal` is missing required column `updated_at`. Required by the override for pattern `^.+_temporal$`."
+    line: 3
+    column: 14
+    endLine: 7
+    endColumn: 24
+output: null

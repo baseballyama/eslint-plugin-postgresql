@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedOuterJoin
+    message: Omit the redundant `OUTER`; use `LEFT JOIN` instead of `LEFT OUTER JOIN`.
+    line: 1
+    column: 20
+    endLine: 1
+    endColumn: 35
+output: SELECT a.id FROM a LEFT JOIN b ON a.id = b.id;

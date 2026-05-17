@@ -1,0 +1,8 @@
+errors:
+  - messageId: noDropNotNull
+    message: "`DROP NOT NULL` lets the column store NULLs again — every consumer that already assumes the column is non-null (joins, COALESCE coverage, app-level types) silently breaks. If a row genuinely needs no value, model it with a sentinel or a separate optional table."
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 1
+output: null

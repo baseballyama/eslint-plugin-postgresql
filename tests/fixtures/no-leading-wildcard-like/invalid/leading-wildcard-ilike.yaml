@@ -1,0 +1,8 @@
+errors:
+  - messageId: noLeadingWildcardLike
+    message: "`LIKE`/`ILIKE` patterns that begin with `%` cannot use a B-tree index and force a sequential scan. If you need substring search, use a `pg_trgm` GIN index, full-text search, or rework the schema so the prefix is indexable."
+    line: 1
+    column: 33
+    endLine: 1
+    endColumn: 38
+output: null

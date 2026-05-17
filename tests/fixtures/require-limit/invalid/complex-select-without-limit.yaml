@@ -1,0 +1,8 @@
+errors:
+  - messageId: missingLimit
+    message: SELECT statement should include a LIMIT clause to prevent excessive data retrieval
+    line: 1
+    column: 0
+    endLine: 6
+    endColumn: 11
+output: null

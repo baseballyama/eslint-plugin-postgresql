@@ -1,0 +1,14 @@
+errors:
+  - messageId: misaligned
+    message: Column definitions in this CREATE TABLE are not vertically aligned.
+    line: 2
+    column: 3
+    endLine: 2
+    endColumn: 23
+output: |-
+  CREATE TABLE pgmigration_triggers (
+    id         BIGSERIAL     PRIMARY KEY,
+    name       TEXT          NOT NULL,
+    file_hash  TEXT          NOT NULL,
+    run_on     TIMESTAMP(3)  NOT NULL
+  );

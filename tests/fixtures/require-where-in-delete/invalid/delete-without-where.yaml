@@ -1,0 +1,8 @@
+errors:
+  - messageId: missingWhere
+    message: DELETE without WHERE removes every row in the table. Add a WHERE clause, or use TRUNCATE if you really mean to empty the table.
+    line: 1
+    column: 13
+    endLine: 1
+    endColumn: 18
+output: null

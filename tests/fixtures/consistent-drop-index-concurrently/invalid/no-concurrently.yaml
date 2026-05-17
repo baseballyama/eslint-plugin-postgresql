@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferConcurrently
+    message: Use `DROP INDEX CONCURRENTLY` to avoid an `ACCESS EXCLUSIVE` lock on the table for the entire drop.
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 1
+output: null

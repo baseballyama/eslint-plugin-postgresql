@@ -1,0 +1,8 @@
+errors:
+  - messageId: noSelectInto
+    message: "`SELECT ... INTO target FROM ...` creates a new table whose semantics differ from a regular `SELECT` and conflict with PL/pgSQL's `SELECT INTO variable`. Use `CREATE TABLE target AS SELECT ...` so the intent is explicit."
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 62
+output: null

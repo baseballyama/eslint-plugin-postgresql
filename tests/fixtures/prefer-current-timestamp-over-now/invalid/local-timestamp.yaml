@@ -1,0 +1,14 @@
+errors:
+  - messageId: preferCurrentTimestampOverLocal
+    message: Use `CURRENT_TIMESTAMP` instead of `LOCALTIMESTAMP`. `LOCALTIMESTAMP` returns a timezone-naive `timestamp`; `CURRENT_TIMESTAMP` returns `timestamptz`, which is what most apps actually want.
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 22
+  - messageId: preferCurrentTimeOverLocal
+    message: Use `CURRENT_TIME` instead of `LOCALTIME`. `LOCALTIME` returns a timezone-naive `time`; `CURRENT_TIME` returns `timetz`.
+    line: 1
+    column: 24
+    endLine: 1
+    endColumn: 33
+output: SELECT CURRENT_TIMESTAMP, CURRENT_TIME FROM t;

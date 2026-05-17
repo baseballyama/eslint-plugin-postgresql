@@ -1,0 +1,14 @@
+errors:
+  - messageId: noCascade
+    message: Avoid `ON DELETE CASCADE`. The deletion will silently propagate through every dependent row; prefer an explicit `RESTRICT` or `SET NULL` action and handle the cleanup in application code.
+    line: 3
+    column: 15
+    endLine: 3
+    endColumn: 25
+  - messageId: noCascade
+    message: Avoid `ON DELETE CASCADE`. The deletion will silently propagate through every dependent row; prefer an explicit `RESTRICT` or `SET NULL` action and handle the cleanup in application code.
+    line: 5
+    column: 19
+    endLine: 5
+    endColumn: 29
+output: null

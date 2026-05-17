@@ -1,0 +1,23 @@
+errors:
+  - messageId: preferOperator
+    message: Use `<expr>::type` operator form instead of `CAST(...)`.
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 26
+  - messageId: preferOperator
+    message: Use `<expr>::type` operator form instead of `CAST(...)`.
+    line: 2
+    column: 8
+    endLine: 2
+    endColumn: 33
+  - messageId: preferOperator
+    message: Use `<expr>::type` operator form instead of `CAST(...)`.
+    line: 3
+    column: 8
+    endLine: 3
+    endColumn: 31
+output: |-
+  SELECT x::integer FROM t;
+  SELECT x::public.my_type FROM t;
+  SELECT x::varchar(255) FROM t;

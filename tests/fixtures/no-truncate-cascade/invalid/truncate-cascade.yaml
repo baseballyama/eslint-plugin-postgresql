@@ -1,0 +1,8 @@
+errors:
+  - messageId: noCascade
+    message: "`TRUNCATE ... CASCADE` also truncates every table that has a foreign key referencing this one. List the dependent tables explicitly so reviewers can see what gets emptied."
+    line: 1
+    column: 10
+    endLine: 1
+    endColumn: 15
+output: null

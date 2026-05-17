@@ -1,0 +1,8 @@
+errors:
+  - messageId: noCascade
+    message: Avoid `DROP TABLE ... CASCADE`. CASCADE silently removes dependent objects (views, foreign keys, sequences); list them explicitly so reviewers can see the blast radius.
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 1
+output: null

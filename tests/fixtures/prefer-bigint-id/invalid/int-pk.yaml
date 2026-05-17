@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferBigintId
+    message: Primary-key `id` columns should be `bigint`. `int` overflows at 2.1 billion rows and the migration to widen it later requires a table rewrite under `ACCESS EXCLUSIVE`. Declare the column as `bigint GENERATED ALWAYS AS IDENTITY` from the start.
+    line: 1
+    column: 21
+    endLine: 1
+    endColumn: 23
+output: null

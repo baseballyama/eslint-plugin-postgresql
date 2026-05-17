@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferFkNotValid
+    message: Adding a foreign key without `NOT VALID` validates every existing row under an `ACCESS EXCLUSIVE` lock that blocks writers. Use `ADD CONSTRAINT ... FOREIGN KEY (...) REFERENCES ... NOT VALID`, then `ALTER TABLE ... VALIDATE CONSTRAINT` in a separate migration (`VALIDATE` only takes a `SHARE UPDATE EXCLUSIVE` lock).
+    line: 2
+    column: 7
+    endLine: 2
+    endColumn: 83
+output: null

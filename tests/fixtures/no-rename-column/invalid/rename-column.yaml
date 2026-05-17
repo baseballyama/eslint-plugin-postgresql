@@ -1,0 +1,8 @@
+errors:
+  - messageId: noRenameColumn
+    message: "`RENAME COLUMN` breaks every running app that still selects/inserts by the old name. The safer pattern is to add a new column, dual-write, backfill, and drop the old one across separate deploys."
+    line: 1
+    column: 13
+    endLine: 1
+    endColumn: 18
+output: null

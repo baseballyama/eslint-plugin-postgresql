@@ -1,0 +1,8 @@
+errors:
+  - messageId: syntaxError
+    message: 'PostgreSQL syntax error: syntax error at or near "WHERE"'
+    line: 1
+    column: 1
+    endLine: 1
+    endColumn: 19
+output: null

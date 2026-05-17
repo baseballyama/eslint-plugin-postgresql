@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferIn
+    message: Combine these `=` checks on `x` into a single `IN (...)` clause.
+    line: 1
+    column: 23
+    endLine: 1
+    endColumn: 46
+output: SELECT * FROM t WHERE x IN (1, 2, 3);

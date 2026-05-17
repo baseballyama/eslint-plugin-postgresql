@@ -46,7 +46,7 @@
     "prepublishOnly": "pnpm clean && pnpm build",
     "check:all": "pnpm format:check && pnpm type:check && pnpm lint:check && pnpm build && pnpm publint && pnpm knip",
     "test:all": "pnpm format:check && pnpm type:check && pnpm lint:check && pnpm test && pnpm build && pnpm publint && pnpm knip",
-    "update-fixtures": "UPDATE_FIXTURES=true vitest run tests/fixtures.test.ts && pnpm format:fix",
+    "update-fixtures": "UPDATE_FIXTURES=true vitest run && pnpm format:fix",
     "update:version": "changeset version",
     "release": "changeset publish"
   },
@@ -61,7 +61,8 @@
     "publint": "^0.3.21",
     "rolldown": "^1.0.1",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "yaml": "^2.9.0"
   },
   "peerDependencies": {
     "eslint": "^8.57.1 || ^9.0.0"

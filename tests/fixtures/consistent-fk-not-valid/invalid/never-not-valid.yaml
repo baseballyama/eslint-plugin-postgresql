@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedFkNotValid
+    message: Avoid `NOT VALID` on foreign keys. The constraint is added in a non-validated state and won't reject existing violations until you remember to run `VALIDATE CONSTRAINT`; some projects prefer to fail loudly at constraint-add time instead.
+    line: 1
+    column: 23
+    endLine: 1
+    endColumn: 78
+output: null

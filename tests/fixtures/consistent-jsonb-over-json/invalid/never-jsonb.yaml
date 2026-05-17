@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedJsonb
+    message: Use `json` instead of `jsonb`. Useful when the project intentionally relies on `json`'s preservation of key order, whitespace, and duplicate keys.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 24
+output: null

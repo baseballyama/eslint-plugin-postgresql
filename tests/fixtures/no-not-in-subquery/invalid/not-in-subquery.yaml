@@ -1,0 +1,8 @@
+errors:
+  - messageId: noNotInSubquery
+    message: "`NOT IN (subquery)` returns no rows if the subquery yields any NULL — almost certainly not what you want. Use `NOT EXISTS (SELECT 1 FROM ... WHERE ...)` instead; it handles NULL correctly."
+    line: 1
+    column: 31
+    endLine: 1
+    endColumn: 34
+output: null

@@ -1,0 +1,8 @@
+errors:
+  - messageId: identifierTooLong
+    message: Identifier `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` is 64 bytes, which exceeds the 63-byte limit. PostgreSQL silently truncates over-length identifiers at parse time, so the object will be created (or looked up) under a different name than written — every later `DROP` / `ALTER` / `\d` that uses the original name will then fail with `does not exist`.
+    line: 1
+    column: 14
+    endLine: 1
+    endColumn: 78
+output: null

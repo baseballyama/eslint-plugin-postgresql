@@ -1,0 +1,8 @@
+errors:
+  - messageId: noMoney
+    message: Avoid `money`. Its output format and precision depend on `lc_monetary`, so the same row looks different on different servers and round-trips badly. Store amounts as `numeric` and keep the currency in a separate column.
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 22
+output: null

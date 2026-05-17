@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferInnerJoin
+    message: Write `INNER JOIN` explicitly instead of bare `JOIN`.
+    line: 1
+    column: 26
+    endLine: 1
+    endColumn: 30
+output: SELECT u.id FROM users u INNER JOIN orders o ON o.user_id = u.id;

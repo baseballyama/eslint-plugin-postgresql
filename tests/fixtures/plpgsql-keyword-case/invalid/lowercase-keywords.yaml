@@ -1,0 +1,83 @@
+errors:
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'declare' should be uppercase: 'DECLARE'."
+    line: 2
+    column: 1
+    endLine: 2
+    endColumn: 8
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'integer' should be uppercase: 'INTEGER'."
+    line: 3
+    column: 14
+    endLine: 3
+    endColumn: 21
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'begin' should be uppercase: 'BEGIN'."
+    line: 4
+    column: 1
+    endLine: 4
+    endColumn: 6
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'if' should be uppercase: 'IF'."
+    line: 5
+    column: 3
+    endLine: 5
+    endColumn: 5
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'is' should be uppercase: 'IS'."
+    line: 5
+    column: 17
+    endLine: 5
+    endColumn: 19
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'null' should be uppercase: 'NULL'."
+    line: 5
+    column: 20
+    endLine: 5
+    endColumn: 24
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'then' should be uppercase: 'THEN'."
+    line: 5
+    column: 25
+    endLine: 5
+    endColumn: 29
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'raise' should be uppercase: 'RAISE'."
+    line: 6
+    column: 5
+    endLine: 6
+    endColumn: 10
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'notice' should be uppercase: 'NOTICE'."
+    line: 6
+    column: 11
+    endLine: 6
+    endColumn: 17
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'end' should be uppercase: 'END'."
+    line: 7
+    column: 3
+    endLine: 7
+    endColumn: 6
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'if' should be uppercase: 'IF'."
+    line: 7
+    column: 7
+    endLine: 7
+    endColumn: 9
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'end' should be uppercase: 'END'."
+    line: 8
+    column: 1
+    endLine: 8
+    endColumn: 4
+output: |-
+  CREATE FUNCTION foo() RETURNS void AS $$
+  DECLARE
+    user_count INTEGER;
+  BEGIN
+    IF user_count IS NULL THEN
+      RAISE NOTICE 'hello';
+    END IF;
+  END;
+  $$ LANGUAGE plpgsql;

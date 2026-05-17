@@ -1,0 +1,8 @@
+errors:
+  - messageId: requireSchemaQualifiedTable
+    message: "`CREATE TABLE` should specify a schema (e.g. `audit.events`). Without one, the target depends on `search_path` and may land in an unintended schema. The rule is off by default in `recommended` because many projects intentionally use the `public` schema."
+    line: 1
+    column: 14
+    endLine: 1
+    endColumn: 38
+output: null

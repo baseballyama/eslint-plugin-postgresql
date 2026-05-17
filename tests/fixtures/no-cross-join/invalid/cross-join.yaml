@@ -1,0 +1,8 @@
+errors:
+  - messageId: noCrossJoin
+    message: Avoid `CROSS JOIN`. Cartesian products are almost always a mistake; use an explicit `JOIN ... ON` with a join condition, or `JOIN ... ON true` if you really do want one.
+    line: 1
+    column: 15
+    endLine: 1
+    endColumn: 29
+output: null

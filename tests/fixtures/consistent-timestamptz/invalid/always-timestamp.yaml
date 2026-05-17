@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferTimestamptz
+    message: "Use `timestamptz` (or `TIMESTAMP WITH TIME ZONE`) instead of `timestamp`. `timestamp` is timezone-naive: it stores the wall-clock value you handed in and assumes every reader and writer share the same convention, so two clients on different `TimeZone` settings will disagree on which instant the row represents."
+    line: 1
+    column: 17
+    endLine: 1
+    endColumn: 27
+output: null

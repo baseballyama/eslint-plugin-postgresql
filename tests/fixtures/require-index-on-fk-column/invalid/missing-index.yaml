@@ -1,0 +1,8 @@
+errors:
+  - messageId: missingIndex
+    message: Foreign-key column `fid` has no covering index in this file. Without one, a DELETE / UPDATE of the parent row sequentially scans this table to enforce the FK.
+    line: 3
+    column: 15
+    endLine: 3
+    endColumn: 25
+output: null

@@ -1,0 +1,26 @@
+errors:
+  - messageId: useIsNull
+    message: "`= NULL` always evaluates to NULL (treated as false). Use `IS NULL` / `IS NOT NULL` instead."
+    line: 1
+    column: 25
+    endLine: 1
+    endColumn: 26
+  - messageId: useIsNull
+    message: "`<> NULL` always evaluates to NULL (treated as false). Use `IS NULL` / `IS NOT NULL` instead."
+    line: 2
+    column: 25
+    endLine: 2
+    endColumn: 27
+  - messageId: useIsNull
+    message: "`<> NULL` always evaluates to NULL (treated as false). Use `IS NULL` / `IS NOT NULL` instead."
+    line: 3
+    column: 25
+    endLine: 3
+    endColumn: 27
+  - messageId: useIsNull
+    message: "`= NULL` always evaluates to NULL (treated as false). Use `IS NULL` / `IS NOT NULL` instead."
+    line: 4
+    column: 28
+    endLine: 4
+    endColumn: 29
+output: null

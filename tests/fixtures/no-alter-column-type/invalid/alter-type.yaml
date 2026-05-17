@@ -1,0 +1,8 @@
+errors:
+  - messageId: noAlterColumnType
+    message: "`ALTER COLUMN ... TYPE` can rewrite the entire table under an ACCESS EXCLUSIVE lock. For non-trivial tables, add a new column, dual-write, backfill, and swap — or use `USING` only for known-safe conversions in a separate migration."
+    line: 1
+    column: 32
+    endLine: 1
+    endColumn: 46
+output: null
