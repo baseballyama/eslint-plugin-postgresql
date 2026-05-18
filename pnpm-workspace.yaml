@@ -1,7 +1,7 @@
-onlyBuiltDependencies:
-  - "@launchql/protobufjs"
-  - esbuild
-  - libpg-query
+allowBuilds:
+  "@launchql/protobufjs": true
+  esbuild: true
+  libpg-query: true
 # pnpm 11 makes strictDepBuilds true by default; we opt out so CI does not
 # fail when a transitive dependency adds a new build script. The packages we
 # actually need built are listed above; anything else is intentionally not
