@@ -54,14 +54,14 @@
     "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "^2.31.0",
     "@types/node": "^24.12.4",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.1.6",
     "knip": "^6.14.1",
     "oxlint": "^1.64.0",
     "prettier": "^3.8.3",
     "publint": "^0.3.21",
     "rolldown": "^1.0.1",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.6",
     "yaml": "^2.9.0"
   },
   "peerDependencies": {

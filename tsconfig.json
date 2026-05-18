@@ -14,7 +14,7 @@
     "noUnusedParameters": true,
 
     "allowImportingTsExtensions": true,
-    "types": ["vitest/importMeta"],
+    "types": ["vitest/importMeta", "node"],
 
     "declaration": true,
     "noEmit": true,
