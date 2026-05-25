@@ -1,5 +1,11 @@
 # eslint-plugin-postgresql
 
+## 0.19.0
+
+### Minor Changes
+
+- [#206](https://github.com/baseballyama/eslint-plugin-postgresql/pull/206) [`0efe3a5`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/0efe3a5f775ecec41b252d208f990977ea13b562) Thanks [@baseballyama](https://github.com/baseballyama)! - Add `eslint@^10.0.0` to the peer dependency range, so the plugin can be used with ESLint v10 in addition to v8 and v9.
+
 ## 0.18.1
 
 ### Patch Changes
