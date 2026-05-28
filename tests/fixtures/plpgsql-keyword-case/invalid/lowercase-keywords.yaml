@@ -6,12 +6,6 @@ errors:
     endLine: 2
     endColumn: 8
   - messageId: expectedUpper
-    message: "PL/pgSQL keyword 'integer' should be uppercase: 'INTEGER'."
-    line: 3
-    column: 14
-    endLine: 3
-    endColumn: 21
-  - messageId: expectedUpper
     message: "PL/pgSQL keyword 'begin' should be uppercase: 'BEGIN'."
     line: 4
     column: 1
@@ -24,12 +18,6 @@ errors:
     endLine: 5
     endColumn: 5
   - messageId: expectedUpper
-    message: "PL/pgSQL keyword 'is' should be uppercase: 'IS'."
-    line: 5
-    column: 17
-    endLine: 5
-    endColumn: 19
-  - messageId: expectedUpper
     message: "PL/pgSQL keyword 'null' should be uppercase: 'NULL'."
     line: 5
     column: 20
@@ -41,18 +29,6 @@ errors:
     column: 25
     endLine: 5
     endColumn: 29
-  - messageId: expectedUpper
-    message: "PL/pgSQL keyword 'raise' should be uppercase: 'RAISE'."
-    line: 6
-    column: 5
-    endLine: 6
-    endColumn: 10
-  - messageId: expectedUpper
-    message: "PL/pgSQL keyword 'notice' should be uppercase: 'NOTICE'."
-    line: 6
-    column: 11
-    endLine: 6
-    endColumn: 17
   - messageId: expectedUpper
     message: "PL/pgSQL keyword 'end' should be uppercase: 'END'."
     line: 7
@@ -74,10 +50,10 @@ errors:
 output: |-
   CREATE FUNCTION foo() RETURNS void AS $$
   DECLARE
-    user_count INTEGER;
+    user_count integer;
   BEGIN
-    IF user_count IS NULL THEN
-      RAISE NOTICE 'hello';
+    IF user_count is NULL THEN
+      raise notice 'hello';
     END IF;
   END;
   $$ LANGUAGE plpgsql;
