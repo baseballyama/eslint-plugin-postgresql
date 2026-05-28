@@ -271,6 +271,30 @@ const rule: Rule.RuleModule = {
           }
         }
 
+        // Field-access guard: when a Keyword token is the right-hand
+        // side of a dotted reference (`kv.key`, `NEW.role`, `t.date`),
+        // PostgreSQL parses the whole expression as a `ColumnRef` whose
+        // `range` only covers the first dotted segment — the trailing
+        // fields fall outside any AST-derived identifier range. Walk
+        // the tokens in order and flag any Keyword whose previous
+        // non-trivial token is `.` as an identifier.
+        const fieldAccessTokenStarts = new Set<number>();
+        for (let i = 1; i < tokens.length; i++) {
+          const token = tokens[i]!;
+          if (token.type !== "Keyword") continue;
+          const prev = tokens[i - 1]!;
+          if (
+            prev.type === "Punctuator" &&
+            prev.value === "." &&
+            // `..` is not a SQL operator — only single-dot counts.
+            (i < 2 ||
+              tokens[i - 2]!.type !== "Punctuator" ||
+              tokens[i - 2]!.value !== ".")
+          ) {
+            fieldAccessTokenStarts.add(token.range[0]);
+          }
+        }
+
         for (const token of tokens) {
           if (token.type !== "Keyword") continue;
           if (generalIdentifierStarts.has(token.range[0])) continue;
@@ -280,6 +304,7 @@ const rule: Rule.RuleModule = {
             continue;
           }
           if (scopedIdentifierTokenStarts.has(token.range[0])) continue;
+          if (fieldAccessTokenStarts.has(token.range[0])) continue;
 
           let desired: string;
           let messageId: "expectedUpper" | "expectedLower";

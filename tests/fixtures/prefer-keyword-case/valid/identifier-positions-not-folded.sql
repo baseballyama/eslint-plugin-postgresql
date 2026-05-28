@@ -22,3 +22,9 @@ ALTER TABLE bar ADD CONSTRAINT uq_bar_date UNIQUE (date);
 INSERT INTO bar (date, role, value) VALUES ('2025-01-01', 'admin', 'x');
 SELECT date, role, value FROM bar WHERE date > '2024-01-01';
 UPDATE bar SET role = 'y' WHERE date = '2024-01-01';
+
+-- Dotted field access: PostgreSQL's ColumnRef range only covers the
+-- first dotted segment, so the rule's range-contains check doesn't see
+-- the trailing field. The after-dot token guard catches it.
+SELECT kv.key, kv.value FROM jsonb_each('{}') AS kv;
+SELECT t.date, t.role, t.text FROM bar AS t WHERE t.date > '2024-01-01';
