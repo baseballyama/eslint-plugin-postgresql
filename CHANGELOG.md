@@ -1,5 +1,17 @@
 # eslint-plugin-postgresql
 
+## 0.19.1
+
+### Patch Changes
+
+- [#216](https://github.com/baseballyama/eslint-plugin-postgresql/pull/216) [`15bbe4f`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/15bbe4ff69f6cc8a9c16305025fe3cfd7fa4db0d) Thanks [@baseballyama](https://github.com/baseballyama)! - `postgresql/require-if-exists`: constrain the `DROP` keyword search to the visited node's own range.
+
+  The previous implementation scanned every token in the file with a module-scoped cursor, which let the visitor land on a `DROP` keyword that belonged to an unrelated `ALTER TABLE ... DROP CONSTRAINT` / `DROP COLUMN` and apply the `IF EXISTS` fix there. Worse, ESLint's `--fix` loop re-parsed the corrupted file and inserted a second `IF EXISTS`, producing `DROP CONSTRAINT IF EXISTS IF EXISTS ...` syntax errors that broke fresh-DB replays.
+
+  postgresql-eslint-parser >= 0.5.3 anchors top-level statement ranges via `stmt_location` / `stmt_len` (including the first statement, whose `stmt_location` libpg-query omits from the JSON output), so `node.range` is now reliable. The rule constrains its token search to that range, and the visitor only matches the `DROP` keyword that opens the visited statement.
+
+  Bumped the peer dependency on `postgresql-eslint-parser` to `^0.5.3`.
+
 ## 0.19.0
 
 ### Minor Changes
