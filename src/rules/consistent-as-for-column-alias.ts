@@ -33,6 +33,18 @@ const rule: Rule.RuleModule = {
   create(context) {
     const option = (context.options[0] ?? {}) as { style?: Style };
     const style: Style = option.style ?? DEFAULT_STYLE;
+
+    // Strip surrounding double quotes from an identifier token's literal
+    // text so we can compare it against `target.name` (which holds the
+    // unquoted identifier).
+    const tokenIdentifierText = (token: AST.Token): string => {
+      const value = token.value;
+      if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+        return value.slice(1, -1);
+      }
+      return value;
+    };
+
     return {
       // Only flag aliases that appear in SELECT's targetList. The same
       // ResTarget node type is used for INSERT column lists and UPDATE
@@ -59,11 +71,22 @@ const rule: Rule.RuleModule = {
           if (!next || nextIndex < 0) continue;
           const hasAs =
             next.type === "Keyword" && next.value.toUpperCase() === "AS";
+
           if (style === "always" && !hasAs) {
+            // Defense against parser ranges that stop in the middle of a
+            // compound expression (TypeCast `expr::type`, dotted ColumnRef
+            // `t.col`, CASE expressions, etc.). If `valEnd` lands inside
+            // the value, the next token is part of the expression — not
+            // the alias — so we must not insert `AS` there. Confirm the
+            // next token is the alias identifier before reporting.
+            const aliasName = target.name;
+            const looksLikeAliasIdentifier =
+              tokenIdentifierText(next) === aliasName;
+            if (!looksLikeAliasIdentifier) continue;
             context.report({
               loc: next.loc,
               messageId: "preferAs",
-              data: { alias: target.name },
+              data: { alias: aliasName },
               fix: (fixer) => fixer.insertTextBeforeRange(next!.range, "AS "),
             });
             continue;
