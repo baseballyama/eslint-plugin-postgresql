@@ -7,3 +7,9 @@ allowBuilds:
 # actually need built are listed above; anything else is intentionally not
 # run.
 strictDepBuilds: false
+# pnpm 11 enforces a 24h `minimumReleaseAge` by default via the
+# supply-chain policy. The maintainer is also the maintainer of
+# `postgresql-eslint-parser`, so a fresh parser release that this
+# repo depends on is intentional and not "ecosystem rot". Set to 0
+# so CI does not block on a same-day parser bump.
+minimumReleaseAge: 0

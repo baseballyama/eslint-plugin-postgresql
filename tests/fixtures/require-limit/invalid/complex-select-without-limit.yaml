@@ -2,7 +2,7 @@ errors:
   - messageId: missingLimit
     message: SELECT statement should include a LIMIT clause to prevent excessive data retrieval
     line: 1
-    column: 0
+    column: 1
     endLine: 6
-    endColumn: 11
+    endColumn: 27
 output: null

@@ -2,7 +2,7 @@ errors:
   - messageId: noVacuumFull
     message: "`VACUUM FULL` takes `ACCESS EXCLUSIVE` and rewrites the whole table; the table is unavailable for the duration. For shrinking a bloated table on a live database, use `pg_repack` or `pg_squeeze`. A plain `VACUUM` (no `FULL`) is fine."
     line: 1
-    column: 8
+    column: 1
     endLine: 1
     endColumn: 18
 output: null

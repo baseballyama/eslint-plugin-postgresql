@@ -2,7 +2,7 @@ errors:
   - messageId: preferReindexConcurrently
     message: "`REINDEX` without `CONCURRENTLY` takes a `SHARE` lock (table) or `ACCESS EXCLUSIVE` (index), blocking writers for the rebuild. Use `REINDEX (TABLE|INDEX) CONCURRENTLY ...` (PG ≥ 12) so writers keep working."
     line: 1
-    column: 15
+    column: 1
     endLine: 1
     endColumn: 20
 output: null

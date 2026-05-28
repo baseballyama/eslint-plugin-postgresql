@@ -2,7 +2,7 @@ errors:
   - messageId: noTemporaryTable
     message: "`TEMPORARY` tables exist only for the current session, so they almost never belong in versioned SQL. If you need session-scoped scratch storage, build it from application code; if you mean a persistent table, drop the `TEMP/TEMPORARY` qualifier."
     line: 1
-    column: 19
+    column: 1
     endLine: 1
-    endColumn: 34
+    endColumn: 35
 output: null

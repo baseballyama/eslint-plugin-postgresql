@@ -2,7 +2,7 @@ errors:
   - messageId: noOrderByOrdinal
     message: "`ORDER BY <position>` silently breaks when the SELECT list changes. Use the column name or alias instead."
     line: 1
-    column: 0
+    column: 37
     endLine: 1
-    endColumn: 0
+    endColumn: 38
 output: null

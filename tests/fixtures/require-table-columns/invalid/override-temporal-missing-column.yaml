@@ -15,8 +15,8 @@ options:
 errors:
   - messageId: missingColumn
     message: "`CREATE TABLE orders_temporal` is missing required column `updated_at`. Required by the override for pattern `^.+_temporal$`."
-    line: 3
-    column: 14
-    endLine: 7
-    endColumn: 24
+    line: 1
+    column: 1
+    endLine: 8
+    endColumn: 2
 output: null

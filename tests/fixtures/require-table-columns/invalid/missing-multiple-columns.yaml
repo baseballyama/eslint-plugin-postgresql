@@ -8,20 +8,20 @@ options:
 errors:
   - messageId: missingColumn
     message: "`CREATE TABLE orders` is missing required column `tenant_id`. Required by the default column list."
-    line: 2
-    column: 14
-    endLine: 5
-    endColumn: 60
+    line: 1
+    column: 1
+    endLine: 6
+    endColumn: 2
   - messageId: missingColumn
     message: "`CREATE TABLE orders` is missing required column `created_by`. Required by the default column list."
-    line: 2
-    column: 14
-    endLine: 5
-    endColumn: 60
+    line: 1
+    column: 1
+    endLine: 6
+    endColumn: 2
   - messageId: missingColumn
     message: "`CREATE TABLE orders` is missing required column `updated_by`. Required by the default column list."
-    line: 2
-    column: 14
-    endLine: 5
-    endColumn: 60
+    line: 1
+    column: 1
+    endLine: 6
+    endColumn: 2
 output: null

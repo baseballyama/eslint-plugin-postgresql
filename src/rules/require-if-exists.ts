@@ -27,40 +27,44 @@ const rule: Rule.RuleModule = {
     },
   },
   create(context) {
-    // The parser sometimes emits `[0, 0]` for the first top-level
-    // statement's `range`, which makes node.range-based DROP token
-    // lookup unreliable. Track a per-file cursor that advances past
-    // the most recently consumed `DROP`, so DropStmt / DropdbStmt
-    // visits in body order each find the next un-consumed one.
-    let cursor = 0;
-    const findNextDrop = (
-      tokens: readonly Tokenish[],
-    ): { dropIdx: number; kindIdx: number } | null => {
+    const visit = (node: {
+      missing_ok?: unknown;
+      range?: readonly [number, number];
+    }): void => {
+      if (node.missing_ok === true) return;
+
+      // Constrain the token search to the visited node's own range.
+      // The previous implementation scanned all file tokens with a
+      // module-scoped cursor, which let the visitor land on a `DROP`
+      // keyword that belonged to an unrelated `ALTER TABLE ... DROP
+      // CONSTRAINT` / `DROP COLUMN` and apply the `IF EXISTS` fix
+      // there. Worse, ESLint's `--fix` loop re-parsed the corrupted
+      // file and inserted a second `IF EXISTS`, producing
+      // `DROP CONSTRAINT IF EXISTS IF EXISTS ...` syntax errors.
+      // postgresql-eslint-parser >= 0.5.2 anchors top-level statement
+      // ranges via `stmt_location` / `stmt_len`, so `node.range` is
+      // now reliable.
+      const range = node.range;
+      if (!Array.isArray(range) || range[1] - range[0] <= 0) return;
+      const [nodeStart, nodeEnd] = range;
+
+      const tokens = (context.sourceCode.ast.tokens ?? []) as Tokenish[];
+      let dropIdx = -1;
       for (let i = 0; i < tokens.length; i++) {
-        if (tokens[i]!.range[0] < cursor) continue;
-        if (
-          tokens[i]!.type === "Keyword" &&
-          tokens[i]!.value.toUpperCase() === "DROP" &&
-          i + 1 < tokens.length
-        ) {
-          return { dropIdx: i, kindIdx: i + 1 };
+        const tok = tokens[i]!;
+        if (tok.range[0] < nodeStart) continue;
+        if (tok.range[0] >= nodeEnd) break;
+        if (tok.type === "Keyword" && tok.value.toUpperCase() === "DROP") {
+          dropIdx = i;
+          break;
         }
       }
-      return null;
-    };
+      if (dropIdx === -1 || dropIdx + 1 >= tokens.length) return;
 
-    const visit = (node: { missing_ok?: unknown }): void => {
-      const tokens = (context.sourceCode.ast.tokens ?? []) as Tokenish[];
-      const found = findNextDrop(tokens);
-      if (!found) return;
-      const { dropIdx, kindIdx } = found;
       const drop = tokens[dropIdx]!;
-      const kind = tokens[kindIdx]!;
-      // Advance past this DROP so the next visitor invocation skips
-      // over it. Done before the missing_ok check so a compliant
-      // DROP also moves the cursor forward.
-      cursor = kind.range[1];
-      if (node.missing_ok === true) return;
+      const kind = tokens[dropIdx + 1]!;
+      if (kind.range[1] > nodeEnd) return;
+
       context.report({
         loc: { start: drop.loc.start, end: kind.loc.end },
         messageId: "missingIfExists",

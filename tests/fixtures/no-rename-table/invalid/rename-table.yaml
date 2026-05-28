@@ -2,7 +2,7 @@ errors:
   - messageId: noRenameTable
     message: "`RENAME TO` breaks every running app that still queries the old name. The safer pattern is `CREATE VIEW old AS SELECT * FROM new` so old callers keep working until they're migrated, then drop the view in a separate deploy."
     line: 1
-    column: 13
+    column: 1
     endLine: 1
-    endColumn: 25
+    endColumn: 41
 output: null
