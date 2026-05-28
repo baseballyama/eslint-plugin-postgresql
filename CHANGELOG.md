@@ -1,5 +1,15 @@
 # eslint-plugin-postgresql
 
+## 0.20.0
+
+### Minor Changes
+
+- [#220](https://github.com/baseballyama/eslint-plugin-postgresql/pull/220) [`6655efa`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/6655efab4bb2d1d7b9a09cf01433288291a82122) Thanks [@baseballyama](https://github.com/baseballyama)! - `postgresql/consistent-create-or-replace`: remove the autofix.
+
+  Adding `OR REPLACE` turns a CREATE statement from "abort if the object already exists" into "silently overwrite the existing object"; removing it does the reverse. Both are runtime-semantics changes that depend on author intent — the maintenance migration that re-defines a function intentionally needs `OR REPLACE`, while the initial-creation migration intentionally does not. An ESLint autofixer must not make that choice on the author's behalf.
+
+  The rule still reports the violation so authors can pick the right form by hand. The `fixable` metadata is removed, and the messages are unchanged.
+
 ## 0.19.2
 
 ### Patch Changes
