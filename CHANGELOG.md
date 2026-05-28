@@ -1,5 +1,15 @@
 # eslint-plugin-postgresql
 
+## 0.21.0
+
+### Minor Changes
+
+- [#222](https://github.com/baseballyama/eslint-plugin-postgresql/pull/222) [`a76292c`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/a76292cc47bbcc4466361f15a523c4b9214c612f) Thanks [@baseballyama](https://github.com/baseballyama)! - `postgresql/require-if-exists`: remove the autofix.
+
+  Adding `IF EXISTS` to a `DROP` statement is a runtime-semantics change: without it, dropping a missing object raises `does not exist` and aborts the migration; with it, the same statement silently no-ops. The choice between "idempotent re-run" and "fail fast on schema drift" belongs to the author, not the linter.
+
+  The rule still reports the violation so authors can pick the right form by hand. The `fixable` metadata is removed, the message is unchanged.
+
 ## 0.20.0
 
 ### Minor Changes
