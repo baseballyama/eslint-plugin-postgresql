@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 import type { Ast } from "postgresql-eslint-parser";
-import { PLPGSQL_KEYWORDS } from "../utils/pg-keywords.js";
+import { PLPGSQL_RESERVED_KEYWORDS } from "../utils/pg-keywords.js";
 
 type CaseStyle = "upper" | "lower";
 
@@ -109,6 +109,19 @@ const isInSkip = (offset: number, skip: SkipRange[]): boolean => {
   return false;
 };
 
+// True when the word at `start` is the right-hand side of a dotted access
+// (e.g. `NEW.role`, `t.column`). We walk backward over any inline whitespace
+// — `NEW . role` is also valid Postgres — and check for a single `.`. Two
+// dots (`..`) are not a SQL operator so are not treated as field access.
+const isFieldAccessTarget = (source: string, start: number): boolean => {
+  let i = start - 1;
+  while (i >= 0 && (source[i] === " " || source[i] === "\t")) i--;
+  if (i < 0 || source[i] !== ".") return false;
+  // `..` (range) is not a field access — only single-dot counts.
+  if (i > 0 && source[i - 1] === ".") return false;
+  return true;
+};
+
 const rule: Rule.RuleModule = {
   meta: {
     type: "layout",
@@ -157,8 +170,15 @@ const rule: Rule.RuleModule = {
           const word = match[0];
           const startInBody = match.index;
           if (isInSkip(startInBody, skip)) continue;
+          // Field-access identifier: a word that follows `.` is the right-hand
+          // side of a dotted reference (e.g. `NEW.role`, `OLD.value`,
+          // `tbl.column`). Even if the word lower-cases to a PL/pgSQL
+          // keyword, it can only be an identifier here, so we must not
+          // case-fold it. (Regression: `prefer-keyword-case`'s previous
+          // behavior corrupted `NEW.role` into `NEW.ROLE` etc.)
+          if (isFieldAccessTarget(source, startInBody)) continue;
           const lower = word.toLowerCase();
-          if (!PLPGSQL_KEYWORDS.has(lower)) continue;
+          if (!PLPGSQL_RESERVED_KEYWORDS.has(lower)) continue;
           if (
             DIAGNOSTIC_ITEM_NAMES.has(lower) &&
             !isInRange(startInBody, diagnosticsRanges)

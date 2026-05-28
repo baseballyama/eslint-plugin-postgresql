@@ -61,18 +61,35 @@ if (plKeywords.size === 0) {
   );
 }
 
+// Record which PL/pgSQL keywords are reserved (cannot be identifier in
+// PL/pgSQL) vs unreserved (can be identifier).
+const plReservedSet = new Set();
+for (const line of plReservedSource.split("\n")) {
+  const m = line.match(/^PG_KEYWORD\("([^"]+)"/);
+  if (m) plReservedSet.add(m[1]);
+}
+
 const sorted = [...keywords.entries()].sort(([a], [b]) => a.localeCompare(b));
-const plSorted = [...plKeywords].sort();
 
 const requiresQuotes = sorted
   .filter(([, c]) => c !== "UNRESERVED_KEYWORD")
   .map(([k]) => k);
-// A PL/pgSQL function body is itself SQL with PL/pgSQL extensions: it can
-// contain SELECT/INSERT/UPDATE/etc. as well as PL-specific keywords like
-// BEGIN/EXCEPTION/RAISE. Merge both sets so a single keyword check
-// covers everything that might appear in a body.
-const plpgsqlAll = [
-  ...new Set([...sorted.map(([k]) => k), ...plSorted]),
+
+// Keywords PostgreSQL refuses as identifiers in any position —
+// `RESERVED_KEYWORD` in kwlist.h plus the PL/pgSQL reserved kwlist.
+// Case-folding rules that walk source text without full positional
+// context must only touch this set, because UNRESERVED / COL_NAME /
+// TYPE_FUNC_NAME keywords (`role`, `date`, `value`, `name`, …) can
+// legitimately be column / function names and case-folding them would
+// corrupt the SQL. We intentionally omit the larger union of kwlist
+// and PL/pgSQL kwlists — it has no current consumer and exporting it
+// would invite future identifier-corruption regressions of the same
+// shape.
+const plpgsqlReserved = [
+  ...new Set([
+    ...sorted.filter(([, c]) => c === "RESERVED_KEYWORD").map(([k]) => k),
+    ...plReservedSet,
+  ]),
 ].sort();
 
 const out =
@@ -94,11 +111,18 @@ const out =
   `// of the SQL kwlist and the PL/pgSQL reserved + unreserved kwlists. Used\n` +
   `// by case-folding rules that walk plpgsql bodies; lower-cased here so\n` +
   `// callers can compare with .toLowerCase() lookup.\n` +
-  `export const PLPGSQL_KEYWORDS: ReadonlySet<string> = new Set([\n` +
-  plpgsqlAll.map((k) => `  ${JSON.stringify(k)},`).join("\n") +
+  `// Keywords PostgreSQL refuses as identifiers in any position —\n` +
+  `// \`RESERVED_KEYWORD\` from kwlist.h plus the PL/pgSQL reserved kwlist.\n` +
+  `// Case-folding rules that walk source text without full positional\n` +
+  `// context must only touch this set, because UNRESERVED / COL_NAME /\n` +
+  `// TYPE_FUNC_NAME keywords (\`role\`, \`date\`, \`value\`, \`name\`, …) can\n` +
+  `// legitimately be column / function names and case-folding them would\n` +
+  `// corrupt the SQL.\n` +
+  `export const PLPGSQL_RESERVED_KEYWORDS: ReadonlySet<string> = new Set([\n` +
+  plpgsqlReserved.map((k) => `  ${JSON.stringify(k)},`).join("\n") +
   `\n]);\n`;
 
 writeFileSync(outFile, out);
 console.log(
-  `Wrote ${keywords.size} kwlist keywords (${requiresQuotes.length} require quoting) and ${plpgsqlAll.length} combined plpgsql keywords to ${outFile}`,
+  `Wrote ${keywords.size} kwlist keywords (${requiresQuotes.length} require quoting) and ${plpgsqlReserved.length} reserved plpgsql keywords to ${outFile}`,
 );

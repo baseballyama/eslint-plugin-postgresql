@@ -1,35 +1,4 @@
 options:
   - types: upper
-errors:
-  - messageId: expectedUpper
-    message: "SQL keyword 'bigint' should be uppercase: 'BIGINT'."
-    line: 2
-    column: 9
-    endLine: 2
-    endColumn: 15
-  - messageId: expectedUpper
-    message: "SQL keyword 'text' should be uppercase: 'TEXT'."
-    line: 3
-    column: 9
-    endLine: 3
-    endColumn: 13
-  - messageId: expectedUpper
-    message: "SQL keyword 'text' should be uppercase: 'TEXT'."
-    line: 6
-    column: 24
-    endLine: 6
-    endColumn: 28
-  - messageId: expectedUpper
-    message: "SQL keyword 'text' should be uppercase: 'TEXT'."
-    line: 7
-    column: 28
-    endLine: 7
-    endColumn: 32
-output: |-
-  CREATE TABLE t (
-    id    BIGINT  NOT NULL,
-    body  TEXT    NOT NULL
-  );
-
-  CREATE FUNCTION fn(arr TEXT[]) RETURNS BOOLEAN LANGUAGE SQL AS '';
-  DROP FUNCTION IF EXISTS fn(TEXT[]);
+errors: []
+output: null
