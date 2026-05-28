@@ -23,7 +23,10 @@ const rule: Rule.RuleModule = {
       category: "Best Practices",
       recommended: false,
     },
-    fixable: "code",
+    // No autofix on purpose. Adding `OR REPLACE` turns a guard
+    // ("error if object already exists") into an in-place overwrite;
+    // removing it does the reverse. Both are runtime-semantics
+    // changes that the linter must not make on the author's behalf.
     schema: [
       {
         type: "object",
@@ -85,39 +88,15 @@ const rule: Rule.RuleModule = {
           loc: create.loc,
           messageId: "preferOrReplace",
           data: { kind },
-          fix: (fixer) =>
-            fixer.insertTextAfterRange(create.range, " OR REPLACE"),
         });
         return;
       }
 
       if (style === "never" && hasOrReplace) {
-        // Locate the `OR` and `REPLACE` keywords that follow CREATE.
-        // We stay strict: the two keywords must be the immediate next
-        // two non-trivial tokens after CREATE. Otherwise we skip the
-        // fix (still report) to avoid mangling unexpected syntax.
-        const orIdx = found.createIdx + 1;
-        const replaceIdx = found.createIdx + 2;
-        const orTok = tokens[orIdx];
-        const replaceTok = tokens[replaceIdx];
-        // `OR` is a Keyword, but `REPLACE` is emitted as an Identifier
-        // by the upstream parser — match value, not just type.
-        const canFix =
-          orTok != null &&
-          orTok.value.toUpperCase() === "OR" &&
-          replaceTok != null &&
-          replaceTok.value.toUpperCase() === "REPLACE";
-        // Advance cursor past `OR REPLACE` so a later CREATE in the
-        // same file isn't tripped up by these tokens.
-        if (canFix) cursor = replaceTok!.range[1];
         context.report({
           loc: create.loc,
           messageId: "unexpectedOrReplace",
           data: { kind },
-          fix: canFix
-            ? (fixer) =>
-                fixer.removeRange([create.range[1], replaceTok!.range[1]])
-            : null,
         });
       }
     };
