@@ -19,7 +19,12 @@ const rule: Rule.RuleModule = {
       category: "Best Practices",
       recommended: false,
     },
-    fixable: "code",
+    // No autofix on purpose. Adding `IF EXISTS` to a `DROP` is a
+    // runtime-semantics change: without it, dropping a missing object
+    // raises an error; with it, the same statement silently no-ops.
+    // The author is the one who decides which behavior is correct for
+    // a given migration (idempotent re-run vs. a guard that fails fast
+    // on schema drift), so the linter only reports — it does not edit.
     schema: [],
     messages: {
       missingIfExists:
@@ -33,17 +38,15 @@ const rule: Rule.RuleModule = {
     }): void => {
       if (node.missing_ok === true) return;
 
-      // Constrain the token search to the visited node's own range.
-      // The previous implementation scanned all file tokens with a
-      // module-scoped cursor, which let the visitor land on a `DROP`
-      // keyword that belonged to an unrelated `ALTER TABLE ... DROP
-      // CONSTRAINT` / `DROP COLUMN` and apply the `IF EXISTS` fix
-      // there. Worse, ESLint's `--fix` loop re-parsed the corrupted
-      // file and inserted a second `IF EXISTS`, producing
-      // `DROP CONSTRAINT IF EXISTS IF EXISTS ...` syntax errors.
-      // postgresql-eslint-parser >= 0.5.2 anchors top-level statement
+      // Constrain the token search to the visited node's own range so
+      // we only report on the `DROP` keyword that opens this statement.
+      // (Earlier `--fix` builds of this rule scanned the whole file and
+      // mis-attributed reports to `ALTER TABLE ... DROP CONSTRAINT` /
+      // `DROP COLUMN`. We keep the bounded scan here for accurate
+      // report locations, even though we no longer autofix.)
+      // postgresql-eslint-parser >= 0.5.3 anchors top-level statement
       // ranges via `stmt_location` / `stmt_len`, so `node.range` is
-      // now reliable.
+      // reliable.
       const range = node.range;
       if (!Array.isArray(range) || range[1] - range[0] <= 0) return;
       const [nodeStart, nodeEnd] = range;
@@ -68,7 +71,6 @@ const rule: Rule.RuleModule = {
       context.report({
         loc: { start: drop.loc.start, end: kind.loc.end },
         messageId: "missingIfExists",
-        fix: (fixer) => fixer.insertTextAfterRange(kind.range, " IF EXISTS"),
       });
     };
     return {
