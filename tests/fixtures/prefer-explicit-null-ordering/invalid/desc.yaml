@@ -2,7 +2,7 @@ errors:
   - messageId: preferExplicitNullOrdering
     message: "`ORDER BY ... ASC|DESC` without `NULLS FIRST` / `NULLS LAST` relies on PostgreSQL's implicit ordering (NULLS LAST for ASC, NULLS FIRST for DESC), which trips up cross-database readers. Add an explicit `NULLS FIRST` / `NULLS LAST`."
     line: 1
-    column: 0
+    column: 31
     endLine: 1
-    endColumn: 0
+    endColumn: 41
 output: null

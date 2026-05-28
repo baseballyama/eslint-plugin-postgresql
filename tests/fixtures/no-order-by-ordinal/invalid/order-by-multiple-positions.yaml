@@ -2,13 +2,13 @@ errors:
   - messageId: noOrderByOrdinal
     message: "`ORDER BY <position>` silently breaks when the SELECT list changes. Use the column name or alias instead."
     line: 1
-    column: 0
+    column: 44
     endLine: 1
-    endColumn: 0
+    endColumn: 45
   - messageId: noOrderByOrdinal
     message: "`ORDER BY <position>` silently breaks when the SELECT list changes. Use the column name or alias instead."
     line: 1
-    column: 0
+    column: 47
     endLine: 1
-    endColumn: 0
+    endColumn: 48
 output: null

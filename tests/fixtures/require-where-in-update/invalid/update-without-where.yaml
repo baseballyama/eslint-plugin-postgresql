@@ -2,7 +2,7 @@ errors:
   - messageId: missingWhere
     message: UPDATE without WHERE rewrites every row in the table. Add a WHERE clause to scope the change.
     line: 1
-    column: 8
+    column: 1
     endLine: 1
     endColumn: 32
 output: null

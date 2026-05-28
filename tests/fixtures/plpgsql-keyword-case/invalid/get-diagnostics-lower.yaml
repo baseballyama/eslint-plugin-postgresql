@@ -1,0 +1,18 @@
+errors:
+  - messageId: expectedUpper
+    message: "PL/pgSQL keyword 'row_count' should be uppercase: 'ROW_COUNT'."
+    line: 8
+    column: 30
+    endLine: 8
+    endColumn: 39
+output: |-
+  CREATE FUNCTION example() RETURNS void
+  LANGUAGE PLPGSQL
+  AS $$
+  DECLARE
+    affected INTEGER;
+  BEGIN
+    UPDATE some_table SET x = 1;
+    GET DIAGNOSTICS affected = ROW_COUNT;
+  END;
+  $$;

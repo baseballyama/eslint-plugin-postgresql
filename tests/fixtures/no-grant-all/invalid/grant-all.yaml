@@ -2,7 +2,7 @@ errors:
   - messageId: noGrantAll
     message: "`GRANT ALL` (or `GRANT ALL PRIVILEGES`) is opaque — list the privileges you actually need (e.g. `SELECT, INSERT, UPDATE`) so the grant is auditable and adding a new PostgreSQL privilege in a future release does not silently extend it."
     line: 1
-    column: 14
+    column: 1
     endLine: 1
     endColumn: 20
   - messageId: noGrantAll
