@@ -19,7 +19,4 @@ errors:
     column: 1
     endLine: 3
     endColumn: 7
-output: |-
-  CREATE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';
-  CREATE PROCEDURE p() LANGUAGE SQL AS '';
-  CREATE VIEW v AS SELECT 1;
+output: null

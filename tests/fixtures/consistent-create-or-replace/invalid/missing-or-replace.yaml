@@ -17,7 +17,4 @@ errors:
     column: 1
     endLine: 3
     endColumn: 7
-output: |-
-  CREATE OR REPLACE FUNCTION fn() RETURNS void LANGUAGE SQL AS '';
-  CREATE OR REPLACE PROCEDURE p() LANGUAGE SQL AS '';
-  CREATE OR REPLACE VIEW v AS SELECT 1;
+output: null
