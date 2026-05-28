@@ -1,0 +1,17 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the column alias `user_id`.
+    line: 8
+    column: 6
+    endLine: 8
+    endColumn: 13
+output: |-
+  -- When the alias is omitted on a TypeCast value the rule's old logic
+  -- would have corrupted `()::ulid id` into `()::AS ulid id` (parser range
+  -- ends mid-cast). The defensive check requires the next token to match
+  -- the alias name before inserting `AS`, so we only flag the bare ones
+  -- whose next token actually is the alias.
+  SELECT
+    COUNT(*) total,
+    id AS user_id
+  FROM users;
