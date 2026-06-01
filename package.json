@@ -69,6 +69,6 @@
   },
   "dependencies": {
     "libpg-query": "^17.7.3",
-    "postgresql-eslint-parser": "^0.5.3"
+    "postgresql-eslint-parser": "^0.5.4"
   }
 }
