@@ -12,8 +12,8 @@ importers:
         specifier: ^8.57.1 || ^9.0.0 || ^10.0.0
         version: 9.39.4(jiti@2.7.0)
       libpg-query:
-        specifier: ^17.7.3
-        version: 17.7.3
+        specifier: ^17.7.4
+        version: 17.7.4
       postgresql-eslint-parser:
         specifier: ^0.5.4
         version: 0.5.4
@@ -1498,8 +1498,8 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  libpg-query@17.7.3:
-    resolution: {integrity: sha512-lHKBvoWRsXt/9bJxpAeFxkLu0CA6tELusqy3o1z6/DwGXSETxhKJDaNlNdrNV8msvXDLBhpg/4RE/fKKs5rYFA==}
+  libpg-query@17.7.4:
+    resolution: {integrity: sha512-hTV3LvacQgJhc6GHpu5GYZMQBOAEpJ/LF1JjkixZ8YLh2TtbuN8y0JlNiPTe8PBTV9ChFkKcZMWSYKyhJfkYaQ==}
 
   locate-path@5.0.0:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
@@ -3222,7 +3222,7 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  libpg-query@17.7.3:
+  libpg-query@17.7.4:
     dependencies:
       '@pgsql/types': 17.6.2
 
