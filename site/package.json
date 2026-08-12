@@ -16,7 +16,7 @@
     "@types/node": "^24.13.2",
     "svelte": "^5.56.3",
     "svelte-check": "^4.6.0",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.1.0"
   },
   "dependencies": {
