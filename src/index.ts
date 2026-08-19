@@ -40,6 +40,7 @@ import noHavingWithoutGroupBy from "./rules/no-having-without-group-by.js";
 import noIdentifierTooLong from "./rules/no-identifier-too-long.js";
 import noImplicitJoin from "./rules/no-implicit-join.js";
 import noLeadingWildcardLike from "./rules/no-leading-wildcard-like.js";
+import noLockingSubqueryWithLimit from "./rules/no-locking-subquery-with-limit.js";
 import noMoneyType from "./rules/no-money-type.js";
 import noNaturalJoin from "./rules/no-natural-join.js";
 import noNotInSubquery from "./rules/no-not-in-subquery.js";
@@ -132,6 +133,7 @@ const rules = {
   "no-identifier-too-long": noIdentifierTooLong,
   "no-implicit-join": noImplicitJoin,
   "no-leading-wildcard-like": noLeadingWildcardLike,
+  "no-locking-subquery-with-limit": noLockingSubqueryWithLimit,
   "no-money-type": noMoneyType,
   "no-natural-join": noNaturalJoin,
   "no-not-in-subquery": noNotInSubquery,
@@ -233,6 +235,7 @@ plugin.configs = {
       "postgresql/no-identifier-too-long": "error",
       "postgresql/no-implicit-join": "warn",
       "postgresql/no-leading-wildcard-like": "warn",
+      "postgresql/no-locking-subquery-with-limit": "error",
       "postgresql/no-money-type": "error",
       "postgresql/no-natural-join": "error",
       "postgresql/no-not-in-subquery": "error",

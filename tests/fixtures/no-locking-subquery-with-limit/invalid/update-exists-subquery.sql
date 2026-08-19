@@ -1,0 +1,9 @@
+UPDATE jobs j
+SET flag = TRUE
+WHERE EXISTS (
+  SELECT 1
+  FROM jobs x
+  WHERE x.id = j.id
+  LIMIT 1
+  FOR UPDATE SKIP LOCKED
+);
