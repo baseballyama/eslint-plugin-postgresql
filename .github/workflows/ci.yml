@@ -101,3 +101,37 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           file-coverage-mode: "changes"
+
+  site:
+    name: Site (build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: site
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24.19.0"
+          cache: "pnpm"
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      # The docs site is a sibling install, not a workspace member, so it has
+      # its own lockfile. Renovate bumps `site/package.json` without
+      # regenerating it, which used to break `Deploy site` only after merge —
+      # this job makes the drift fail on the PR instead.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-workspace
+
+      - name: Run build
+        run: pnpm build
