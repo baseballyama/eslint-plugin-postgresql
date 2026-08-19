@@ -21,8 +21,7 @@ const rule: Rule.RuleModule = {
     return {
       CreateStmt(node: Ast.CreateStmt) {
         const relation = node.relation as
-          | (Ast.RangeVar & { schemaname?: string })
-          | undefined;
+          (Ast.RangeVar & { schemaname?: string }) | undefined;
         if (typeof relation?.schemaname === "string" && relation.schemaname)
           return;
         context.report({

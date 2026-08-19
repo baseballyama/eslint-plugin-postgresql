@@ -21,8 +21,7 @@ const rule: Rule.RuleModule = {
     return {
       CreateStmt(node: Ast.CreateStmt) {
         const relation = node.relation as
-          | (Ast.RangeVar & { relpersistence?: string })
-          | undefined;
+          (Ast.RangeVar & { relpersistence?: string }) | undefined;
         if (relation?.relpersistence !== "u") return;
         context.report({
           node: node as unknown as Rule.Node,
