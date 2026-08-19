@@ -338,6 +338,25 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
+    name: "no-locking-subquery-with-limit",
+    description:
+      "Disallow a locking sub-SELECT with LIMIT inside UPDATE / DELETE.",
+    longDescription:
+      "PostgreSQL only guarantees that a sub-`SELECT` is evaluated once when it lives in a `WITH` clause. An `IN (...)` sub-`SELECT` is planned as a join, so it is re-executed for every candidate row of the enclosing statement — and when it carries a row-locking clause, each re-execution silently skips the rows the statement has already modified. The window slides down the table and `UPDATE ... WHERE id IN (SELECT ... LIMIT 1 FOR UPDATE)` ends up modifying **every** candidate row, not one (PostgreSQL BUG #15715; Tom Lane's answer is that this is expected, not a bug). `SKIP LOCKED` is not the culprit: plain `FOR UPDATE` and `FOR SHARE` slide the same way. Move the sub-`SELECT` into a CTE, which is single-evaluated. A sub-`SELECT` without a locking clause is unaffected — re-running it returns the same rows — and so is one in `FROM` / `USING`, which the planner materialises as its own scan node.",
+    type: "problem",
+    recommended: "error",
+    fixable: false,
+    category: "safety",
+    incorrect: [
+      "UPDATE delayed_jobs SET locked_at = now()\nWHERE id IN (\n  SELECT id FROM delayed_jobs ORDER BY priority LIMIT 1 FOR UPDATE\n);",
+      "DELETE FROM ledger_entries\nWHERE id IN (\n  SELECT id FROM ledger_entries LIMIT 100 FOR NO KEY UPDATE SKIP LOCKED\n);",
+    ],
+    correct: [
+      "WITH c AS MATERIALIZED (\n  SELECT id FROM delayed_jobs ORDER BY priority LIMIT 1 FOR UPDATE SKIP LOCKED\n)\nUPDATE delayed_jobs SET locked_at = now() WHERE id IN (SELECT id FROM c);",
+      "UPDATE jobs SET flag = TRUE\nWHERE id IN (SELECT id FROM jobs LIMIT 1); -- no locking clause",
+    ],
+  },
+  {
     name: "snake-case-table-name",
     description: "Require snake_case table names.",
     longDescription:

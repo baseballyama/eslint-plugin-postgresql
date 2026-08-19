@@ -1,0 +1,8 @@
+errors:
+  - messageId: lockingSubqueryWithLimit
+    message: This sub-`SELECT` combines a row-locking clause (`FOR UPDATE` / `FOR NO KEY UPDATE` / `FOR SHARE` / `FOR KEY SHARE`) with `LIMIT` / `OFFSET`, and PostgreSQL may re-run it for every candidate row of the enclosing `UPDATE` / `DELETE`. Each re-run silently skips the rows this statement already modified, so the window slides and the limit stops bounding the number of modified rows. Move the sub-`SELECT` into a `WITH` clause, which PostgreSQL evaluates exactly once.
+    line: 3
+    column: 10
+    endLine: 6
+    endColumn: 12
+output: null
