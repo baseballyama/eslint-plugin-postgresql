@@ -1,5 +1,19 @@
 # eslint-plugin-postgresql
 
+## 0.23.0
+
+### Minor Changes
+
+- [#255](https://github.com/baseballyama/eslint-plugin-postgresql/pull/255) [`e48bb83`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/e48bb83f1bdf62b5a07e8e112d3e8ef0283f5a70) Thanks [@baseballyama](https://github.com/baseballyama)! - feat: add `no-locking-subquery-with-limit` rule (recommended: `error`)
+
+  Flags `UPDATE` / `DELETE` statements whose `IN (...)`, `EXISTS (...)` or
+  scalar sub-`SELECT` carries both a row-locking clause and `LIMIT` / `OFFSET`.
+  PostgreSQL re-executes such a sub-`SELECT` for every candidate row, and each
+  re-execution skips the rows the statement already modified — so the limit
+  stops bounding how many rows are modified and the statement can touch the
+  whole table (PostgreSQL BUG [#15715](https://github.com/baseballyama/eslint-plugin-postgresql/issues/15715)). Move the sub-`SELECT` into a `WITH`
+  clause, which PostgreSQL evaluates exactly once.
+
 ## 0.22.2
 
 ### Patch Changes
