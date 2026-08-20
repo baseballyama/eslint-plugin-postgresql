@@ -27,6 +27,16 @@ const rule: Rule.RuleModule = {
         const valuesLists = (node as { valuesLists?: unknown }).valuesLists;
         if (Array.isArray(valuesLists) && valuesLists.length > 0) return;
 
+        // A plain SELECT with no FROM clause returns exactly one row —
+        // `SELECT pg_advisory_xact_lock($1)`, `SELECT set_config(...)`,
+        // `SELECT 1`. There is nothing to limit, and LIMIT would only add
+        // noise. Set operations (`op` other than `SETOP_NONE`) also carry no
+        // `fromClause` of their own but do have arms that can return many
+        // rows, so they stay in scope.
+        const fromClause = node.fromClause;
+        const hasFrom = Array.isArray(fromClause) && fromClause.length > 0;
+        if (node.op === "SETOP_NONE" && !hasFrom) return;
+
         // A SELECT has a LIMIT if `limitCount` is set and `limitOption`
         // isn't the parser's default sentinel.
         const hasLimit =
