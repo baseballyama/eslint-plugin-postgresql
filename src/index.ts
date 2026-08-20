@@ -1,6 +1,7 @@
 import type { ESLint, Linter } from "eslint";
 import postgresqlParser from "postgresql-eslint-parser";
 import { name, version } from "./meta.js";
+import embeddedSql from "./processors/embedded-sql.js";
 import alignColumnDefinitions from "./rules/align-column-definitions.js";
 import alignValues from "./rules/align-values.js";
 import consistentAsForColumnAlias from "./rules/consistent-as-for-column-alias.js";
@@ -192,6 +193,12 @@ const plugin: ESLint.Plugin = {
     version,
   },
   rules,
+  // Lints the SQL inside `sql` template literals in `.ts` / `.js` files —
+  // the shape Drizzle, postgres.js and slonik produce. See the README for
+  // how to wire it up next to a preset.
+  processors: {
+    "embedded-sql": embeddedSql,
+  },
 };
 
 // `configs.recommended` references the plugin object itself in `plugins`, so

@@ -95,6 +95,81 @@ export default [
 ];
 ```
 
+### SQL written in TypeScript (Drizzle, postgres.js, slonik)
+
+ORMs keep SQL in two places, and the plugin reaches them differently.
+
+**Migration files.** `drizzle-kit generate` writes plain `.sql` migrations.
+They need no extra setup — point the presets at the output directory and
+every DDL rule applies:
+
+```js
+import postgresql from "eslint-plugin-postgresql";
+
+export default [
+  {
+    files: ["drizzle/**/*.sql"],
+    ...postgresql.configs.recommended,
+  },
+];
+```
+
+**`sql` template literals.** For SQL embedded in `.ts` / `.js`, the
+`embedded-sql` processor carves each statement out into a virtual `.sql`
+file, lints it with the normal rules, and maps the reports (and any fixes)
+back to the position in the original file:
+
+```js
+import postgresql from "eslint-plugin-postgresql";
+import tseslint from "typescript-eslint";
+
+export default [
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.sql"],
+    ...postgresql.configs.recommended,
+  },
+  {
+    files: ["src/**/*.ts"],
+    processor: postgresql.processors["embedded-sql"],
+  },
+];
+```
+
+The `**/*.sql` block matches the virtual files too, so one preset covers
+both real and embedded SQL. The host file keeps being linted by its own
+config — `typescript-eslint` above still sees it.
+
+What the processor picks up, and what it leaves alone:
+
+- **Only complete statements.** ``sql`SELECT id FROM users` `` is linted;
+  expression fragments like ``sql`excluded.user_name` `` or
+  ``sql`${users.id} IS NULL` `` have no standalone parse and are skipped.
+- **Interpolations become placeholders.** Each `${...}` is replaced by an
+  identifier of exactly the same width, so positions stay accurate. Reports
+  and fixes that land on a placeholder are discarded rather than shown —
+  the plugin will not tell you to rename an expression it cannot see. If the
+  substituted text does not parse, the template is skipped instead of being
+  reported as a syntax error.
+- **Templates containing a `\` escape are skipped**, because the raw source
+  and the string that actually reaches PostgreSQL differ there.
+- **Only the `sql` tag** is recognised — the tag Drizzle, postgres.js and
+  slonik all use.
+- **The ORM query builder is out of scope.** `db.select().from(users)` and
+  `pgTable(...)` never produce SQL text, so no rule can see them. Lint the
+  generated migrations instead.
+
+Rules written for standalone files can be noisy here — `require-trailing-semicolon`
+flags every embedded statement, for instance. Turn those off for the virtual
+files:
+
+```js
+{
+  files: ["**/*.ts/*.sql"],
+  rules: { "postgresql/require-trailing-semicolon": "off" },
+}
+```
+
 ## Rules
 
 Click a rule name to open its documentation page (examples, rationale, options).

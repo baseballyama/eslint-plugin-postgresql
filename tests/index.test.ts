@@ -124,6 +124,16 @@ describe("eslint-plugin-postgresql", () => {
     ).toEqual([]);
   });
 
+  it("ships the embedded-sql processor", () => {
+    const processor = plugin.processors?.["embedded-sql"];
+    expect(processor).toBeDefined();
+    // Fixes are mapped back into the host file, so the processor must
+    // advertise autofix or ESLint discards them.
+    expect(processor?.supportsAutofix).toBe(true);
+    expect(typeof processor?.preprocess).toBe("function");
+    expect(typeof processor?.postprocess).toBe("function");
+  });
+
   it("ships configs.stylistic that only references fixable rules", () => {
     const stylistic = plugin.configs?.["stylistic"];
     expect(stylistic).toBeDefined();
