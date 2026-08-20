@@ -420,7 +420,7 @@ export const rules: RuleMeta[] = [
     name: "require-limit",
     description: "Require a LIMIT clause on SELECT.",
     longDescription:
-      "Defends against accidentally pulling the entire table over the wire. Best applied to ad-hoc query files; report-style queries that intentionally aggregate everything will fight the rule and should disable it locally.",
+      "Defends against accidentally pulling the entire table over the wire. Best applied to ad-hoc query files; report-style queries that intentionally aggregate everything will fight the rule and should disable it locally. A SELECT with no FROM clause returns a single row, so `SELECT pg_advisory_xact_lock($1)` and friends are left alone.",
     type: "suggestion",
     recommended: "warn",
     fixable: false,
@@ -432,6 +432,7 @@ export const rules: RuleMeta[] = [
     correct: [
       "SELECT * FROM users LIMIT 100;",
       "SELECT name, email FROM users WHERE active = true LIMIT 50;",
+      "SELECT pg_advisory_xact_lock(42);",
     ],
   },
   {

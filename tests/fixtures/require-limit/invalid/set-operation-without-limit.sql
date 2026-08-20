@@ -1,0 +1,3 @@
+SELECT id FROM users
+UNION
+SELECT id FROM admins;
