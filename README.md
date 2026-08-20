@@ -95,6 +95,120 @@ export default [
 ];
 ```
 
+### SQL written in TypeScript (Drizzle, Prisma, Kysely, postgres.js)
+
+ORMs keep SQL in two places, and the plugin reaches them differently.
+
+**Migration files.** `drizzle-kit generate` and `prisma migrate dev` both
+write plain `.sql` migrations. They need no extra setup — point the presets
+at the output directory and every DDL rule applies. For a schema-first ORM
+this is where nearly all the value is, since every table your app has passes
+through here:
+
+```js
+import postgresql from "eslint-plugin-postgresql";
+
+export default [
+  {
+    files: ["drizzle/**/*.sql", "prisma/migrations/**/*.sql"],
+    ...postgresql.configs.recommended,
+  },
+];
+```
+
+**`sql` template literals.** For SQL embedded in `.ts` / `.js`, the
+`embedded-sql` processor carves each statement out into a virtual `.sql`
+file, lints it with the normal rules, and maps the reports (and any fixes)
+back to the position in the original file:
+
+```js
+import postgresql from "eslint-plugin-postgresql";
+import tseslint from "typescript-eslint";
+
+export default [
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.sql"],
+    ...postgresql.configs.recommended,
+  },
+  {
+    files: ["src/**/*.ts"],
+    processor: postgresql.processors["embedded-sql"],
+  },
+];
+```
+
+The `**/*.sql` block matches the virtual files too, so one preset covers
+both real and embedded SQL. The host file keeps being linted by its own
+config, type-aware rules included — `typescript-eslint` above still sees it.
+
+#### Turning off the rules the virtual files inherit
+
+A flat-config entry with no `files` key applies to **every** file ESLint
+lints, and the virtual `.sql` files are no exception. In a project where
+`typescript-eslint` is registered without a `files` restriction — the common
+case — its rules are handed a PostgreSQL AST and a type-aware rule will throw
+outright:
+
+```
+Error while loading rule '@typescript-eslint/await-thenable': You have used a
+rule which requires type information, but don't have parserOptions set to
+generate type information for this file.
+Occurred while linting src/db.ts/0_0.sql
+```
+
+Switch those rules off on the virtual files, the same way you would for a
+real `.sql` file. Put the block last so it wins:
+
+```js
+import tseslint from "typescript-eslint";
+
+{
+  files: ["**/*.ts/*.sql"],
+  rules: {
+    ...tseslint.configs.disableTypeChecked.rules,
+    // …plus any other plugin whose rules are registered without `files`.
+  },
+}
+```
+
+If you already have a config block that neutralises your JS/TS rules for
+`**/*.sql` files, point it at `**/*.ts/*.sql` as well and you are done.
+
+What the processor picks up, and what it leaves alone:
+
+- **Only complete statements.** ``sql`SELECT id FROM users` `` is linted;
+  expression fragments like ``sql`excluded.user_name` `` or
+  ``sql`${users.id} IS NULL` `` have no standalone parse and are skipped.
+- **Interpolations become placeholders.** Each `${...}` is replaced by an
+  identifier of exactly the same width, so positions stay accurate. Reports
+  and fixes that land on a placeholder are discarded rather than shown —
+  the plugin will not tell you to rename an expression it cannot see. If the
+  substituted text does not parse, the template is skipped instead of being
+  reported as a syntax error.
+- **Templates containing a `\` escape are skipped**, because the raw source
+  and the string that actually reaches PostgreSQL differ there.
+- **Recognised tags** are `sql` (Drizzle, Kysely, postgres.js) and
+  `$queryRaw` / `$executeRaw` (Prisma). The tag is the last identifier before
+  the backtick, so `prisma.$queryRaw` matches. Anything that is not a plain
+  identifier is out of reach: Prisma's `$queryRawUnsafe("...")` and TypeORM's
+  `.query("...")` take a string argument rather than a template, and modern
+  slonik tags with `sql.type(schema)`, whose last token is a `)`.
+- **The ORM query builder is out of scope.** `db.select().from(users)` and
+  `pgTable(...)` never produce SQL text, so no rule can see them. Lint the
+  generated migrations instead.
+
+Rules written for standalone files can be noisy here — `require-trailing-semicolon`
+flags every embedded statement, for instance. Turn those off in the same
+`**/*.ts/*.sql` block:
+
+```js
+{
+  files: ["**/*.ts/*.sql"],
+  rules: { "postgresql/require-trailing-semicolon": "off" },
+}
+```
+
 ## Rules
 
 Click a rule name to open its documentation page (examples, rationale, options).
