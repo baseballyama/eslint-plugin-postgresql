@@ -35,6 +35,12 @@ export const isConstraint = (node: unknown): node is Ast.Constraint =>
 export const isSubLink = (node: unknown): node is Ast.SubLink =>
   isObjectWithType(node, "SubLink");
 
+export const isRangeSubselect = (node: unknown): node is Ast.RangeSubselect =>
+  isObjectWithType(node, "RangeSubselect");
+
+export const isRangeFunction = (node: unknown): node is Ast.RangeFunction =>
+  isObjectWithType(node, "RangeFunction");
+
 const isObjectWithType = <T extends string>(
   node: unknown,
   type: T,
