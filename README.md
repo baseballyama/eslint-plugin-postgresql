@@ -95,20 +95,22 @@ export default [
 ];
 ```
 
-### SQL written in TypeScript (Drizzle, postgres.js, slonik)
+### SQL written in TypeScript (Drizzle, Prisma, Kysely, postgres.js)
 
 ORMs keep SQL in two places, and the plugin reaches them differently.
 
-**Migration files.** `drizzle-kit generate` writes plain `.sql` migrations.
-They need no extra setup — point the presets at the output directory and
-every DDL rule applies:
+**Migration files.** `drizzle-kit generate` and `prisma migrate dev` both
+write plain `.sql` migrations. They need no extra setup — point the presets
+at the output directory and every DDL rule applies. For a schema-first ORM
+this is where nearly all the value is, since every table your app has passes
+through here:
 
 ```js
 import postgresql from "eslint-plugin-postgresql";
 
 export default [
   {
-    files: ["drizzle/**/*.sql"],
+    files: ["drizzle/**/*.sql", "prisma/migrations/**/*.sql"],
     ...postgresql.configs.recommended,
   },
 ];
@@ -153,8 +155,12 @@ What the processor picks up, and what it leaves alone:
   reported as a syntax error.
 - **Templates containing a `\` escape are skipped**, because the raw source
   and the string that actually reaches PostgreSQL differ there.
-- **Only the `sql` tag** is recognised — the tag Drizzle, postgres.js and
-  slonik all use.
+- **Recognised tags** are `sql` (Drizzle, Kysely, postgres.js) and
+  `$queryRaw` / `$executeRaw` (Prisma). The tag is the last identifier before
+  the backtick, so `prisma.$queryRaw` matches. Anything that is not a plain
+  identifier is out of reach: Prisma's `$queryRawUnsafe("...")` and TypeORM's
+  `.query("...")` take a string argument rather than a template, and modern
+  slonik tags with `sql.type(schema)`, whose last token is a `)`.
 - **The ORM query builder is out of scope.** `db.select().from(users)` and
   `pgTable(...)` never produce SQL text, so no rule can see them. Lint the
   generated migrations instead.

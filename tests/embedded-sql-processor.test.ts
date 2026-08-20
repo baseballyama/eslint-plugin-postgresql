@@ -51,6 +51,24 @@ describe("processors/embedded-sql", () => {
     expect(code[21]).toBe("*");
   });
 
+  it("lints Prisma's raw-query tags", () => {
+    const code = [
+      "const rows = await prisma.$queryRaw`SELECT * FROM users`;",
+      "await prisma.$executeRaw`DELETE FROM sessions`;",
+    ].join("\n");
+    expect(
+      positionsOf(
+        lintSql(code, {
+          "postgresql/no-select-star": "error",
+          "postgresql/require-where-in-delete": "error",
+        }),
+      ),
+    ).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 1, column: 44 },
+      { ruleId: "postgresql/require-where-in-delete", line: 2, column: 38 },
+    ]);
+  });
+
   it("maps positions on later lines of a multi-line template", () => {
     const code = [
       "await db.execute(sql`",

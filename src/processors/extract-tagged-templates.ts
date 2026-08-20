@@ -137,7 +137,10 @@ const skipRegex = (code: string, start: number): number => {
 
 /**
  * Finds every ``tag`...` `` template literal in JavaScript or TypeScript
- * source, along with the `${...}` spans inside it.
+ * source whose tag is one of `tags`, along with the `${...}` spans inside it.
+ *
+ * The tag is the last identifier before the backtick, so a member expression
+ * such as `prisma.$queryRaw` matches on `$queryRaw`.
  *
  * This is a lexer, not a parser: it tracks strings, comments, regular
  * expressions and nested template literals so a backtick inside any of them
@@ -147,7 +150,7 @@ const skipRegex = (code: string, start: number): number => {
  */
 export const extractTaggedTemplates = (
   code: string,
-  tag: string,
+  tags: ReadonlySet<string>,
 ): TaggedTemplate[] => {
   const found: TaggedTemplate[] = [];
   let frame: Frame = { kind: "code", parent: null, braceDepth: 0 };
@@ -208,7 +211,7 @@ export const extractTaggedTemplates = (
       frame = {
         kind: "template",
         parent: frame,
-        tagged: lastToken === tag,
+        tagged: tags.has(lastToken),
         start: i + 1,
         interpolations: [],
         openInterpolation: null,

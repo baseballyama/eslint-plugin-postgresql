@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { extractTaggedTemplates } from "../src/processors/extract-tagged-templates.js";
 
+const SQL_TAGS = new Set(["sql"]);
+
 const textsOf = (code: string) =>
-  extractTaggedTemplates(code, "sql").map((t) => code.slice(t.start, t.end));
+  extractTaggedTemplates(code, SQL_TAGS).map((t) => code.slice(t.start, t.end));
 
 describe("extractTaggedTemplates", () => {
   it("finds a tagged template and reports the span between the backticks", () => {
     const code = "const q = sql`SELECT 1`;";
-    const [template] = extractTaggedTemplates(code, "sql");
+    const [template] = extractTaggedTemplates(code, SQL_TAGS);
     expect(template).toBeDefined();
     expect(code.slice(template!.start, template!.end)).toBe("SELECT 1");
     expect(template!.interpolations).toEqual([]);
@@ -21,6 +23,14 @@ describe("extractTaggedTemplates", () => {
 
   it("accepts a member-expression tag", () => {
     expect(textsOf("db.sql`SELECT 1`")).toEqual(["SELECT 1"]);
+  });
+
+  it("matches every tag it is given", () => {
+    const code = "prisma.$queryRaw`SELECT 1`; tx.$executeRaw`DELETE FROM t`;";
+    const tags = new Set(["$queryRaw", "$executeRaw"]);
+    expect(
+      extractTaggedTemplates(code, tags).map((t) => code.slice(t.start, t.end)),
+    ).toEqual(["SELECT 1", "DELETE FROM t"]);
   });
 
   it("does not mistake backticks inside strings or comments for templates", () => {
@@ -53,7 +63,7 @@ describe("extractTaggedTemplates", () => {
 
   it("records interpolation spans, including nested braces", () => {
     const code = "sql`SELECT ${{ a: 1 }.a} FROM t WHERE x = ${id}`";
-    const [template] = extractTaggedTemplates(code, "sql");
+    const [template] = extractTaggedTemplates(code, SQL_TAGS);
     expect(template).toBeDefined();
     expect(template!.interpolations.map(([s, e]) => code.slice(s, e))).toEqual([
       "${{ a: 1 }.a}",

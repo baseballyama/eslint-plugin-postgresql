@@ -6,8 +6,21 @@ import {
   type TaggedTemplate,
 } from "./extract-tagged-templates.js";
 
-/** The template tag treated as SQL. Drizzle, postgres.js and slonik all use it. */
-const SQL_TAG = "sql";
+/**
+ * Template tags treated as SQL. `sql` is what Drizzle, Kysely and postgres.js
+ * export; `$queryRaw` / `$executeRaw` are Prisma's raw-query tags, reached
+ * through `prisma.$queryRaw`.
+ *
+ * Tags that are not a plain identifier are out of reach — Prisma's
+ * `$queryRawUnsafe("...")` and TypeORM's `.query("...")` take a string
+ * argument rather than a template, and modern slonik tags with
+ * `sql.type(schema)` whose last token is a `)`.
+ */
+const SQL_TAGS: ReadonlySet<string> = new Set([
+  "sql",
+  "$queryRaw",
+  "$executeRaw",
+]);
 
 /** Extension given to the virtual files carved out of the host file. */
 const VIRTUAL_EXTENSION = ".sql";
@@ -322,7 +335,7 @@ const embeddedSql: Linter.Processor<Linter.ProcessorFile> = {
   preprocess(text, filename) {
     const hostLineStarts = lineStartsOf(text);
     const blocks: EmbeddedBlock[] = [];
-    for (const template of extractTaggedTemplates(text, SQL_TAG)) {
+    for (const template of extractTaggedTemplates(text, SQL_TAGS)) {
       const block = buildBlock(text, template, hostLineStarts);
       if (block !== null) blocks.push(block);
     }
