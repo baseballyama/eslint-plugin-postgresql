@@ -300,15 +300,6 @@ const translateMessage = (
   return translated;
 };
 
-const extensionOf = (filename: string): string => {
-  const dot = filename.lastIndexOf(".");
-  const separator = Math.max(
-    filename.lastIndexOf("/"),
-    filename.lastIndexOf("\\"),
-  );
-  return dot > separator + 1 ? filename.slice(dot) : "";
-};
-
 /**
  * Blocks carved out of the file currently being linted, keyed by filename so
  * `postprocess` can map each message list back. ESLint always pairs one
@@ -323,9 +314,9 @@ const blockCache = new Map<string, EmbeddedBlock[]>();
  * emitting one virtual `.sql` file per complete statement.
  *
  * The host file is emitted alongside them, unchanged, so the rules that
- * normally apply to it keep running.
+ * normally apply to it keep running — including type-aware ones.
  */
-const embeddedSql: Linter.Processor<Linter.ProcessorFile> = {
+const embeddedSql: Linter.Processor<string | Linter.ProcessorFile> = {
   meta: {
     name: "postgresql/embedded-sql",
     version: "1",
@@ -346,10 +337,12 @@ const embeddedSql: Linter.Processor<Linter.ProcessorFile> = {
         text: block.text,
         filename: `${index}${VIRTUAL_EXTENSION}`,
       })),
-      // Same text and same extension as the host file, which is how ESLint
-      // knows to lint it with the host's own config instead of resolving a
-      // new one (and re-entering this processor).
-      { text, filename: `${blocks.length}${extensionOf(filename)}` },
+      // The host file goes back as a bare string, not a named block. ESLint
+      // lints a string block with the original options — same config, same
+      // filename — so type-aware setups keep working: `projectService` still
+      // sees the real path instead of a virtual one it cannot find in the
+      // TypeScript program.
+      text,
     ];
   },
 
@@ -361,8 +354,8 @@ const embeddedSql: Linter.Processor<Linter.ProcessorFile> = {
     for (const [index, messages] of messageLists.entries()) {
       const block = blocks[index];
       if (block === undefined) {
-        // The trailing list belongs to the host file; its positions are
-        // already host positions.
+        // The trailing list belongs to the host file, which was linted as
+        // itself; its positions are already host positions.
         result.push(...messages);
         continue;
       }

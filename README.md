@@ -140,7 +140,40 @@ export default [
 
 The `**/*.sql` block matches the virtual files too, so one preset covers
 both real and embedded SQL. The host file keeps being linted by its own
-config — `typescript-eslint` above still sees it.
+config, type-aware rules included — `typescript-eslint` above still sees it.
+
+#### Turning off the rules the virtual files inherit
+
+A flat-config entry with no `files` key applies to **every** file ESLint
+lints, and the virtual `.sql` files are no exception. In a project where
+`typescript-eslint` is registered without a `files` restriction — the common
+case — its rules are handed a PostgreSQL AST and a type-aware rule will throw
+outright:
+
+```
+Error while loading rule '@typescript-eslint/await-thenable': You have used a
+rule which requires type information, but don't have parserOptions set to
+generate type information for this file.
+Occurred while linting src/db.ts/0_0.sql
+```
+
+Switch those rules off on the virtual files, the same way you would for a
+real `.sql` file. Put the block last so it wins:
+
+```js
+import tseslint from "typescript-eslint";
+
+{
+  files: ["**/*.ts/*.sql"],
+  rules: {
+    ...tseslint.configs.disableTypeChecked.rules,
+    // …plus any other plugin whose rules are registered without `files`.
+  },
+}
+```
+
+If you already have a config block that neutralises your JS/TS rules for
+`**/*.sql` files, point it at `**/*.ts/*.sql` as well and you are done.
 
 What the processor picks up, and what it leaves alone:
 
@@ -166,8 +199,8 @@ What the processor picks up, and what it leaves alone:
   generated migrations instead.
 
 Rules written for standalone files can be noisy here — `require-trailing-semicolon`
-flags every embedded statement, for instance. Turn those off for the virtual
-files:
+flags every embedded statement, for instance. Turn those off in the same
+`**/*.ts/*.sql` block:
 
 ```js
 {

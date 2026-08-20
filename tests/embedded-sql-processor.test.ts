@@ -156,6 +156,23 @@ describe("processors/embedded-sql", () => {
     ]);
   });
 
+  it("hands the host file back as a bare string, not a named block", () => {
+    const code = "const q = sql`SELECT id FROM users`;";
+    const blocks = processor.preprocess?.(code, "db.ts") ?? [];
+    processor.postprocess?.([[], []], "db.ts");
+
+    expect(blocks).toHaveLength(2);
+    expect(blocks[0]).toEqual({
+      text: "SELECT id FROM users",
+      filename: "0.sql",
+    });
+    // A named block would be linted under a synthetic path like `db.ts/1.ts`,
+    // which type-aware setups cannot find in the TypeScript program — every
+    // file would fail with "was not found by the project service". ESLint
+    // lints a string block with the original filename instead.
+    expect(blocks[1]).toBe(code);
+  });
+
   it("applies a fix inside the template without disturbing the host file", () => {
     const code = "const q = sql`SELECT * FROM t WHERE a != 1`;";
     const result = fixSql(code, {
