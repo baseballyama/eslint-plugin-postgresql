@@ -1,5 +1,6 @@
 import type { Rule } from "eslint";
 import type { Ast } from "postgresql-eslint-parser";
+import { isRangeFunction, isRangeSubselect } from "../utils/ast.js";
 
 const rule: Rule.RuleModule = {
   meta: {
@@ -19,6 +20,17 @@ const rule: Rule.RuleModule = {
   create(context) {
     return {
       JoinExpr(node: Ast.JoinExpr) {
+        // `CROSS JOIN LATERAL (...)` is the idiomatic way to correlate a
+        // subquery or set-returning function with the row on its left. The
+        // right side references the left, so it cannot produce the unintended
+        // cartesian product this rule exists to catch, and there is no
+        // `ON` clause to write instead.
+        const rarg = node.rarg;
+        const isLateral =
+          (isRangeSubselect(rarg) || isRangeFunction(rarg)) &&
+          rarg.lateral === true;
+        if (isLateral) return;
+
         const isCrossJoin =
           node.jointype === "JOIN_INNER" &&
           !node.quals &&

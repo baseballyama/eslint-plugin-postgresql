@@ -116,7 +116,7 @@ export const rules: RuleMeta[] = [
     name: "no-cross-join",
     description: "Warn on CROSS JOIN.",
     longDescription:
-      "If the intent really is a cartesian product, write `JOIN ... ON true` so the intent reads back. PostgreSQL rejects `INNER JOIN b` without `ON`/`USING`, so the explicit `CROSS JOIN` is the only form this rule sees in practice.",
+      "If the intent really is a cartesian product, write `JOIN ... ON true` so the intent reads back. PostgreSQL rejects `INNER JOIN b` without `ON`/`USING`, so the explicit `CROSS JOIN` is the only form this rule sees in practice. `CROSS JOIN LATERAL` is exempt: its right side is correlated with the row on its left, so no cartesian product can result.",
     type: "suggestion",
     recommended: "warn",
     fixable: false,
@@ -125,6 +125,7 @@ export const rules: RuleMeta[] = [
     correct: [
       "SELECT * FROM a JOIN b ON a.id = b.id;",
       "SELECT * FROM a JOIN b ON true; -- intentional cartesian",
+      "SELECT a.id, t.tag FROM a CROSS JOIN LATERAL unnest(a.tags) AS t(tag);",
     ],
   },
   {
