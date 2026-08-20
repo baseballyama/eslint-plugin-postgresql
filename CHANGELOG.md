@@ -1,5 +1,38 @@
 # eslint-plugin-postgresql
 
+## 0.24.0
+
+### Minor Changes
+
+- [#261](https://github.com/baseballyama/eslint-plugin-postgresql/pull/261) [`54638b6`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/54638b6664d86f9851889f51d082e32977714f62) Thanks [@baseballyama](https://github.com/baseballyama)! - Add the `embedded-sql` processor, which lints SQL written inside template
+  literals in TypeScript and JavaScript files: the `sql` tag used by Drizzle,
+  Kysely and postgres.js, and Prisma's `$queryRaw` / `$executeRaw`. Point it at
+  your source files and the existing rules report against the original file,
+  autofix included:
+
+  ```js
+  {
+    files: ["src/**/*.ts"],
+    processor: postgresql.processors["embedded-sql"],
+  }
+  ```
+
+  Only complete statements are linted; expression fragments such as
+  ``sql`excluded.user_name` `` are left alone, and `${...}` interpolations are
+  never reported on or rewritten.
+
+### Patch Changes
+
+- [#263](https://github.com/baseballyama/eslint-plugin-postgresql/pull/263) [`b730809`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/b7308090e254d9d3e333ed5b05e606acbc5fcd3b) Thanks [@baseballyama](https://github.com/baseballyama)! - `no-cross-join` no longer flags `CROSS JOIN LATERAL`. The right side of a
+  LATERAL join is correlated with the row on its left, so it cannot produce the
+  unintended cartesian product the rule exists to catch — and there is no
+  `ON` clause to write instead. A plain `CROSS JOIN` still reports.
+
+- [#262](https://github.com/baseballyama/eslint-plugin-postgresql/pull/262) [`a231474`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/a23147411848a9d83b5773e46962e70ca3045167) Thanks [@baseballyama](https://github.com/baseballyama)! - `require-limit` no longer flags a `SELECT` with no `FROM` clause. Queries like
+  `SELECT pg_advisory_xact_lock($1)`, `SELECT set_config(...)` and `SELECT 1`
+  return exactly one row, so there is nothing for `LIMIT` to bound. Set
+  operations still report, since their arms can return many rows.
+
 ## 0.23.0
 
 ### Minor Changes
