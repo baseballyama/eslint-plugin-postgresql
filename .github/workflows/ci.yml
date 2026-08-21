@@ -106,30 +106,63 @@ jobs:
     name: Site (build)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Needed by "Sync lockfile on Renovate PRs" below, which pushes the
+    # regenerated lockfile back to the Renovate branch.
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: site
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # On a pull request this checks out the PR head instead of the merge
+          # commit, so the sync step below has something it can push back to
+          # the branch. Addressed by SHA rather than by branch name so that it
+          # still resolves for a fork PR, whose branch does not exist here.
+          # Empty on push events, where it falls back to the pushed commit.
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24.19.0"
           cache: "pnpm"
           cache-dependency-path: site/pnpm-lock.yaml
 
+      # Renovate bumps the versions in `site/package.json` but never touches
+      # `site/pnpm-lock.yaml`: it reads the root `pnpm-workspace.yaml`, treats
+      # `site/` as part of that workspace, and only ever runs pnpm at the root.
+      # The `lock-file-maintenance` branch shows this plainly — a run whose only
+      # job is refreshing lockfiles rewrites the root one and leaves the site
+      # one alone. So regenerate it here rather than making the maintainer run
+      # pnpm by hand on every dependency PR. Restricted to Renovate branches:
+      # a human touching `site/package.json` is expected to commit the lockfile
+      # with it, and a fork PR's token cannot push anyway.
+      - name: Sync lockfile on Renovate PRs
+        if: startsWith(github.head_ref, 'renovate/')
+        run: |
+          pnpm install --lockfile-only --ignore-workspace
+          if git diff --quiet -- pnpm-lock.yaml; then
+            echo "site/pnpm-lock.yaml is already in sync"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "build(site): sync site/pnpm-lock.yaml with site/package.json" -- pnpm-lock.yaml
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
+
       # The docs site is a sibling install, not a workspace member, so it has
-      # its own lockfile. Renovate bumps `site/package.json` without
-      # regenerating it, which used to break `Deploy site` only after merge —
-      # this job makes the drift fail on the PR instead.
+      # its own lockfile. `--frozen-lockfile` is the drift guard: on a Renovate
+      # branch the step above has already repaired the lockfile, and anywhere
+      # else drift fails the PR instead of breaking `Deploy site` after merge.
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-workspace
 
