@@ -52,16 +52,16 @@
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.0",
-    "@changesets/cli": "^3.0.0",
+    "@changesets/cli": "^3.0.1",
     "@types/node": "^24.13.3",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "knip": "^6.32.2",
-    "oxlint": "^1.78.0",
+    "oxlint": "^1.79.0",
     "prettier": "^3.9.6",
-    "publint": "^0.3.23",
-    "rolldown": "^1.2.4",
+    "publint": "^0.3.24",
+    "rolldown": "^1.2.5",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.10",
+    "vitest": "^4.1.11",
     "yaml": "^2.9.0"
   },
   "peerDependencies": {
