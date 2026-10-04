@@ -45,3 +45,7 @@ jobs:
           publish-script: pnpm release
           commit-message: "chore: release eslint-plugin-postgresql"
           pr-title: "chore: release eslint-plugin-postgresql"
+        env:
+          # @changesets/changelog-github reads the token from the environment
+          # when `changeset version` builds the changelog.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
