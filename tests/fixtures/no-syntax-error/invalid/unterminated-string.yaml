@@ -1,6 +1,6 @@
 errors:
   - messageId: syntaxError
-    message: 'PostgreSQL syntax error: Unexpected token ''u'', "unterminat"... is not valid JSON'
+    message: 'PostgreSQL syntax error: unterminated quoted string at or near "''unterminated string FROM users;"'
     line: 1
     column: 1
     endLine: 1
