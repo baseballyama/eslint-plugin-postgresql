@@ -1,0 +1,72 @@
+# Temporary, not for merge: installs the published eslint-plugin-postgresql
+# 0.25.0 and postgresql-eslint-parser 0.6.0 from the npm registry, verifies
+# their registry signatures and attestations with npm audit signatures
+# (per-package JSON), and lints SQL and a Prisma file through them.
+name: tmp-published
+on:
+  push:
+    branches: [verify/plugin-published-0.25.0]
+permissions:
+  contents: read
+jobs:
+  signatures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Install from the registry and verify
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -o pipefail
+          mkdir app && cd app && echo '{"name":"app","private":true,"type":"module"}' > package.json
+          npm install eslint@10 eslint-plugin-postgresql@0.25.0 postgresql-eslint-parser@0.6.0
+          npm --version
+          npm ls eslint-plugin-postgresql postgresql-eslint-parser @libpg-query/parser
+          npm audit signatures --json --include-attestations > "$RUNNER_TEMP/audit.json" || { echo "npm audit signatures failed"; cat "$RUNNER_TEMP/audit.json"; exit 1; }
+          node -e '
+            const a = JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP + "/audit.json", "utf8"));
+            console.log("top-level keys:", Object.keys(a).join(", "));
+            console.log("invalid:", JSON.stringify(a.invalid ?? []), "missing:", JSON.stringify(a.missing ?? []));
+            const list = [...(a.verified ?? []), ...(Array.isArray(a.attestations) ? a.attestations : [])];
+            let ok = (a.invalid ?? []).length === 0 && (a.missing ?? []).length === 0;
+            for (const want of ["eslint-plugin-postgresql@0.25.0", "postgresql-eslint-parser@0.6.0"]) {
+              const s = JSON.stringify(a);
+              const present = s.includes(want) || s.includes(want.replace("@", "/-/").replace(/@/, "-"));
+              console.log(want, "mentioned in audit JSON:", present);
+            }
+            process.exitCode = ok ? 0 : 1;
+          '
+          npm audit signatures
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: audit-signatures-published
+          path: ${{ runner.temp }}/audit.json
+  fresh-consumer:
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        pm: [npm, pnpm, yarn]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Fresh install of the published plugin
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir app && cd app && echo '{"name":"app","private":true,"type":"module"}' > package.json
+          case "${{ matrix.pm }}" in
+            npm) npm install eslint@10 eslint-plugin-postgresql@0.25.0 ;;
+            pnpm) npx -y pnpm@12.9.1 add eslint@10 eslint-plugin-postgresql@0.25.0 --config.strict-dep-builds=false ;;
+            # Yarn 4 quarantines recently published versions (YN0016); pre-approve
+            # the two packages published today in this throwaway app.
+            yarn) corepack enable && yarn set version stable && printf 'nodeLinker: node-modules\nnpmPreapprovedPackages:\n  - eslint-plugin-postgresql\n  - postgresql-eslint-parser\n' >> .yarnrc.yml && yarn add eslint@10 eslint-plugin-postgresql@0.25.0 ;;
+          esac
+      - name: Import and lint
+        working-directory: ${{ runner.temp }}/app
+        run: cp "$GITHUB_WORKSPACE/.github/tmp-consumer/check.mjs" . && node check.mjs
