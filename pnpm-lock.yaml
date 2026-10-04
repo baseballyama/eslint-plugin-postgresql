@@ -19,40 +19,40 @@ importers:
         version: 0.5.4
     devDependencies:
       '@changesets/changelog-github':
-        specifier: ^1.0.0
+        specifier: ^1.0.1
         version: 1.0.1
       '@changesets/cli':
-        specifier: ^3.0.0
+        specifier: ^3.0.3
         version: 3.0.3
       '@types/node':
-        specifier: ^24.13.3
+        specifier: ^24.19.0
         version: 24.19.0
       '@vitest/coverage-v8':
-        specifier: ^4.1.10
+        specifier: ^4.1.11
         version: 4.1.11(vitest@4.1.11)
       knip:
-        specifier: ^6.32.2
+        specifier: ^6.39.0
         version: 6.39.0
       oxlint:
-        specifier: ^1.78.0
+        specifier: ^1.86.0
         version: 1.86.0
       prettier:
-        specifier: ^3.9.6
+        specifier: ^3.9.9
         version: 3.9.9
       publint:
-        specifier: ^0.3.23
+        specifier: ^0.3.24
         version: 0.3.24
       rolldown:
-        specifier: ^1.2.4
+        specifier: ^1.2.12
         version: 1.2.12
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^4.1.10
+        specifier: ^4.1.11
         version: 4.1.11(@types/node@24.19.0)(@vitest/coverage-v8@4.1.11)(vite@8.3.2(@types/node@24.19.0)(jiti@2.7.0)(yaml@2.9.1))
       yaml:
-        specifier: ^2.9.0
+        specifier: ^2.9.1
         version: 2.9.1
 
 packages:
