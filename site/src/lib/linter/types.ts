@@ -1,4 +1,4 @@
-import type { Severity } from "#lib/data/rules";
+import type { Severity } from "#lib/data/rules.ts";
 
 export interface Diagnostic {
   ruleId: string;

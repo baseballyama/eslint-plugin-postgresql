@@ -1,6 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { rules, categoryLabel, type RuleMeta, type Severity, type RuleType } from "#lib/data/rules";
+  import { rules, categoryLabel, type RuleMeta, type Severity, type RuleType } from "#lib/data/rules.ts";
   import SeverityBadge from "#lib/components/SeverityBadge.svelte";
 
   let query = $state("");

@@ -51,8 +51,8 @@ jobs:
         run: |
           set +e
           (cd before/site && pnpm check > "$RUNNER_TEMP/check-before.txt" 2>&1; echo "before exit $?")
-          (cd after/site && pnpm check > "$RUNNER_TEMP/check-after.txt" 2>&1; echo "after exit $?")
-          tail -5 "$RUNNER_TEMP/check-before.txt"; echo ---; tail -40 "$RUNNER_TEMP/check-after.txt"
+          (cd after/site && NO_COLOR=1 pnpm check --output human > "$RUNNER_TEMP/check-after.txt" 2>&1; echo "after exit $?")
+          tail -5 "$RUNNER_TEMP/check-before.txt"; echo ---; grep -E '^(Error|Warn)' "$RUNNER_TEMP/check-after.txt" | sort | uniq -c | sort -rn | head -20; tail -3 "$RUNNER_TEMP/check-after.txt"
       - name: Serve both builds under the Pages base path
         run: |
           for v in before:8001 after:8002; do

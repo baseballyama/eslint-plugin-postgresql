@@ -1,10 +1,10 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { rules, categoryLabel } from "#lib/data/rules";
+  import { rules, categoryLabel } from "#lib/data/rules.ts";
   import SqlBlock from "#lib/components/SqlBlock.svelte";
   import SeverityBadge from "#lib/components/SeverityBadge.svelte";
   import Playground from "#lib/components/Playground.svelte";
-  import { highlightSql } from "#lib/util/sql-highlight";
+  import { highlightSql } from "#lib/util/sql-highlight.ts";
 
   let { data } = $props();
   const rule = $derived(data.rule);

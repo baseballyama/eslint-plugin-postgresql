@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { rules as allRules, type Severity } from "#lib/data/rules";
-  import { DEFAULT_EXAMPLE } from "#lib/data/examples";
-  import { lint, type LintResult } from "#lib/linter/client";
-  import type { Diagnostic, EnabledRules } from "#lib/linter/types";
+  import { rules as allRules, type Severity } from "#lib/data/rules.ts";
+  import { DEFAULT_EXAMPLE } from "#lib/data/examples.ts";
+  import { lint, type LintResult } from "#lib/linter/client.ts";
+  import type { Diagnostic, EnabledRules } from "#lib/linter/types.ts";
   import Editor from "./Editor.svelte";
 
   /**

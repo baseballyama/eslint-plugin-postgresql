@@ -2,7 +2,7 @@
   import { page } from "$app/state";
   import { resolve } from "$app/paths";
   import Logo from "./Logo.svelte";
-  import { createThemeStore, type Theme } from "#lib/theme.svelte";
+  import { createThemeStore, type Theme } from "#lib/theme.svelte.ts";
 
   // `trailingSlash: "always"` in +layout.ts is what GitHub Pages needs for
   // static prerender — keep the nav targets in sync with the generated

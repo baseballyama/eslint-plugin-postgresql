@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { rules, categoryLabel } from "#lib/data/rules";
-  import { highlightSql } from "#lib/util/sql-highlight";
+  import { rules, categoryLabel } from "#lib/data/rules.ts";
+  import { highlightSql } from "#lib/util/sql-highlight.ts";
 
   const ruleCount = rules.length;
   const errorCount = rules.filter((r) => r.recommended === "error").length;
