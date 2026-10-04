@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@codemirror/commands':
-        specifier: ^6.10.4
+        specifier: ^6.11.1
         version: 6.11.1
       '@codemirror/lang-sql':
         specifier: ^6.10.0
@@ -18,10 +18,10 @@ importers:
         specifier: ^6.12.4
         version: 6.12.4
       '@codemirror/state':
-        specifier: ^6.7.1
+        specifier: ^6.7.6
         version: 6.7.6
       '@codemirror/view':
-        specifier: ^6.43.8
+        specifier: ^6.43.13
         version: 6.43.13
       '@lezer/highlight':
         specifier: ^1.2.3
