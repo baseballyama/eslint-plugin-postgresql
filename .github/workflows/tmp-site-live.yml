@@ -1,0 +1,64 @@
+# Temporary, not for merge: checks the deployed docs site after #282, including
+# the CSS of a deep 404 page.
+name: tmp-site-live
+on:
+  push:
+    branches: [verify/site-live-5d0bb03]
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.21.0"
+      - name: Open the live site
+        timeout-minutes: 10
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw" && cd "$RUNNER_TEMP/pw"
+          npm init -y >/dev/null && npm install playwright@1.63.0 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          cat > live.mjs <<'JS'
+          import { chromium } from "playwright";
+          const site = "https://baseballyama.github.io/eslint-plugin-postgresql/";
+          const pages = ["", "rules/", "rules/no-select-star/", "playground/", "rules/does-not-exist/", "a/b/c/does-not-exist/"];
+          const browser = await chromium.launch();
+          let failed = false;
+          try {
+            for (const path of pages) {
+              const page = await browser.newPage();
+              const errors = [];
+              const failedRequests = [];
+              page.on("pageerror", (e) => errors.push(e.message));
+              page.on("response", (r) => r.status() >= 400 && r.url() !== site + path && failedRequests.push(`${r.status()} ${r.url()}`));
+              const res = await page.goto(site + path, { waitUntil: "networkidle", timeout: 60000 });
+              if (path === "playground/") await page.waitForTimeout(5000);
+              const info = await page.evaluate(() => ({
+                title: document.title,
+                sheets: [...document.styleSheets].filter((s) => { try { return s.cssRules.length > 0; } catch { return true; } }).length,
+                font: getComputedStyle(document.body).fontFamily,
+                bg: getComputedStyle(document.body).backgroundColor,
+                active: [...document.querySelectorAll("nav a.active, header a.active")].map((a) => a.textContent.trim()),
+                text: document.body.innerText.slice(0, 120).replace(/\s+/g, " "),
+                entry: [...document.querySelectorAll("link[rel=modulepreload]")].map((l) => l.href).find((u) => u.includes("start.")) ?? "-",
+              }));
+              const expect404 = path.includes("does-not-exist");
+              const ok = res.status() === (expect404 ? 404 : 200) && info.sheets > 0 && failedRequests.length === 0 && errors.length === 0;
+              console.log(`${ok ? "OK  " : "FAIL"} /${path}: status ${res.status()}, stylesheets ${info.sheets}, font ${info.font.split(",")[0]}, bg ${info.bg}, active [${info.active}], errors [${errors.join(" | ")}], failed [${failedRequests.join(" | ")}], title ${JSON.stringify(info.title)}, entry ${info.entry}, text ${JSON.stringify(info.text)}`);
+              if (!ok) failed = true;
+              await page.screenshot({ path: `${process.env.RUNNER_TEMP}/live-${path.replaceAll("/", "_") || "home"}.png`, fullPage: true });
+              await page.close();
+            }
+          } finally {
+            await browser.close();
+          }
+          process.exitCode = failed ? 1 : 0;
+          JS
+          node live.mjs
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: site-live-shots
+          path: ${{ runner.temp }}/live-*.png
