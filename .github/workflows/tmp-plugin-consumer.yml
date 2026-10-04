@@ -51,8 +51,22 @@ jobs:
           case "${{ matrix.pm }}" in
             npm) npm install eslint@10 "$tgz" ;;
             pnpm) npx -y pnpm@12.9.1 add eslint@10 "$tgz" --config.strict-dep-builds=false ;;
-            yarn) corepack enable && yarn set version stable && printf 'nodeLinker: node-modules\n' >> .yarnrc.yml && cp "$tgz" plugin.tgz && yarn add eslint@10 ./plugin.tgz ;;
+            # Yarn 4 quarantines versions published only recently (YN0016), which
+            # includes postgresql-eslint-parser 0.6.0 today. Pre-approve that one
+            # package in this throwaway app so the check can run.
+            yarn) corepack enable && yarn set version stable && printf 'nodeLinker: node-modules\nnpmPreapprovedPackages:\n  - postgresql-eslint-parser\n' >> .yarnrc.yml && cp "$tgz" plugin.tgz && yarn add eslint@10 ./plugin.tgz ;;
           esac
+      - name: npm audit signatures
+        if: matrix.pm == 'npm'
+        working-directory: ${{ runner.temp }}/app
+        run: |
+          npm ls postgresql-eslint-parser @libpg-query/parser
+          npm audit signatures 2>&1 | tee "$RUNNER_TEMP/audit-signatures.txt"
+      - uses: actions/upload-artifact@v7
+        if: matrix.pm == 'npm'
+        with:
+          name: audit-signatures-node${{ matrix.node }}
+          path: ${{ runner.temp }}/audit-signatures.txt
       - name: Import and lint
         working-directory: ${{ runner.temp }}/app
         run: cp "$GITHUB_WORKSPACE/.github/tmp-consumer/check.mjs" . && node check.mjs
