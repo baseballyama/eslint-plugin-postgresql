@@ -75,3 +75,4 @@ jobs:
         with:
           name: packages
           path: .cmp/*/*.tgz
+          include-hidden-files: true
