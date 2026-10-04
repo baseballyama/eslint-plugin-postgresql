@@ -168,3 +168,8 @@ jobs:
 
       - name: Run build
         run: pnpm build
+
+      # svelte-check works again now that the site is on TypeScript 6
+      # (svelte-check 4 does not support TypeScript 7, which the root uses).
+      - name: Type check
+        run: pnpm check
