@@ -54,11 +54,11 @@ writeFileSync("prisma.ts", "const rows = await prisma.$queryRaw`SELECT * FROM us
 writeFileSync(
   "eslint.embedded.config.js",
   // Same shape as the README: the processor on the host files, and the
-  // **/*.sql block (which also matches the virtual files) with the parser.
-  'import postgresql from "eslint-plugin-postgresql";\nimport parser from "postgresql-eslint-parser";\nexport default [{ files: ["**/*.ts"], processor: postgresql.processors["embedded-sql"] }, { files: ["**/*.sql"], plugins: { postgresql }, languageOptions: { parser }, rules: { "postgresql/no-select-star": "error", "postgresql/require-where-in-delete": "error" } }];\n',
+  // recommended preset on **/*.sql, which also matches the virtual files.
+  'import postgresql from "eslint-plugin-postgresql";\nexport default [{ files: ["**/*.ts"], processor: postgresql.processors["embedded-sql"] }, { files: ["**/*.sql"], ...postgresql.configs.recommended, rules: { ...postgresql.configs.recommended.rules, "postgresql/no-select-star": "error", "postgresql/require-where-in-delete": "error" } }];\n',
 );
 const [prisma] = await new ESLint({ overrideConfigFile: "eslint.embedded.config.js" }).lintFiles(["prisma.ts"]);
-const got = prisma.messages.map((m) => `${m.ruleId ?? "(fatal)"}@${m.line}:${m.column}`);
+const got = prisma.messages.filter((m) => m.fatal || ["postgresql/no-select-star", "postgresql/require-where-in-delete"].includes(m.ruleId)).map((m) => `${m.ruleId ?? "(fatal)"}@${m.line}:${m.column}`);
 console.log(`prisma.ts: ${got.join(", ") || "no messages"}`);
 if (JSON.stringify(got) !== JSON.stringify(["postgresql/no-select-star@1:44", "postgresql/require-where-in-delete@2:26"])) {
   console.log("prisma.ts: expected no-select-star@1:44 and require-where-in-delete@2:26");
