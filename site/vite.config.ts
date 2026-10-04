@@ -6,9 +6,25 @@ import { defineConfig } from "vite";
 // GitHub Pages serves the site under the repository name unless a custom
 // domain is configured. `BASE_PATH` lets CI override it (set to "" for a
 // user/org pages site or a CNAME deployment).
-const base =
+const base = basePath(
   process.env.BASE_PATH ??
-  (process.env.NODE_ENV === "production" ? "/eslint-plugin-postgresql" : "");
+    (process.env.NODE_ENV === "production" ? "/eslint-plugin-postgresql" : ""),
+);
+
+// Kit 3 types `paths.base` as "" or a root-relative path; reject anything else
+// from the environment instead of letting the build produce broken links.
+function basePath(value: string) {
+  if (!isBasePath(value)) {
+    throw new Error(
+      `BASE_PATH must be empty or start with "/", got ${JSON.stringify(value)}`,
+    );
+  }
+  return value;
+}
+
+function isBasePath(value: string): value is "" | `/${string}` {
+  return value === "" || value.startsWith("/");
+}
 
 export default defineConfig({
   plugins: [
