@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 type Style = "always" | "never";
 
@@ -6,7 +6,7 @@ const DEFAULT_STYLE: Style = "always";
 
 const SIDE_KEYWORDS = new Set(["LEFT", "RIGHT", "FULL"]);
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

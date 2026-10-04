@@ -1,9 +1,10 @@
-import { Linter, type Rule } from "eslint";
+import { Linter } from "eslint";
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { parse, stringify } from "yaml";
 import postgresqlParser from "postgresql-eslint-parser";
+import type { RuleModule } from "../src/utils/rule.js";
 
 const UPDATE_FIXTURES = process.env["UPDATE_FIXTURES"] === "true";
 
@@ -23,7 +24,7 @@ type FixtureMeta = {
 };
 
 const flatConfigFor = (
-  rule: Rule.RuleModule,
+  rule: RuleModule,
   ruleName: string,
   options: unknown[] | undefined,
 ) => ({
@@ -39,14 +40,14 @@ const flatConfigFor = (
 const newLinter = () => new Linter({ configType: "flat" });
 
 const lintOnce = (
-  rule: Rule.RuleModule,
+  rule: RuleModule,
   ruleName: string,
   code: string,
   options: unknown[] | undefined,
 ) => newLinter().verify(code, flatConfigFor(rule, ruleName, options));
 
 const lintAndFix = (
-  rule: Rule.RuleModule,
+  rule: RuleModule,
   ruleName: string,
   code: string,
   options: unknown[] | undefined,
@@ -94,7 +95,7 @@ const messageToExpected = (m: Linter.LintMessage): ExpectedError => ({
 });
 
 const buildFixtureMetaFromLint = (
-  rule: Rule.RuleModule,
+  rule: RuleModule,
   ruleName: string,
   code: string,
   options: unknown[] | undefined,
@@ -124,7 +125,7 @@ const buildFixtureMetaFromLint = (
 };
 
 const assertInvalidFixture = (
-  rule: Rule.RuleModule,
+  rule: RuleModule,
   ruleName: string,
   filename: string,
   code: string,
@@ -156,7 +157,7 @@ const assertInvalidFixture = (
 };
 
 const assertValidFixture = (
-  rule: Rule.RuleModule,
+  rule: RuleModule,
   ruleName: string,
   filename: string,
   code: string,
@@ -171,7 +172,7 @@ const assertValidFixture = (
 
 export const runRuleTest = (
   ruleName: string,
-  rule: Rule.RuleModule,
+  rule: RuleModule,
   testDescription: string,
 ) => {
   describe(`${ruleName} — ${testDescription}`, () => {

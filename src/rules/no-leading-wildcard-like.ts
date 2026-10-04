@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
 const getStringConst = (node: unknown): string | undefined => {
@@ -12,7 +13,7 @@ const getStringConst = (node: unknown): string | undefined => {
 const isLikeKind = (kind: unknown): boolean =>
   kind === "AEXPR_LIKE" || kind === "AEXPR_ILIKE";
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {

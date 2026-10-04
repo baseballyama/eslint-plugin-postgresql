@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
 const hasDistinctOn = (
@@ -12,7 +13,7 @@ const hasDistinctOn = (
   );
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

@@ -1,10 +1,11 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName } from "../utils/ast.js";
 
 const TIME_TYPES = new Set(["time", "timetz"]);
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {

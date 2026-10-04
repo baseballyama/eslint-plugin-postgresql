@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 type Style = "always" | "never";
 
@@ -21,7 +22,7 @@ const isConcurrent = (params: ReindexStmt["params"]): boolean => {
   );
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

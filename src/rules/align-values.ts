@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import { getFullSourceRange } from "../utils/ast.js";
 
 const DEFAULT_GAP = 1;
@@ -16,7 +16,7 @@ interface Row {
   line: number;
 }
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

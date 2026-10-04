@@ -1,4 +1,5 @@
-import type { AST, Rule } from "eslint";
+import type { AST } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 type Form = "operator" | "function";
 
@@ -59,7 +60,7 @@ const findTypeEnd = (
   return end;
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

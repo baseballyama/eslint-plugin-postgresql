@@ -1,9 +1,10 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
 const SNAKE_CASE = /^[a-z][a-z0-9_]*$/;
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {

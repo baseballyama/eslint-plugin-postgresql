@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isConstraint } from "../utils/ast.js";
 
@@ -15,7 +16,7 @@ const VALIDATING_CONTYPES: ReadonlySet<string> = new Set([
   "CONSTR_CHECK",
 ]);
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {

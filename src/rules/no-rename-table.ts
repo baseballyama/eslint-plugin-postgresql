@@ -1,11 +1,12 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 interface RenameStmtNode {
   type: "RenameStmt";
   renameType?: string;
 }
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

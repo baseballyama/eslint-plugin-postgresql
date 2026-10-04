@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 type CaseStyle = "upper" | "lower";
 type TypeCaseStyle = CaseStyle | "skip";
@@ -204,7 +204,7 @@ const transformer =
   (value: string): string =>
     style === "upper" ? value.toUpperCase() : value.toLowerCase();
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

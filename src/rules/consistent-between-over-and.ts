@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import { getFullSourceRange } from "../utils/ast.js";
 
 type Style = "always" | "never";
@@ -14,7 +14,7 @@ const opName = (node: unknown): string | null => {
   return typeof sval === "string" ? sval : null;
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {
