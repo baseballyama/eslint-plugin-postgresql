@@ -33,6 +33,11 @@
       "description": "GitHub Actions: group all updates so the matrix moves together",
       "matchManagers": ["github-actions"],
       "groupName": "github-actions"
+    },
+    {
+      "description": "engines.node is a deliberate minimum (site/: SvelteKit 3 needs >=22.17); rangeStrategy bump would raise it with every Node release",
+      "matchDepTypes": ["engines"],
+      "enabled": false
     }
   ],
   "lockFileMaintenance": {

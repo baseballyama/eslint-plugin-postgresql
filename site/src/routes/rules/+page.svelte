@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-  import { rules, categoryLabel, type RuleMeta, type Severity, type RuleType } from "$lib/data/rules";
-  import SeverityBadge from "$lib/components/SeverityBadge.svelte";
+  import { resolve } from "$app/paths";
+  import { rules, categoryLabel, type RuleMeta, type Severity, type RuleType } from "#lib/data/rules.ts";
+  import SeverityBadge from "#lib/components/SeverityBadge.svelte";
 
   let query = $state("");
   let severityFilter = $state<"all" | Severity>("all");
@@ -135,7 +135,7 @@
     <ul class="rule-list">
       {#each filtered as r (r.name)}
         <li class="rule-card">
-          <a class="rule-link" href={`${base}/rules/${r.name}/`}>
+          <a class="rule-link" href={resolve(`rules/${r.name}/`)}>
             <div class="rule-head">
               <h3 class="mono name">{r.name}</h3>
               <div class="badges">
