@@ -53,7 +53,9 @@ process.exitCode = failed ? 1 : 0;
 writeFileSync("prisma.ts", "const rows = await prisma.$queryRaw`SELECT * FROM users`;\nawait prisma.$executeRaw`DELETE FROM sessions`;\n");
 writeFileSync(
   "eslint.embedded.config.js",
-  'import postgresql from "eslint-plugin-postgresql";\nexport default [{ files: ["**/*.ts"], processor: postgresql.processors["embedded-sql"], rules: {} }, { files: ["**/*.ts/**/*.sql"], plugins: { postgresql }, rules: { "postgresql/no-select-star": "error", "postgresql/require-where-in-delete": "error" } }];\n',
+  // Same shape as the README: the processor on the host files, and the
+  // **/*.sql block (which also matches the virtual files) with the parser.
+  'import postgresql from "eslint-plugin-postgresql";\nimport parser from "postgresql-eslint-parser";\nexport default [{ files: ["**/*.ts"], processor: postgresql.processors["embedded-sql"] }, { files: ["**/*.sql"], plugins: { postgresql }, languageOptions: { parser }, rules: { "postgresql/no-select-star": "error", "postgresql/require-where-in-delete": "error" } }];\n',
 );
 const [prisma] = await new ESLint({ overrideConfigFile: "eslint.embedded.config.js" }).lintFiles(["prisma.ts"]);
 const got = prisma.messages.map((m) => `${m.ruleId ?? "(fatal)"}@${m.line}:${m.column}`);
