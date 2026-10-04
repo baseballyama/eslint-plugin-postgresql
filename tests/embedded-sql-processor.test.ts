@@ -65,7 +65,8 @@ describe("processors/embedded-sql", () => {
       ),
     ).toEqual([
       { ruleId: "postgresql/no-select-star", line: 1, column: 44 },
-      { ruleId: "postgresql/require-where-in-delete", line: 2, column: 38 },
+      // The DELETE statement starts at column 26, right after the backtick.
+      { ruleId: "postgresql/require-where-in-delete", line: 2, column: 26 },
     ]);
   });
 
