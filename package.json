@@ -53,9 +53,9 @@
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.0",
     "@changesets/cli": "^3.0.0",
-    "@types/node": "^24.13.3",
+    "@types/node": "^24.13.6",
     "@vitest/coverage-v8": "^4.1.10",
-    "knip": "^6.32.2",
+    "knip": "^6.32.3",
     "oxlint": "^1.78.0",
     "prettier": "^3.9.6",
     "publint": "^0.3.23",

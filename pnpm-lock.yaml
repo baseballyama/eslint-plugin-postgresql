@@ -25,13 +25,13 @@ importers:
         specifier: ^3.0.0
         version: 3.0.3
       '@types/node':
-        specifier: ^24.13.3
+        specifier: ^24.13.6
         version: 24.19.0
       '@vitest/coverage-v8':
         specifier: ^4.1.10
         version: 4.1.11(vitest@4.1.11)
       knip:
-        specifier: ^6.32.2
+        specifier: ^6.32.3
         version: 6.39.0
       oxlint:
         specifier: ^1.78.0
