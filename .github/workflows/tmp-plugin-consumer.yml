@@ -1,0 +1,58 @@
+# Temporary, not for merge: packs this branch's plugin (no publish) and
+# installs it fresh with npm, pnpm and yarn on Node 22 and 24, next to ESLint
+# 10, then lints SQL and a Prisma file through the installed package.
+name: tmp-plugin-consumer
+on:
+  push:
+    branches: [verify/plugin-consumer-7c2d5c2]
+permissions:
+  contents: read
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+          mkdir -p "$RUNNER_TEMP/pack" && npm pack --pack-destination "$RUNNER_TEMP/pack"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: plugin-packed
+          path: ${{ runner.temp }}/pack/*.tgz
+  fresh-consumer:
+    needs: pack
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        pm: [npm, pnpm, yarn]
+        node: [22, 24]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: plugin-packed
+          path: ${{ runner.temp }}/pack
+      - name: Fresh install of the packed plugin
+        working-directory: ${{ runner.temp }}
+        run: |
+          tgz=$(ls "$RUNNER_TEMP"/pack/*.tgz)
+          mkdir app && cd app && echo '{"name":"app","private":true,"type":"module"}' > package.json
+          case "${{ matrix.pm }}" in
+            npm) npm install eslint@10 "$tgz" ;;
+            pnpm) npx -y pnpm@12.9.1 add eslint@10 "$tgz" --config.strict-dep-builds=false ;;
+            yarn) corepack enable && yarn set version stable && printf 'nodeLinker: node-modules\n' >> .yarnrc.yml && cp "$tgz" plugin.tgz && yarn add eslint@10 ./plugin.tgz ;;
+          esac
+      - name: Import and lint
+        working-directory: ${{ runner.temp }}/app
+        run: cp "$GITHUB_WORKSPACE/.github/tmp-consumer/check.mjs" . && node check.mjs
