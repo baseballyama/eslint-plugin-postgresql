@@ -1,0 +1,46 @@
+# Temporary, not for merge: regenerates the lockfile and the YAML fixture
+# snapshots for build/parser-0.6.0 (postgresql-eslint-parser ^0.6.0), and
+# uploads both as a patch. Then runs the quality gate and the tests.
+name: tmp-parser-060
+on:
+  push:
+    branches: [verify/plugin-parser-060-046d560]
+permissions:
+  contents: read
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Regenerate the lockfile
+        run: |
+          pnpm install --no-frozen-lockfile
+          pnpm dedupe
+          pnpm dedupe --check
+          pnpm install --frozen-lockfile
+          grep -A2 "postgresql-eslint-parser':" pnpm-lock.yaml | head -3
+          grep -E "^  postgresql-eslint-parser@" pnpm-lock.yaml
+          grep -qE "^  postgresql-eslint-parser@0\.6\.0:" pnpm-lock.yaml
+      - name: Regenerate the fixture snapshots
+        run: |
+          set -o pipefail
+          pnpm update-fixtures 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep -E "Tests |Test Files|×" || true
+          git status --short
+          git diff --stat
+          git diff -- 'tests/fixtures' > "$RUNNER_TEMP/fixtures.patch"
+          cp pnpm-lock.yaml "$RUNNER_TEMP/pnpm-lock.yaml"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: parser-060-regen
+          path: |
+            ${{ runner.temp }}/fixtures.patch
+            ${{ runner.temp }}/pnpm-lock.yaml
+      - name: Quality gate
+        run: pnpm check:all
+      - name: Tests
+        run: pnpm test
