@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-  import { rules, categoryLabel } from "$lib/data/rules";
-  import { highlightSql } from "$lib/util/sql-highlight";
+  import { resolve } from "$app/paths";
+  import { rules, categoryLabel } from "#lib/data/rules";
+  import { highlightSql } from "#lib/util/sql-highlight";
 
   const ruleCount = rules.length;
   const errorCount = rules.filter((r) => r.recommended === "error").length;
@@ -64,8 +64,8 @@
     </p>
 
     <div class="cta-row">
-      <a class="btn primary" href={`${base}/playground/`}>Open the Playground</a>
-      <a class="btn ghost" href={`${base}/rules/`}>Browse rules</a>
+      <a class="btn primary" href={resolve("playground/")}>Open the Playground</a>
+      <a class="btn ghost" href={resolve("rules/")}>Browse rules</a>
     </div>
 
     <div class="install">
@@ -120,8 +120,8 @@
         they lint TypeScript.
       </p>
       <p class="usage-lede">
-        See the <a href={`${base}/rules/`}>rules</a> for what fires by default, or try the
-        <a href={`${base}/playground/`}>playground</a> to feel the diagnostics in your hands.
+        See the <a href={resolve("rules/")}>rules</a> for what fires by default, or try the
+        <a href={resolve("playground/")}>playground</a> to feel the diagnostics in your hands.
       </p>
     </div>
     <pre class="code"><code>{@html highlightSql(configSnippet)}</code></pre>
@@ -143,7 +143,7 @@
           <ul class="cat-rules">
             {#each list as r (r.name)}
               <li>
-                <a class="rule-chip" href={`${base}/rules/${r.name}/`}>
+                <a class="rule-chip" href={resolve(`rules/${r.name}/`)}>
                   <code>{r.name}</code>
                 </a>
               </li>

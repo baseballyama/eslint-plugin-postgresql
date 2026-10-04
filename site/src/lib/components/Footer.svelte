@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
 </script>
 
 <footer class="foot">
@@ -14,9 +14,9 @@
     <div class="foot-col">
       <div class="foot-heading">Project</div>
       <ul>
-        <li><a href={`${base}/`}>Home</a></li>
-        <li><a href={`${base}/rules/`}>Rules</a></li>
-        <li><a href={`${base}/playground/`}>Playground</a></li>
+        <li><a href={resolve("/")}>Home</a></li>
+        <li><a href={resolve("rules/")}>Rules</a></li>
+        <li><a href={resolve("playground/")}>Playground</a></li>
       </ul>
     </div>
     <div class="foot-col">

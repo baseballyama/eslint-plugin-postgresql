@@ -1,5 +1,5 @@
 import { error } from "@sveltejs/kit";
-import { rules, ruleByName } from "$lib/data/rules";
+import { rules, ruleByName } from "#lib/data/rules";
 import type { PageLoad } from "./$types";
 import type { EntryGenerator } from "./$types";
 
