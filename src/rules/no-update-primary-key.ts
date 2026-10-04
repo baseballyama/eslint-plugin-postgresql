@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isResTarget } from "../utils/ast.js";
 
@@ -7,7 +8,7 @@ import { isResTarget } from "../utils/ast.js";
 // names without redefining the default.
 const DEFAULT_PK_COLUMN_NAMES: readonly string[] = ["id"];
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

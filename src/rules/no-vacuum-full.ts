@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 interface DefElem {
   type: "DefElem";
@@ -15,7 +16,7 @@ const hasFullOption = (options: VacuumStmt["options"]): boolean => {
   return options.some((o) => o && o.type === "DefElem" && o.defname === "full");
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

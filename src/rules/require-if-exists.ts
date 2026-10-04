@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 interface Tokenish {
   type?: string;
@@ -10,7 +10,7 @@ interface Tokenish {
   };
 }
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {

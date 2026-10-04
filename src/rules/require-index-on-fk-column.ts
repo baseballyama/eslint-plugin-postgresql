@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 interface FkInfo {
   // The leading column of the FK key. Index lookups for FK enforcement
@@ -21,7 +22,7 @@ const getNameFromString = (n: unknown): string | undefined => {
   return typeof sval === "string" ? sval : undefined;
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

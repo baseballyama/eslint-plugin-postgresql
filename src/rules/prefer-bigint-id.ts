@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName, isColumnDef, isConstraint } from "../utils/ast.js";
 
@@ -38,7 +39,7 @@ const isTablePrimaryKeyOn = (
   });
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {

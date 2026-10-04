@@ -1,10 +1,10 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 type Operator = "<>" | "!=";
 
 const DEFAULT: Operator = "<>";
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

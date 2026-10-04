@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { PLPGSQL_RESERVED_KEYWORDS } from "../utils/pg-keywords.js";
 
@@ -122,7 +122,7 @@ const isFieldAccessTarget = (source: string, start: number): boolean => {
   return true;
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

@@ -1,6 +1,6 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

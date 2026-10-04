@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import { PG_KEYWORDS_REQUIRING_QUOTES } from "../utils/pg-keywords.js";
 
 // PostgreSQL unquoted identifiers are case-folded to lowercase. So
@@ -8,7 +8,7 @@ import { PG_KEYWORDS_REQUIRING_QUOTES } from "../utils/pg-keywords.js";
 // text is already exclusively lowercase.
 const SAFE_UNQUOTED = /^[a-z_][a-z0-9_$]*$/;
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "layout",
     docs: {

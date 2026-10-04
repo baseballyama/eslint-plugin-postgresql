@@ -1,4 +1,5 @@
-import type { AST, Rule } from "eslint";
+import type { AST } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 // PostgreSQL stores identifiers in a fixed-width `name` column whose size is
 // `NAMEDATALEN`. With the default `NAMEDATALEN = 64`, an identifier can hold
@@ -25,7 +26,7 @@ const isQuotedIdentifier = (value: unknown): value is string =>
   value.charCodeAt(0) === 0x22 /* " */ &&
   value.charCodeAt(value.length - 1) === 0x22;
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

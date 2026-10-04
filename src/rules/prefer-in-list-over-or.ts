@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import { getFullSourceRange } from "../utils/ast.js";
 
 interface EqArg {
@@ -23,7 +23,7 @@ const isEquality = (node: unknown): node is EqExpr => {
   return true;
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "suggestion",
     docs: {

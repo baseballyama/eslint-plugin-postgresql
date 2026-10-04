@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isConstraint } from "../utils/ast.js";
 
@@ -46,7 +47,7 @@ const findMissingColumns = (
   return required.filter((c) => !present.has(c));
 };
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {

@@ -1,11 +1,12 @@
 import type { Rule } from "eslint";
+import type { RuleModule } from "../utils/rule.js";
 
 interface DefElem {
   defname?: string;
   arg?: { type?: string; boolval?: boolean };
 }
 
-const rule: Rule.RuleModule = {
+const rule: RuleModule = {
   meta: {
     type: "problem",
     docs: {
