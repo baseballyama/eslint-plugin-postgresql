@@ -41,11 +41,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Pack both versions
+      - name: Pack and install both versions like a user would
         run: |
           mkdir -p .cmp/base .cmp/head
-          (cd .cmp/base && npm pack eslint-plugin-postgresql@0.24.0 --silent && tar xzf ./*.tgz)
-          npm pack --silent --pack-destination .cmp/head && (cd .cmp/head && tar xzf ./*.tgz)
+          npm pack eslint-plugin-postgresql@0.24.0 --silent --pack-destination .cmp/base
+          npm pack --silent --pack-destination .cmp/head
+          for v in base head; do
+            (cd .cmp/$v && tar xzf ./*.tgz && mkdir proj && cd proj && npm init -y >/dev/null \
+              && npm install --no-audit --no-fund ../*.tgz eslint@10 >/dev/null)
+          done
           {
             echo "### Tarball contents (0.24.0 → this build)"
             echo '```diff'
@@ -60,8 +64,12 @@ jobs:
             (cd .cmp/base/package && find dist -type f -exec wc -c {} + | sort -k2) | sed 's/^/0.24.0 /'
             (cd .cmp/head/package && find dist -type f -exec wc -c {} + | sort -k2) | sed 's/^/head   /'
             echo '```'
+            echo "### Installed parser versions"
+            echo '```'
+            for v in base head; do echo "$v: $(node -p "require('./.cmp/$v/proj/node_modules/postgresql-eslint-parser/package.json').version")"; done
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      - run: node .github/tmp-compare/compare.mjs "$PWD/.cmp/base/package" "$PWD/.cmp/head/package"
+      - run: node .github/tmp-compare/compare.mjs "$PWD/.cmp/base/proj/node_modules/eslint-plugin-postgresql" "$PWD/.cmp/head/proj/node_modules/eslint-plugin-postgresql"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
