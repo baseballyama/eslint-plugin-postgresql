@@ -34,16 +34,16 @@ importers:
         specifier: ^3.0.10
         version: 3.0.10(@sveltejs/kit@2.70.3(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.1)(vite@8.3.1(@types/node@24.19.0)))(svelte@5.57.1)(typescript@7.0.2)(vite@8.3.1(@types/node@24.19.0)))
       '@sveltejs/kit':
-        specifier: ^2.70.2
+        specifier: ^2.70.3
         version: 2.70.3(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.1)(vite@8.3.1(@types/node@24.19.0)))(svelte@5.57.1)(typescript@7.0.2)(vite@8.3.1(@types/node@24.19.0))
       '@sveltejs/vite-plugin-svelte':
-        specifier: ^7.3.0
+        specifier: ^7.3.1
         version: 7.3.1(svelte@5.57.1)(vite@8.3.1(@types/node@24.19.0))
       '@types/node':
-        specifier: ^24.13.3
+        specifier: ^24.19.0
         version: 24.19.0
       svelte:
-        specifier: ^5.56.9
+        specifier: ^5.57.1
         version: 5.57.1
       svelte-check:
         specifier: ^4.7.6
@@ -52,7 +52,7 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vite:
-        specifier: ^8.1.5
+        specifier: ^8.3.1
         version: 8.3.1(@types/node@24.19.0)
 
 packages:
