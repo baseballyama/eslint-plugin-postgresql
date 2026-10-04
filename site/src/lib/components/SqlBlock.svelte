@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { highlightSql } from "$lib/util/sql-highlight";
+  import { highlightSql } from "#lib/util/sql-highlight.ts";
 
   let {
     sql,

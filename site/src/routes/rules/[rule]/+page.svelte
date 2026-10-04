@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-  import { rules, categoryLabel } from "$lib/data/rules";
-  import SqlBlock from "$lib/components/SqlBlock.svelte";
-  import SeverityBadge from "$lib/components/SeverityBadge.svelte";
-  import Playground from "$lib/components/Playground.svelte";
-  import { highlightSql } from "$lib/util/sql-highlight";
+  import { resolve } from "$app/paths";
+  import { rules, categoryLabel } from "#lib/data/rules.ts";
+  import SqlBlock from "#lib/components/SqlBlock.svelte";
+  import SeverityBadge from "#lib/components/SeverityBadge.svelte";
+  import Playground from "#lib/components/Playground.svelte";
+  import { highlightSql } from "#lib/util/sql-highlight.ts";
 
   let { data } = $props();
   const rule = $derived(data.rule);
@@ -74,7 +74,7 @@
 <article>
   <header class="rule-head">
     <div class="shell-wide">
-      <a class="back" href={`${base}/rules/`}>
+      <a class="back" href={resolve("rules/")}>
         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
           <path
             d="M13 8H4M7 4L3 8l4 4"
@@ -197,7 +197,7 @@
 
   <nav class="prev-next shell-wide">
     {#if prev}
-      <a class="prev-next-link" href={`${base}/rules/${prev.name}/`}>
+      <a class="prev-next-link" href={resolve(`rules/${prev.name}/`)}>
         <span class="dir">← Previous</span>
         <span class="rn mono">{prev.name}</span>
       </a>
@@ -205,7 +205,7 @@
       <span></span>
     {/if}
     {#if next}
-      <a class="prev-next-link right" href={`${base}/rules/${next.name}/`}>
+      <a class="prev-next-link right" href={resolve(`rules/${next.name}/`)}>
         <span class="dir">Next →</span>
         <span class="rn mono">{next.name}</span>
       </a>

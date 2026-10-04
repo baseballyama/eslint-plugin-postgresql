@@ -1,24 +1,22 @@
 <script lang="ts">
-  import { page } from "$app/stores";
-  import { base } from "$app/paths";
+  import { page } from "$app/state";
+  import { resolve } from "$app/paths";
   import Logo from "./Logo.svelte";
-  import { createThemeStore, type Theme } from "$lib/theme.svelte";
+  import { createThemeStore, type Theme } from "#lib/theme.svelte.ts";
 
   // `trailingSlash: "always"` in +layout.ts is what GitHub Pages needs for
   // static prerender — keep the nav targets in sync with the generated
   // routes (`/rules/`, `/playground/`) so links resolve without a redirect.
   const items = [
-    { href: "/", label: "Home" },
-    { href: "/rules/", label: "Rules" },
-    { href: "/playground/", label: "Playground" },
+    { href: resolve("/"), route: "/", label: "Home" },
+    { href: resolve("rules/"), route: "/rules", label: "Rules" },
+    { href: resolve("playground/"), route: "/playground", label: "Playground" },
   ];
 
-  const isActive = (href: string) => {
-    const pathname = $page.url.pathname;
-    const target = `${base}${href}`;
-    if (href === "/") return pathname === `${base}/` || pathname === base;
-    return pathname.startsWith(target);
-  };
+  // Compared by route ID: during prerendering `resolve` returns a relative
+  // base, which never equals the absolute `page.url.pathname`.
+  const isActive = (route: string) =>
+    route === "/" ? page.route.id === "/" : (page.route.id?.startsWith(route) ?? false);
 
   const theme = createThemeStore();
   const label: Record<Theme, string> = {
@@ -30,7 +28,7 @@
 
 <header class="nav">
   <div class="shell row">
-    <a class="brand" href={`${base}/`}>
+    <a class="brand" href={resolve("/")}>
       <span class="mark" aria-hidden="true"><Logo size={22} /></span>
       <span class="name">eslint-plugin-postgresql</span>
     </a>
@@ -39,8 +37,8 @@
       {#each items as item (item.href)}
         <a
           class="link"
-          class:active={isActive(item.href)}
-          href={`${base}${item.href}`}
+          class:active={isActive(item.route)}
+          href={item.href}
         >
           {item.label}
         </a>

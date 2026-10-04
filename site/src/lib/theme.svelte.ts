@@ -3,7 +3,7 @@
  * it on `<html data-theme="…">`. The corresponding CSS in `app.css` reads
  * that attribute (plus `prefers-color-scheme` for the `auto` fallback).
  */
-import { browser } from "$app/environment";
+import { browser } from "$app/env";
 
 export type Theme = "auto" | "light" | "dark";
 
