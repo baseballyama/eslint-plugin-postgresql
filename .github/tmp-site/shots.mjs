@@ -68,6 +68,7 @@ const internal = new Set(
 );
 for (const url of internal) {
   const res = await fetch(url, { redirect: "manual" });
+  await res.arrayBuffer();
   if (res.status !== 200) {
     failed = true;
     console.log(`link ${url.replace(sites.after, "")} -> ${res.status}`);
