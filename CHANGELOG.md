@@ -1,5 +1,13 @@
 # eslint-plugin-postgresql
 
+## 0.25.1
+
+### Patch Changes
+
+- [#291](https://github.com/baseballyama/eslint-plugin-postgresql/pull/291) [`fcdda6c`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/fcdda6c4851a5a5fa90d930c1e80fe8344f4ee3e) Thanks [@abrahamguo](https://github.com/abrahamguo)! - The `embedded-sql` processor now lints templates whose tag has type
+  arguments, such as ``sql<Row[]>`...` `` or ``prisma.$queryRaw<User[]>`...` ``.
+  Before, the closing `>` was taken as the tag, so these templates were skipped.
+
 ## 0.25.0
 
 ### Minor Changes
