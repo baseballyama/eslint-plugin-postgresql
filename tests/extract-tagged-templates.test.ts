@@ -30,8 +30,23 @@ describe("extractTaggedTemplates", () => {
       "sql<number>`SELECT 1`;",
       "sql<Array<Row>>`SELECT 2`;",
       "sql<Pick<Row, `id` | `name`>[]>`SELECT 3`;",
+      "sql<{ id: number; onRow: () => void }>`SELECT 4`;",
     ].join("\n");
-    expect(textsOf(code)).toEqual(["SELECT 1", "SELECT 2", "SELECT 3"]);
+    expect(textsOf(code)).toEqual([
+      "SELECT 1",
+      "SELECT 2",
+      "SELECT 3",
+      "SELECT 4",
+    ]);
+  });
+
+  it("does not mistake a less-than after a tag for type arguments", () => {
+    const code = [
+      "if (sql < max) log();",
+      "const f = () => `SELECT 1`;",
+      "sql<Row>`SELECT 2`;",
+    ].join("\n");
+    expect(textsOf(code)).toEqual(["SELECT 2"]);
   });
 
   it("matches every tag it is given", () => {

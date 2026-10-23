@@ -252,10 +252,19 @@ export const extractTaggedTemplates = (
       i += 1;
       continue;
     }
-    if (char === "<" && (typeArguments !== null || tags.has(lastToken))) {
-      typeArguments ??= { tag: lastToken, depth: 0 };
+    // A `<` after a tag may be a less-than (`sql < max`) that never closes, so
+    // each `<` after a tag restarts the count instead of nesting into it.
+    if (char === "<" && tags.has(lastToken)) {
+      typeArguments = { tag: lastToken, depth: 1 };
+    } else if (char === "<" && typeArguments !== null) {
       typeArguments.depth += 1;
-    } else if (char === ">" && typeArguments !== null) {
+    } else if (
+      char === ">" &&
+      typeArguments !== null &&
+      // The `>` of an arrow, as in `sql<() => Row>` or a later `() => ...`,
+      // closes nothing.
+      code.charAt(i - 1) !== "="
+    ) {
       typeArguments.depth -= 1;
       if (typeArguments.depth === 0) {
         lastToken = typeArguments.tag;
