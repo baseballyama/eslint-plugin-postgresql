@@ -25,6 +25,15 @@ describe("extractTaggedTemplates", () => {
     expect(textsOf("db.sql`SELECT 1`")).toEqual(["SELECT 1"]);
   });
 
+  it("skips type arguments between the tag and the backtick", () => {
+    const code = [
+      "sql<number>`SELECT 1`;",
+      "sql<Array<Row>>`SELECT 2`;",
+      "sql<Pick<Row, `id` | `name`>[]>`SELECT 3`;",
+    ].join("\n");
+    expect(textsOf(code)).toEqual(["SELECT 1", "SELECT 2", "SELECT 3"]);
+  });
+
   it("matches every tag it is given", () => {
     const code = "prisma.$queryRaw`SELECT 1`; tx.$executeRaw`DELETE FROM t`;";
     const tags = new Set(["$queryRaw", "$executeRaw"]);

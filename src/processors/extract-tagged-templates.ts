@@ -140,7 +140,8 @@ const skipRegex = (code: string, start: number): number => {
  * source whose tag is one of `tags`, along with the `${...}` spans inside it.
  *
  * The tag is the last identifier before the backtick, so a member expression
- * such as `prisma.$queryRaw` matches on `$queryRaw`.
+ * such as `prisma.$queryRaw` matches on `$queryRaw`. Type arguments after the
+ * tag, as in ``sql<Row[]>`...` ``, are skipped.
  *
  * This is a lexer, not a parser: it tracks strings, comments, regular
  * expressions and nested template literals so a backtick inside any of them
@@ -155,6 +156,8 @@ export const extractTaggedTemplates = (
   const found: TaggedTemplate[] = [];
   let frame: Frame = { kind: "code", parent: null, braceDepth: 0 };
   let lastToken = "";
+  /** The tag whose type arguments are being skipped, and how many `<` are open. */
+  let typeArguments: { tag: string; depth: number } | null = null;
   let i = 0;
 
   while (i < code.length) {
@@ -248,6 +251,18 @@ export const extractTaggedTemplates = (
       lastToken = "}";
       i += 1;
       continue;
+    }
+    if (char === "<" && (typeArguments !== null || tags.has(lastToken))) {
+      typeArguments ??= { tag: lastToken, depth: 0 };
+      typeArguments.depth += 1;
+    } else if (char === ">" && typeArguments !== null) {
+      typeArguments.depth -= 1;
+      if (typeArguments.depth === 0) {
+        lastToken = typeArguments.tag;
+        typeArguments = null;
+        i += 1;
+        continue;
+      }
     }
 
     if (!WHITESPACE.test(char)) lastToken = char;
