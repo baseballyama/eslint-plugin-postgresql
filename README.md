@@ -190,7 +190,8 @@ What the processor picks up, and what it leaves alone:
   and the string that actually reaches PostgreSQL differ there.
 - **Recognised tags** are `sql` (Drizzle, Kysely, postgres.js) and
   `$queryRaw` / `$executeRaw` (Prisma). The tag is the last identifier before
-  the backtick, so `prisma.$queryRaw` matches. Anything that is not a plain
+  the backtick, so `prisma.$queryRaw` matches, and type arguments after it are
+  skipped, so ``sql<Row[]>`...` `` matches too. Anything that is not a plain
   identifier is out of reach: Prisma's `$queryRawUnsafe("...")` and TypeORM's
   `.query("...")` take a string argument rather than a template, and modern
   slonik tags with `sql.type(schema)`, whose last token is a `)`.
