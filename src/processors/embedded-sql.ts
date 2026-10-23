@@ -90,14 +90,12 @@ interface EmbeddedBlock {
   text: string;
   /** Offset in the host file of the first character of `text`. */
   start: number;
-  /** 1-based line in the host file of `start`. */
-  startLine: number;
-  /** 0-based column in the host file of `start`. */
-  startColumn: number;
   /** Placeholder spans, as `[start, end)` offsets into `text`. */
   placeholders: OffsetRange[];
   /** Offset of each line start in `text`, for line/column → offset lookups. */
   lineStarts: number[];
+  /** Offset of each line start in the host file, for offset → line/column. */
+  hostLineStarts: number[];
 }
 
 const lineStartsOf = (text: string): number[] => {
@@ -208,27 +206,32 @@ const buildBlock = (
   // `no-syntax-error` still sees genuine typos.
   if (placeholders.length > 0 && hasParseError(text)) return null;
 
-  const lineIndex = lineIndexOf(hostLineStarts, template.start);
   return {
     text,
     start: template.start,
-    startLine: lineIndex + 1,
-    startColumn: template.start - (hostLineStarts[lineIndex] ?? 0),
     placeholders,
     lineStarts: lineStartsOf(text),
+    hostLineStarts,
   };
 };
 
+/**
+ * Maps a block position into the host file through offsets, which line up by
+ * construction. Lines do not: a placeholder has no line breaks, so one that
+ * stands in for a multi-line `${...}` leaves the block with fewer lines.
+ */
 const translatePosition = (
   block: EmbeddedBlock,
   line: number,
   column: number,
-): { line: number; column: number } => ({
-  line: block.startLine + line - 1,
-  // Only the first line of the block is indented by the host file; later
-  // lines start at column 1 in both coordinate systems.
-  column: line === 1 ? block.startColumn + column : column,
-});
+): { line: number; column: number } => {
+  const offset = block.start + offsetAt(block.lineStarts, line, column);
+  const lineIndex = lineIndexOf(block.hostLineStarts, offset);
+  return {
+    line: lineIndex + 1,
+    column: offset - (block.hostLineStarts[lineIndex] ?? 0) + 1,
+  };
+};
 
 const overlapsPlaceholder = (
   placeholders: OffsetRange[],

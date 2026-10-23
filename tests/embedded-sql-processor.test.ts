@@ -100,6 +100,21 @@ describe("processors/embedded-sql", () => {
     ).toEqual([{ ruleId: "postgresql/no-select-star", line: 1, column: 22 }]);
   });
 
+  it("maps positions after an interpolation that spans several lines", () => {
+    const code = [
+      "const q = sql`SELECT ${columns({",
+      "  id: true,",
+      "})}, *",
+      "FROM (SELECT * FROM users) AS u`;",
+    ].join("\n");
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 3, column: 6 },
+      { ruleId: "postgresql/no-select-star", line: 4, column: 14 },
+    ]);
+  });
+
   it("reports a genuine syntax error in a template without interpolations", () => {
     const code = "const q = sql`SELECT FROM WHERE`;";
     const messages = lintSql(code, { "postgresql/no-syntax-error": "error" });
