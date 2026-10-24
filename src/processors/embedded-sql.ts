@@ -98,10 +98,17 @@ interface EmbeddedBlock {
   hostLineStarts: number[];
 }
 
+/**
+ * The line breaks ESLint and `postgresql-eslint-parser` count. Positions are
+ * mapped through offsets, so a line start we miss here would shift every
+ * report after it.
+ */
+const LINE_BREAK = /\r\n|[\r\n\u2028\u2029]/gu;
+
 const lineStartsOf = (text: string): number[] => {
   const starts = [0];
-  for (let i = 0; i < text.length; i += 1) {
-    if (text.charAt(i) === "\n") starts.push(i + 1);
+  for (const match of text.matchAll(LINE_BREAK)) {
+    starts.push(match.index + match[0].length);
   }
   return starts;
 };
