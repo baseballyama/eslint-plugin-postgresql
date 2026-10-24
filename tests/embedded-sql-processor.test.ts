@@ -142,6 +142,38 @@ describe("processors/embedded-sql", () => {
     );
   });
 
+  it("stays silent when the parse fails just after an interpolation", () => {
+    // Each placeholder is accepted as a name, so the parse fails right after
+    // it, on the reserved word that starts the next clause or at the end of
+    // the statement: the `${...}` held a clause.
+    const code = [
+      "const a = sql`WITH ${ctes} SELECT * FROM recent`;",
+      "const b = sql`SELECT * FROM orders JOIN users ${joinCondition}`;",
+    ].join("\n");
+    expect(lintSql(code, { "postgresql/no-syntax-error": "error" })).toEqual(
+      [],
+    );
+  });
+
+  it("reports a syntax error the author made in an interpolated template", () => {
+    // The parse fails away from `${id}`, or right after it on something that
+    // cannot start a clause, so the mistake is in the author's SQL.
+    const code = [
+      "const a = sql`SELECT id,, name FROM users WHERE id = ${id}`;",
+      "const b = sql`SELECT id FROM users WHERE id = ${id} ORDER BYY id`;",
+      "const c = sql`SELECT id FROM users WHERE id = ${id} ANDD active`;",
+      "const d = sql`SELECT id FROM users WHERE id = ${id},, active`;",
+    ].join("\n");
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-syntax-error": "error" })),
+    ).toEqual([
+      { ruleId: "postgresql/no-syntax-error", line: 1, column: 15 },
+      { ruleId: "postgresql/no-syntax-error", line: 2, column: 15 },
+      { ruleId: "postgresql/no-syntax-error", line: 3, column: 15 },
+      { ruleId: "postgresql/no-syntax-error", line: 4, column: 15 },
+    ]);
+  });
+
   it("does not report on the placeholder that stands in for an interpolation", () => {
     // The expression is longer than PostgreSQL's identifier limit, so the
     // placeholder would trip no-identifier-too-long if it were reported on.
