@@ -100,6 +100,31 @@ describe("processors/embedded-sql", () => {
     ).toEqual([{ ruleId: "postgresql/no-select-star", line: 1, column: 22 }]);
   });
 
+  it("maps positions after an interpolation that spans several lines", () => {
+    const code = [
+      "const q = sql`SELECT ${columns({",
+      "  id: true,",
+      "})}, *",
+      "FROM (SELECT * FROM users) AS u`;",
+    ].join("\n");
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 3, column: 6 },
+      { ruleId: "postgresql/no-select-star", line: 4, column: 14 },
+    ]);
+  });
+
+  it("maps positions across every line break ESLint counts", () => {
+    // A lone `\r` inside the SQL and a U+2028 before the template each start
+    // a new line for ESLint and for the parser.
+    const code =
+      "// a\u2028b\nconst q = sql`SELECT ${columns({\r\n})}, 1,\r *\nFROM users`;";
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([{ ruleId: "postgresql/no-select-star", line: 5, column: 2 }]);
+  });
+
   it("reports a genuine syntax error in a template without interpolations", () => {
     const code = "const q = sql`SELECT FROM WHERE`;";
     const messages = lintSql(code, { "postgresql/no-syntax-error": "error" });
