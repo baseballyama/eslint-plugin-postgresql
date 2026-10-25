@@ -28,6 +28,16 @@ const VIRTUAL_EXTENSION = ".sql";
 const WHITESPACE = /\s/;
 const WORD_PART = /[A-Za-z_]/;
 
+/** SQL ending where only a parenthesized list can follow. */
+const LIST_POSITION = /\b(?:IN|VALUES)\s*$/iu;
+/**
+ * SQL ending in `INSERT INTO <table>`, where a column list or rows follow. The
+ * table name stops at `(`, so `INSERT INTO users(${columns})` is not matched.
+ */
+const INSERT_TARGET = /\bINSERT\s+INTO\s+[^\s(]+\s*$/iu;
+const SET_POSITION = /\bSET\s*$/iu;
+const SINGLE_SET_TARGET = /^\s*(?:=|TO\b)/iu;
+
 /**
  * Keywords that can begin a complete PostgreSQL statement. A `sql` template
  * that starts with anything else is an expression fragment — ``sql`excluded.id` ``,
@@ -90,20 +100,25 @@ interface EmbeddedBlock {
   text: string;
   /** Offset in the host file of the first character of `text`. */
   start: number;
-  /** 1-based line in the host file of `start`. */
-  startLine: number;
-  /** 0-based column in the host file of `start`. */
-  startColumn: number;
   /** Placeholder spans, as `[start, end)` offsets into `text`. */
   placeholders: OffsetRange[];
   /** Offset of each line start in `text`, for line/column → offset lookups. */
   lineStarts: number[];
+  /** Offset of each line start in the host file, for offset → line/column. */
+  hostLineStarts: number[];
 }
+
+/**
+ * The line breaks ESLint and `postgresql-eslint-parser` count. Positions are
+ * mapped through offsets, so a line start we miss here would shift every
+ * report after it.
+ */
+const LINE_BREAK = /\r\n|[\r\n\u2028\u2029]/gu;
 
 const lineStartsOf = (text: string): number[] => {
   const starts = [0];
-  for (let i = 0; i < text.length; i += 1) {
-    if (text.charAt(i) === "\n") starts.push(i + 1);
+  for (const match of text.matchAll(LINE_BREAK)) {
+    starts.push(match.index + match[0].length);
   }
   return starts;
 };
@@ -124,14 +139,46 @@ const offsetAt = (lineStarts: number[], line: number, column: number): number =>
   (lineStarts[line - 1] ?? 0) + column - 1;
 
 /**
- * Builds the identifier that stands in for one `${...}`. It has to be exactly
- * as wide as the span it replaces so every offset in the block still lines up
- * with the host file — that is what keeps reported positions and autofix
- * ranges usable without a source map.
+ * Where a bare identifier can never parse, a `${...}` has to expand to a list
+ * or to assignments — the way postgres.js expands ``IN ${sql(ids)}``,
+ * ``INSERT INTO users ${sql(user)}`` and ``UPDATE users SET ${sql(user)}`` —
+ * so its placeholder takes that shape. Returns `null` everywhere else.
  */
-const placeholderFor = (index: number, width: number): string | null => {
-  const base = `_p${index}`;
-  return base.length > width ? null : base.padEnd(width, "_");
+const shapeFor = (
+  name: string,
+  before: string,
+  after: string,
+): string | null => {
+  if (LIST_POSITION.test(before)) return `(${name})`;
+  if (INSERT_TARGET.test(before)) return `VALUES(${name})`;
+  // `SET ${column} = ...` and `SET ${parameter} TO ...` name a single target.
+  if (SET_POSITION.test(before) && !SINGLE_SET_TARGET.test(after)) {
+    return `${name}=${name}`;
+  }
+  return null;
+};
+
+/**
+ * Builds the SQL that stands in for one `${...}`, given the block text before
+ * it and the template text after it. It has to be exactly as wide as the span
+ * it replaces so every offset in the block still lines up with the host file
+ * — that is what keeps reported positions and autofix ranges usable without a
+ * source map.
+ */
+const placeholderFor = (
+  index: number,
+  width: number,
+  before: string,
+  after: string,
+): string | null => {
+  const name = `_p${index}`;
+  const shape = shapeFor(name, before, after);
+  // A shape too wide for a short `${x}` falls back to the bare identifier,
+  // which can still parse where an expression may follow IN, as in
+  // `POSITION('a' IN ${s})`. Padding a shape with `_` would glue a stray
+  // identifier onto its end.
+  if (shape !== null && shape.length <= width) return shape.padEnd(width, " ");
+  return name.length > width ? null : name.padEnd(width, "_");
 };
 
 /**
@@ -188,11 +235,17 @@ const buildBlock = (
   for (const [absoluteStart, absoluteEnd] of template.interpolations) {
     const start = absoluteStart - template.start;
     const end = absoluteEnd - template.start;
-    const placeholder = placeholderFor(placeholders.length, end - start);
+    text += raw.slice(cursor, start);
+    const placeholder = placeholderFor(
+      placeholders.length,
+      end - start,
+      text,
+      raw.slice(end),
+    );
     // Only unreachable in practice: a template would need hundreds of
     // interpolations before `_p<n>` outgrows the shortest `${x}`.
     if (placeholder === null) return null;
-    text += raw.slice(cursor, start) + placeholder;
+    text += placeholder;
     placeholders.push([start, end]);
     cursor = end;
   }
@@ -208,27 +261,32 @@ const buildBlock = (
   // `no-syntax-error` still sees genuine typos.
   if (placeholders.length > 0 && hasParseError(text)) return null;
 
-  const lineIndex = lineIndexOf(hostLineStarts, template.start);
   return {
     text,
     start: template.start,
-    startLine: lineIndex + 1,
-    startColumn: template.start - (hostLineStarts[lineIndex] ?? 0),
     placeholders,
     lineStarts: lineStartsOf(text),
+    hostLineStarts,
   };
 };
 
+/**
+ * Maps a block position into the host file through offsets, which line up by
+ * construction. Lines do not: a placeholder has no line breaks, so one that
+ * stands in for a multi-line `${...}` leaves the block with fewer lines.
+ */
 const translatePosition = (
   block: EmbeddedBlock,
   line: number,
   column: number,
-): { line: number; column: number } => ({
-  line: block.startLine + line - 1,
-  // Only the first line of the block is indented by the host file; later
-  // lines start at column 1 in both coordinate systems.
-  column: line === 1 ? block.startColumn + column : column,
-});
+): { line: number; column: number } => {
+  const offset = block.start + offsetAt(block.lineStarts, line, column);
+  const lineIndex = lineIndexOf(block.hostLineStarts, offset);
+  return {
+    line: lineIndex + 1,
+    column: offset - (block.hostLineStarts[lineIndex] ?? 0) + 1,
+  };
+};
 
 const overlapsPlaceholder = (
   placeholders: OffsetRange[],

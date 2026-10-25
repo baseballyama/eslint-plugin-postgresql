@@ -100,6 +100,116 @@ describe("processors/embedded-sql", () => {
     ).toEqual([{ ruleId: "postgresql/no-select-star", line: 1, column: 22 }]);
   });
 
+  it("lints a statement whose interpolation expands to a list", () => {
+    // postgres.js expands `sql(ids)` to `($1, $2, ...)`, so a bare
+    // identifier in its place would not parse.
+    const code = [
+      "const a = sql`SELECT * FROM users WHERE id IN ${sql(ids)}`;",
+      "const b = sql`SELECT * FROM (VALUES ${sql(rows)}) AS v (id, name)`;",
+    ].join("\n");
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 1, column: 22 },
+      { ruleId: "postgresql/no-select-star", line: 2, column: 22 },
+    ]);
+  });
+
+  it("lints INSERT and UPDATE statements that take a row helper", () => {
+    // postgres.js expands `sql(user, "name")` to `("name") values ($1)` after
+    // INSERT INTO and to `"name" = $1` after SET.
+    const code = [
+      'await sql`INSERT INTO "users" ${sql(user, "name")}`;',
+      'await sql`UPDATE users SET ${sql(user, "name")}`;',
+    ].join("\n");
+    expect(
+      positionsOf(
+        lintSql(code, {
+          "postgresql/no-unnecessary-quoted-identifier": "error",
+          "postgresql/require-where-in-update": "error",
+        }),
+      ),
+    ).toEqual([
+      {
+        ruleId: "postgresql/no-unnecessary-quoted-identifier",
+        line: 1,
+        column: 23,
+      },
+      { ruleId: "postgresql/require-where-in-update", line: 2, column: 11 },
+    ]);
+  });
+
+  it("keeps a bare placeholder for a single SET target", () => {
+    const code = "const q = sql`UPDATE users SET ${column} = ${value}`;";
+    expect(
+      positionsOf(
+        lintSql(code, { "postgresql/require-where-in-update": "error" }),
+      ),
+    ).toEqual([
+      { ruleId: "postgresql/require-where-in-update", line: 1, column: 15 },
+    ]);
+
+    // One SQL block plus the host file: `SET name TO value` still parses.
+    const setCommand = "const q = sql`SET ${sql(parameter)} TO DEFAULT`;";
+    const blocks = processor.preprocess?.(setCommand, "db.ts") ?? [];
+    processor.postprocess?.([[], []], "db.ts");
+    expect(blocks).toHaveLength(2);
+  });
+
+  it("keeps a bare placeholder where a list shape does not fit", () => {
+    // `(_p0)` is wider than `${s}`; `_p0_` still parses after POSITION's IN.
+    const code =
+      "const q = sql`SELECT * FROM t WHERE POSITION('a' IN ${s}) > 0`;";
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([{ ruleId: "postgresql/no-select-star", line: 1, column: 22 }]);
+  });
+
+  it("keeps a bare placeholder inside the column list of an INSERT", () => {
+    // `users(` is not a table name followed by rows, so `${sql(columns)}`
+    // stays a column name and the statement still parses.
+    const code =
+      'await sql`INSERT INTO users(${sql(columns)}, "name") VALUES (1, 2)`;';
+    expect(
+      positionsOf(
+        lintSql(code, {
+          "postgresql/no-unnecessary-quoted-identifier": "error",
+        }),
+      ),
+    ).toEqual([
+      {
+        ruleId: "postgresql/no-unnecessary-quoted-identifier",
+        line: 1,
+        column: 46,
+      },
+    ]);
+  });
+
+  it("maps positions after an interpolation that spans several lines", () => {
+    const code = [
+      "const q = sql`SELECT ${columns({",
+      "  id: true,",
+      "})}, *",
+      "FROM (SELECT * FROM users) AS u`;",
+    ].join("\n");
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 3, column: 6 },
+      { ruleId: "postgresql/no-select-star", line: 4, column: 14 },
+    ]);
+  });
+
+  it("maps positions across every line break ESLint counts", () => {
+    // A lone `\r` inside the SQL and a U+2028 before the template each start
+    // a new line for ESLint and for the parser.
+    const code =
+      "// a\u2028b\nconst q = sql`SELECT ${columns({\r\n})}, 1,\r *\nFROM users`;";
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([{ ruleId: "postgresql/no-select-star", line: 5, column: 2 }]);
+  });
+
   it("reports a genuine syntax error in a template without interpolations", () => {
     const code = "const q = sql`SELECT FROM WHERE`;";
     const messages = lintSql(code, { "postgresql/no-syntax-error": "error" });

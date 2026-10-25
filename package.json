@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-postgresql",
-  "version": "0.25.0",
+  "version": "0.25.2",
   "type": "module",
   "packageManager": "pnpm@12.9.1",
   "main": "./dist/index.js",
@@ -53,15 +53,15 @@
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
-    "@types/node": "^26.6.4",
-    "@vitest/coverage-v8": "^5.0.3",
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
     "knip": "^6.39.0",
     "oxlint": "^1.86.0",
-    "prettier": "^3.9.9",
+    "prettier": "^3.9.10",
     "publint": "^0.3.25",
-    "rolldown": "^1.2.12",
+    "rolldown": "^1.2.14",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3",
+    "vitest": "^5.0.5",
     "yaml": "^2.9.1"
   },
   "peerDependencies": {
@@ -69,6 +69,6 @@
   },
   "dependencies": {
     "libpg-query": "^17.7.4",
-    "postgresql-eslint-parser": "^0.6.0"
+    "postgresql-eslint-parser": "^0.6.1"
   }
 }
