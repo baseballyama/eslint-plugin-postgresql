@@ -187,8 +187,11 @@ What the processor picks up, and what it leaves alone:
   or `VALUES`, rows after `INSERT INTO <table>`, and assignments after `SET`
   (unless `=` or `TO` follows). Reports and fixes that land on a placeholder
   are discarded rather than shown — the plugin will not tell you to rename an
-  expression it cannot see. If the substituted text does not parse, the
-  template is skipped instead of being reported as a syntax error.
+  expression it cannot see. If the substituted text fails to parse on a
+  placeholder, or right after one at the end of the statement or on a
+  reserved word such as `SELECT`, the template is skipped instead of being
+  reported as a syntax error: that `${...}` holds a clause or a list, not a
+  name. A syntax error anywhere else is reported.
 - **Templates containing a `\` escape are skipped**, because the raw source
   and the string that actually reaches PostgreSQL differ there.
 - **Recognised tags** are `sql` (Drizzle, Kysely, postgres.js) and
