@@ -102,6 +102,29 @@ const STATEMENT_KEYWORDS = new Set([
   "WITH",
 ]);
 
+/**
+ * Openings of the ALTER TABLE sub-commands that begin with a statement
+ * keyword: their first two words, or just the keyword for a bare
+ * ``sql`DROP` `` or ``sql`SET` ``, as picked in
+ * ``${nullable ? sql`DROP` : sql`SET`} NOT NULL``. No statement opens this
+ * way, so a template that does is a fragment. `SET DATA TYPE` is left out,
+ * since `SET data = ...` is a statement that sets a parameter.
+ */
+const SUBCOMMAND_OPENINGS = new Set([
+  "ALTER COLUMN",
+  "ALTER CONSTRAINT",
+  "DROP",
+  "DROP COLUMN",
+  "DROP CONSTRAINT",
+  "DROP DEFAULT",
+  "DROP EXPRESSION",
+  "DROP IDENTITY",
+  "DROP NOT",
+  "SET",
+  "SET DEFAULT",
+  "SET NOT",
+]);
+
 interface EmbeddedBlock {
   /** SQL text with every `${...}` swapped for an equal-length placeholder. */
   text: string;
@@ -305,6 +328,14 @@ const buildBlock = (
 
   const firstWord = firstWordOf(text);
   if (firstWord === null || !STATEMENT_KEYWORDS.has(firstWord)) return null;
+  // A keyword counts as bare only at the end of the template, since
+  // `SET "app.id" = 1` is a statement.
+  const next = skipTrivia(text, skipTrivia(text, 0) + firstWord.length);
+  const opening =
+    next === text.length
+      ? firstWord
+      : `${firstWord} ${firstWordOf(text, next) ?? ""}`;
+  if (SUBCOMMAND_OPENINGS.has(opening)) return null;
 
   return {
     text,
