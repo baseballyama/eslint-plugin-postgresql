@@ -242,6 +242,49 @@ describe("processors/embedded-sql", () => {
     );
   });
 
+  it("lints the rest of a template that fails to parse on an interpolation", () => {
+    // Rules that read tokens still run without a parse; only the syntax
+    // error the placeholder caused is withheld.
+    const code = [
+      "const a = sql`WITH ${ctes} SELECT * FROM recent WHERE id != 1`;",
+      "const b = sql`SELECT * FROM orders JOIN users ${on} WHERE id != 1`;",
+    ].join("\n");
+    expect(
+      positionsOf(
+        lintSql(code, {
+          "postgresql/no-syntax-error": "error",
+          "postgresql/prefer-not-equals-operator": "error",
+        }),
+      ),
+    ).toEqual([
+      { ruleId: "postgresql/prefer-not-equals-operator", line: 1, column: 58 },
+      { ruleId: "postgresql/prefer-not-equals-operator", line: 2, column: 62 },
+    ]);
+  });
+
+  it("withholds the placeholder's syntax error under any plugin name", () => {
+    // Flat config lets users register the plugin as something other than
+    // `postgresql`, and the rule id carries that name.
+    const code = "const q = sql`WITH ${ctes} SELECT * FROM recent`;";
+    const messages = new Linter({ configType: "flat" }).verify(
+      code,
+      [
+        { files: ["**/*.ts"], processor },
+        {
+          files: ["**/*.sql"],
+          plugins: { pg: plugin },
+          languageOptions: { parser: postgresqlParser },
+          rules: { "pg/no-syntax-error": "error" },
+        },
+      ],
+      {
+        filename: "db.ts",
+        filterCodeBlock: (blockFilename) => blockFilename.endsWith(".sql"),
+      },
+    );
+    expect(messages).toEqual([]);
+  });
+
   it("reports a syntax error the author made in an interpolated template", () => {
     // The parse fails away from `${id}`, or right after it on something that
     // cannot start a clause, so the mistake is in the author's SQL.
