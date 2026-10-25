@@ -181,11 +181,14 @@ What the processor picks up, and what it leaves alone:
   expression fragments like ``sql`excluded.user_name` `` or
   ``sql`${users.id} IS NULL` `` have no standalone parse and are skipped.
 - **Interpolations become placeholders.** Each `${...}` is replaced by an
-  identifier of exactly the same width, so positions stay accurate. Reports
-  and fixes that land on a placeholder are discarded rather than shown —
-  the plugin will not tell you to rename an expression it cannot see. If the
-  substituted text does not parse, the template is skipped instead of being
-  reported as a syntax error.
+  identifier of exactly the same width, so positions stay accurate. Where an
+  identifier can never parse, the placeholder takes the shape the `${...}`
+  must expand to, as postgres.js's `sql(...)` helpers do: a list after `IN`
+  or `VALUES`, rows after `INSERT INTO <table>`, and assignments after `SET`
+  (unless `=` or `TO` follows). Reports and fixes that land on a placeholder
+  are discarded rather than shown — the plugin will not tell you to rename an
+  expression it cannot see. If the substituted text does not parse, the
+  template is skipped instead of being reported as a syntax error.
 - **Templates containing a `\` escape are skipped**, because the raw source
   and the string that actually reaches PostgreSQL differ there.
 - **Recognised tags** are `sql` (Drizzle, Kysely, postgres.js) and
