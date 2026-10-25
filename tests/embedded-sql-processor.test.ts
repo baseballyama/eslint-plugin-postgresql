@@ -262,6 +262,29 @@ describe("processors/embedded-sql", () => {
     ]);
   });
 
+  it("withholds the placeholder's syntax error under any plugin name", () => {
+    // Flat config lets users register the plugin as something other than
+    // `postgresql`, and the rule id carries that name.
+    const code = "const q = sql`WITH ${ctes} SELECT * FROM recent`;";
+    const messages = new Linter({ configType: "flat" }).verify(
+      code,
+      [
+        { files: ["**/*.ts"], processor },
+        {
+          files: ["**/*.sql"],
+          plugins: { pg: plugin },
+          languageOptions: { parser: postgresqlParser },
+          rules: { "pg/no-syntax-error": "error" },
+        },
+      ],
+      {
+        filename: "db.ts",
+        filterCodeBlock: (blockFilename) => blockFilename.endsWith(".sql"),
+      },
+    );
+    expect(messages).toEqual([]);
+  });
+
   it("reports a syntax error the author made in an interpolated template", () => {
     // The parse fails away from `${id}`, or right after it on something that
     // cannot start a clause, so the mistake is in the author's SQL.

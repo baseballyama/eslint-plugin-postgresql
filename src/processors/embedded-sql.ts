@@ -26,6 +26,12 @@ const SQL_TAGS: ReadonlySet<string> = new Set([
 /** Extension given to the virtual files carved out of the host file. */
 const VIRTUAL_EXTENSION = ".sql";
 
+/**
+ * Name of the rule that reports parse failures. Matched without its plugin
+ * prefix, since a flat config may register the plugin under any name.
+ */
+const SYNTAX_ERROR_RULE = "no-syntax-error";
+
 const WHITESPACE = /\s/;
 const WORD_PART = /[A-Za-z_]/;
 
@@ -370,7 +376,7 @@ const translateMessage = (
   // `${...}` holds a clause or a list, not a name.
   if (
     block.failsOnPlaceholder &&
-    message.ruleId === "postgresql/no-syntax-error"
+    message.ruleId?.endsWith(`/${SYNTAX_ERROR_RULE}`) === true
   ) {
     return null;
   }
