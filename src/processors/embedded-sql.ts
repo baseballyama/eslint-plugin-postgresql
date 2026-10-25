@@ -141,12 +141,11 @@ const placeholderFor = (index: number, width: number): string | null => {
 };
 
 /**
- * First word of the SQL text, upper-cased, skipping leading whitespace and
- * comments. Returns `null` when the text starts with something that is not a
- * word at all.
+ * Offset of the first character at or after `from` that is neither whitespace
+ * nor part of a comment, or `sql.length` when only those remain.
  */
-const firstWordOf = (sql: string): string | null => {
-  let i = 0;
+const skipTrivia = (sql: string, from: number): number => {
+  let i = from;
   while (i < sql.length) {
     const char = sql.charAt(i);
     if (WHITESPACE.test(char)) {
@@ -155,29 +154,40 @@ const firstWordOf = (sql: string): string | null => {
     }
     if (char === "-" && sql.charAt(i + 1) === "-") {
       const end = sql.indexOf("\n", i);
-      if (end === -1) return null;
+      if (end === -1) return sql.length;
       i = end + 1;
       continue;
     }
     if (char === "/" && sql.charAt(i + 1) === "*") {
       const end = sql.indexOf("*/", i + 2);
-      if (end === -1) return null;
+      if (end === -1) return sql.length;
       i = end + 2;
       continue;
     }
     break;
   }
-  let end = i;
+  return i;
+};
+
+/**
+ * First word of the SQL text from `from` on, upper-cased, skipping leading
+ * whitespace and comments. Returns `null` when the text starts with something
+ * that is not a word at all.
+ */
+const firstWordOf = (sql: string, from = 0): string | null => {
+  const start = skipTrivia(sql, from);
+  let end = start;
   while (end < sql.length && WORD_PART.test(sql.charAt(end))) end += 1;
-  return end === i ? null : sql.slice(i, end).toUpperCase();
+  return end === start ? null : sql.slice(start, end).toUpperCase();
 };
 
 /**
  * Whether `sql` fails to parse because of a placeholder rather than the
  * author's SQL. A placeholder is an identifier, so where the `${...}` really
  * holds a clause or a list, the parser stops on the placeholder itself — or,
- * having accepted it as a name, right after it: at the end of the statement,
- * as in ``sql`SELECT * FROM a JOIN b ${on}` ``, or on a reserved word that
+ * having accepted it as a name, right after it: at the end of the statement
+ * (a `;` or nothing but comments may follow), as in
+ * ``sql`SELECT * FROM a JOIN b ${on}` ``, or on a reserved word that
  * starts the next clause, as in ``sql`WITH ${ctes} SELECT ...` ``. Anything
  * else right after a placeholder, such as a stray comma or a misspelled
  * keyword, is the author's. An error the parser gives no position for cannot
@@ -191,14 +201,17 @@ const failsOnPlaceholder = (
   if (error === undefined) return false;
   const index = error.errorPosition?.index;
   if (index === undefined) return true;
-  const rest = sql.slice(index);
+  const next = skipTrivia(sql, index);
   const startsClause =
-    rest.trim() === "" ||
-    PG_KEYWORDS_REQUIRING_QUOTES.has(firstWordOf(rest)?.toLowerCase() ?? "");
+    next === sql.length ||
+    sql.charAt(next) === ";" ||
+    PG_KEYWORDS_REQUIRING_QUOTES.has(
+      firstWordOf(sql, next)?.toLowerCase() ?? "",
+    );
   return placeholders.some(
     ([start, end]) =>
       start <= index &&
-      (index < end || (startsClause && sql.slice(end, index).trim() === "")),
+      (index < end || (startsClause && skipTrivia(sql, end) >= index)),
   );
 };
 

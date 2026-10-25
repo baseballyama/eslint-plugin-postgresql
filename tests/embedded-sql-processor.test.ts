@@ -149,6 +149,8 @@ describe("processors/embedded-sql", () => {
     const code = [
       "const a = sql`WITH ${ctes} SELECT * FROM recent`;",
       "const b = sql`SELECT * FROM orders JOIN users ${joinCondition}`;",
+      "const c = sql`SELECT * FROM orders JOIN users ${joinCondition};`;",
+      "const d = sql`SELECT * FROM orders JOIN users ${joinCondition} -- why`;",
     ].join("\n");
     expect(lintSql(code, { "postgresql/no-syntax-error": "error" })).toEqual(
       [],
