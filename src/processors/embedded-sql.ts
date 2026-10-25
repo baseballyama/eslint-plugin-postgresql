@@ -29,6 +29,16 @@ const VIRTUAL_EXTENSION = ".sql";
 const WHITESPACE = /\s/;
 const WORD_PART = /[A-Za-z_]/;
 
+/** SQL ending where only a parenthesized list can follow. */
+const LIST_POSITION = /\b(?:IN|VALUES)\s*$/iu;
+/**
+ * SQL ending in `INSERT INTO <table>`, where a column list or rows follow. The
+ * table name stops at `(`, so `INSERT INTO users(${columns})` is not matched.
+ */
+const INSERT_TARGET = /\bINSERT\s+INTO\s+[^\s(]+\s*$/iu;
+const SET_POSITION = /\bSET\s*$/iu;
+const SINGLE_SET_TARGET = /^\s*(?:=|TO\b)/iu;
+
 /**
  * Keywords that can begin a complete PostgreSQL statement. A `sql` template
  * that starts with anything else is an expression fragment — ``sql`excluded.id` ``,
@@ -130,14 +140,46 @@ const offsetAt = (lineStarts: number[], line: number, column: number): number =>
   (lineStarts[line - 1] ?? 0) + column - 1;
 
 /**
- * Builds the identifier that stands in for one `${...}`. It has to be exactly
- * as wide as the span it replaces so every offset in the block still lines up
- * with the host file — that is what keeps reported positions and autofix
- * ranges usable without a source map.
+ * Where a bare identifier can never parse, a `${...}` has to expand to a list
+ * or to assignments — the way postgres.js expands ``IN ${sql(ids)}``,
+ * ``INSERT INTO users ${sql(user)}`` and ``UPDATE users SET ${sql(user)}`` —
+ * so its placeholder takes that shape. Returns `null` everywhere else.
  */
-const placeholderFor = (index: number, width: number): string | null => {
-  const base = `_p${index}`;
-  return base.length > width ? null : base.padEnd(width, "_");
+const shapeFor = (
+  name: string,
+  before: string,
+  after: string,
+): string | null => {
+  if (LIST_POSITION.test(before)) return `(${name})`;
+  if (INSERT_TARGET.test(before)) return `VALUES(${name})`;
+  // `SET ${column} = ...` and `SET ${parameter} TO ...` name a single target.
+  if (SET_POSITION.test(before) && !SINGLE_SET_TARGET.test(after)) {
+    return `${name}=${name}`;
+  }
+  return null;
+};
+
+/**
+ * Builds the SQL that stands in for one `${...}`, given the block text before
+ * it and the template text after it. It has to be exactly as wide as the span
+ * it replaces so every offset in the block still lines up with the host file
+ * — that is what keeps reported positions and autofix ranges usable without a
+ * source map.
+ */
+const placeholderFor = (
+  index: number,
+  width: number,
+  before: string,
+  after: string,
+): string | null => {
+  const name = `_p${index}`;
+  const shape = shapeFor(name, before, after);
+  // A shape too wide for a short `${x}` falls back to the bare identifier,
+  // which can still parse where an expression may follow IN, as in
+  // `POSITION('a' IN ${s})`. Padding a shape with `_` would glue a stray
+  // identifier onto its end.
+  if (shape !== null && shape.length <= width) return shape.padEnd(width, " ");
+  return name.length > width ? null : name.padEnd(width, "_");
 };
 
 /**
@@ -234,11 +276,17 @@ const buildBlock = (
   for (const [absoluteStart, absoluteEnd] of template.interpolations) {
     const start = absoluteStart - template.start;
     const end = absoluteEnd - template.start;
-    const placeholder = placeholderFor(placeholders.length, end - start);
+    text += raw.slice(cursor, start);
+    const placeholder = placeholderFor(
+      placeholders.length,
+      end - start,
+      text,
+      raw.slice(end),
+    );
     // Only unreachable in practice: a template would need hundreds of
     // interpolations before `_p<n>` outgrows the shortest `${x}`.
     if (placeholder === null) return null;
-    text += raw.slice(cursor, start) + placeholder;
+    text += placeholder;
     placeholders.push([start, end]);
     cursor = end;
   }
