@@ -107,6 +107,11 @@ interface EmbeddedBlock {
   lineStarts: number[];
   /** Offset of each line start in the host file, for offset → line/column. */
   hostLineStarts: number[];
+  /**
+   * Whether `text` fails to parse because of a placeholder, which makes its
+   * syntax error our substitution's rather than the author's.
+   */
+  failsOnPlaceholder: boolean;
 }
 
 /**
@@ -295,21 +300,17 @@ const buildBlock = (
   const firstWord = firstWordOf(text);
   if (firstWord === null || !STATEMENT_KEYWORDS.has(firstWord)) return null;
 
-  // With placeholders in play a parse failure may be our substitution's fault
-  // rather than the author's. Those blocks are dropped instead of reporting a
-  // syntax error we do not stand behind; any other failure is the author's,
-  // so the block is kept for `no-syntax-error` to report. Interpolation-free
-  // templates are passed through unparsed, so every typo in them is reported.
-  if (placeholders.length > 0 && failsOnPlaceholder(text, placeholders)) {
-    return null;
-  }
-
   return {
     text,
     start: template.start,
     placeholders,
     lineStarts: lineStartsOf(text),
     hostLineStarts,
+    // With placeholders in play a parse failure may be our substitution's
+    // fault rather than the author's. Interpolation-free templates are passed
+    // through unparsed, so every typo in them is reported.
+    failsOnPlaceholder:
+      placeholders.length > 0 && failsOnPlaceholder(text, placeholders),
   };
 };
 
@@ -363,6 +364,17 @@ const translateMessage = (
   message: Linter.LintMessage,
   block: EmbeddedBlock,
 ): Linter.LintMessage | null => {
+  // A block that fails to parse on a placeholder is still linted, because
+  // rules that read tokens rather than the syntax tree (keyword case, `<>` or
+  // `!=`) work without a parse. Only its syntax error is withheld: that
+  // `${...}` holds a clause or a list, not a name.
+  if (
+    block.failsOnPlaceholder &&
+    message.ruleId === "postgresql/no-syntax-error"
+  ) {
+    return null;
+  }
+
   const anchor = offsetAt(block.lineStarts, message.line, message.column);
   // A placeholder is not code the author wrote, so anything anchored inside
   // one (a too-long identifier, a casing complaint) is our artefact.
