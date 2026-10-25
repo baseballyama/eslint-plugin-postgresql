@@ -1,5 +1,25 @@
 # eslint-plugin-postgresql
 
+## 0.25.3
+
+### Patch Changes
+
+- [#295](https://github.com/baseballyama/eslint-plugin-postgresql/pull/295) [`04e401b`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/04e401b58c6148b9649b60d6f244c32f0dcf1325) Thanks [@abrahamguo](https://github.com/abrahamguo)! - The `embedded-sql` processor now lints statements that use postgres.js's
+  `sql(...)` helpers, such as `WHERE id IN ${sql(ids)}`,
+  `INSERT INTO users ${sql(user)}` and `UPDATE users SET ${sql(user)}`. Before,
+  every `${...}` became a bare identifier, which cannot parse in those spots, so
+  the whole statement was silently skipped. A `${...}` there now stands in as
+  the list, rows or assignments it expands to.
+
+- [#296](https://github.com/baseballyama/eslint-plugin-postgresql/pull/296) [`2bad365`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/2bad365bebb0cfa3b6e910f0f9806d01dfd3df6f) Thanks [@abrahamguo](https://github.com/abrahamguo)! - `no-syntax-error` now reports syntax errors in `sql` templates that contain a
+  `${...}`, such as `` sql`SELECT id,, name FROM users WHERE id = ${id}` ``.
+  Before, the `embedded-sql` processor skipped every such template that failed
+  to parse, because the identifier standing in for a `${...}` can itself be what
+  does not parse. It now skips a template only when the parse fails on that
+  identifier, or right after it at the end of the statement or on a reserved
+  word such as `SELECT` or `WHERE`: there, the `${...}` held a clause rather
+  than a value.
+
 ## 0.25.2
 
 ### Patch Changes
