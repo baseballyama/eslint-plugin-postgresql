@@ -22,11 +22,24 @@ interface TemplateFrame {
   openInterpolation: number | null;
 }
 
+/**
+ * A `(`, or a `<` after a member path, not yet closed. Call and type arguments
+ * can sit between a tag and its backtick, as in ``sql.type(schema)`...` `` and
+ * ``sql<Row[]>`...` ``, so each bracket sets aside the path before it for its
+ * close to restore.
+ */
+interface Bracket {
+  close: ")" | ">";
+  path: string | null;
+}
+
 interface CodeFrame {
   kind: "code";
   /** The template whose `${` opened this frame; `null` at the top level. */
   parent: TemplateFrame | null;
   braceDepth: number;
+  /** Brackets open in this frame, innermost last. */
+  brackets: Bracket[];
 }
 
 type Frame = TemplateFrame | CodeFrame;
@@ -137,11 +150,12 @@ const skipRegex = (code: string, start: number): number => {
 
 /**
  * Finds every ``tag`...` `` template literal in JavaScript or TypeScript
- * source whose tag is one of `tags`, along with the `${...}` spans inside it.
+ * source whose tag `isSqlTag` accepts, along with the `${...}` spans inside it.
  *
- * The tag is the last identifier before the backtick, so a member expression
- * such as `prisma.$queryRaw` matches on `$queryRaw`. Type arguments after the
- * tag, as in ``sql<Row[]>`...` ``, are skipped.
+ * `isSqlTag` is given the tag's member path: its identifiers joined by `.`,
+ * without call or type arguments. ``prisma.$queryRaw`...` `` gives
+ * `prisma.$queryRaw`, ``sql<Row[]>`...` `` gives `sql`, and
+ * ``sql.type(schema)`...` `` gives `sql.type`.
  *
  * This is a lexer, not a parser: it tracks strings, comments, regular
  * expressions and nested template literals so a backtick inside any of them
@@ -151,13 +165,21 @@ const skipRegex = (code: string, start: number): number => {
  */
 export const extractTaggedTemplates = (
   code: string,
-  tags: ReadonlySet<string>,
+  isSqlTag: (path: string) => boolean,
 ): TaggedTemplate[] => {
   const found: TaggedTemplate[] = [];
-  let frame: Frame = { kind: "code", parent: null, braceDepth: 0 };
+  let frame: Frame = {
+    kind: "code",
+    parent: null,
+    braceDepth: 0,
+    brackets: [],
+  };
   let lastToken = "";
-  /** The tag whose type arguments are being skipped, and how many `<` are open. */
-  let typeArguments: { tag: string; depth: number } | null = null;
+  /**
+   * The member path the last token ends, such as `prisma.$queryRaw`, or
+   * `null` when it ends none. Always `null` inside a template.
+   */
+  let path: string | null = null;
   let i = 0;
 
   while (i < code.length) {
@@ -183,7 +205,7 @@ export const extractTaggedTemplates = (
       }
       if (char === "$" && code.charAt(i + 1) === "{") {
         frame.openInterpolation = i;
-        frame = { kind: "code", parent: frame, braceDepth: 0 };
+        frame = { kind: "code", parent: frame, braceDepth: 0, brackets: [] };
         lastToken = "";
         i += 2;
         continue;
@@ -200,6 +222,14 @@ export const extractTaggedTemplates = (
       i = skipBlockComment(code, i);
       continue;
     }
+    if (WHITESPACE.test(char)) {
+      i += 1;
+      continue;
+    }
+
+    const pathBefore: string | null = path;
+    path = null;
+
     if (char === '"' || char === "'") {
       i = skipQuoted(code, i);
       lastToken = char;
@@ -214,7 +244,7 @@ export const extractTaggedTemplates = (
       frame = {
         kind: "template",
         parent: frame,
-        tagged: tags.has(lastToken),
+        tagged: pathBefore !== null && isSqlTag(pathBefore),
         start: i + 1,
         interpolations: [],
         openInterpolation: null,
@@ -226,7 +256,15 @@ export const extractTaggedTemplates = (
       const identStart = i;
       i += 1;
       while (i < code.length && IDENT_PART.test(code.charAt(i))) i += 1;
-      lastToken = code.slice(identStart, i);
+      const identifier = code.slice(identStart, i);
+      if (lastToken === ".") {
+        path = pathBefore === null ? identifier : `${pathBefore}.${identifier}`;
+      } else if (!REGEX_PRECEDING_KEYWORDS.has(identifier)) {
+        // A template right after `return` or `await` is untagged, so those
+        // keywords start no path.
+        path = identifier;
+      }
+      lastToken = identifier;
       continue;
     }
     if (char === "{") {
@@ -252,29 +290,28 @@ export const extractTaggedTemplates = (
       i += 1;
       continue;
     }
-    // A `<` after a tag may be a less-than (`sql < max`) that never closes, so
-    // each `<` after a tag restarts the count instead of nesting into it.
-    if (char === "<" && tags.has(lastToken)) {
-      typeArguments = { tag: lastToken, depth: 1 };
-    } else if (char === "<" && typeArguments !== null) {
-      typeArguments.depth += 1;
+    if (char === ".") {
+      path = pathBefore;
+    } else if (char === "(") {
+      frame.brackets.push({ close: ")", path: pathBefore });
+    } else if (char === ")") {
+      // A `<` still open here was a less-than, as in `if (a < b)`.
+      let bracket = frame.brackets.pop();
+      while (bracket?.close === ">") bracket = frame.brackets.pop();
+      path = bracket?.path ?? null;
+    } else if (char === "<" && pathBefore !== null) {
+      frame.brackets.push({ close: ">", path: pathBefore });
     } else if (
       char === ">" &&
-      typeArguments !== null &&
+      frame.brackets.at(-1)?.close === ">" &&
       // The `>` of an arrow, as in `sql<() => Row>` or a later `() => ...`,
       // closes nothing.
       code.charAt(i - 1) !== "="
     ) {
-      typeArguments.depth -= 1;
-      if (typeArguments.depth === 0) {
-        lastToken = typeArguments.tag;
-        typeArguments = null;
-        i += 1;
-        continue;
-      }
+      path = frame.brackets.pop()!.path;
     }
 
-    if (!WHITESPACE.test(char)) lastToken = char;
+    lastToken = char;
     i += 1;
   }
 

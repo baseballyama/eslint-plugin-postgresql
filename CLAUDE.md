@@ -15,8 +15,9 @@ to parse `.sql` files into an ESLint-compatible AST.
 - **Package manager**: pnpm. Lockfile is committed. Use `pnpm install
 --frozen-lockfile` in CI.
 - **Public API**: the default export from `dist/index.js` — a `plugin` object
-  exposing `rules` and `configs.recommended`. Anything not reachable through
-  that export is internal.
+  exposing `rules` and `configs.recommended` — and the named export
+  `createEmbeddedSqlProcessor`. Anything not reachable through those exports
+  is internal.
 - **Related projects**:
   - [`postgresql-eslint-parser`](https://github.com/baseballyama/postgresql-eslint-parser) — parser layer.
   - [`libpg-query`](https://github.com/pganalyze/libpg-query-node) — actual PostgreSQL parser.

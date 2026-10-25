@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { extractTaggedTemplates } from "../src/processors/extract-tagged-templates.js";
 
-const SQL_TAGS = new Set(["sql"]);
+const isSqlTag = (path: string) => path === "sql" || path.endsWith(".sql");
 
-const textsOf = (code: string) =>
-  extractTaggedTemplates(code, SQL_TAGS).map((t) => code.slice(t.start, t.end));
+const textsOf = (code: string, predicate = isSqlTag) =>
+  extractTaggedTemplates(code, predicate).map((t) =>
+    code.slice(t.start, t.end),
+  );
+
+const acceptAll = () => true;
 
 describe("extractTaggedTemplates", () => {
   it("finds a tagged template and reports the span between the backticks", () => {
     const code = "const q = sql`SELECT 1`;";
-    const [template] = extractTaggedTemplates(code, SQL_TAGS);
+    const [template] = extractTaggedTemplates(code, isSqlTag);
     expect(template).toBeDefined();
     expect(code.slice(template!.start, template!.end)).toBe("SELECT 1");
     expect(template!.interpolations).toEqual([]);
@@ -49,12 +53,55 @@ describe("extractTaggedTemplates", () => {
     expect(textsOf(code)).toEqual(["SELECT 2"]);
   });
 
-  it("matches every tag it is given", () => {
-    const code = "prisma.$queryRaw`SELECT 1`; tx.$executeRaw`DELETE FROM t`;";
-    const tags = new Set(["$queryRaw", "$executeRaw"]);
-    expect(
-      extractTaggedTemplates(code, tags).map((t) => code.slice(t.start, t.end)),
-    ).toEqual(["SELECT 1", "DELETE FROM t"]);
+  it("does not mistake a less-than for type arguments when any path is a tag", () => {
+    const code = [
+      "if (a < b) log();",
+      "const small = a < b;",
+      "const f = () => `SELECT 1`;",
+      "pg<Row>`SELECT 2`;",
+    ].join("\n");
+    expect(textsOf(code, acceptAll)).toEqual(["SELECT 2"]);
+  });
+
+  it("skips nested type arguments when any path is a tag", () => {
+    const code = "pg<Pick<Row<`users`>, `id` | `name`>[]>`SELECT 1`;";
+    expect(textsOf(code, acceptAll)).toEqual(["SELECT 1"]);
+  });
+
+  it("gives the predicate each tag's member path, without call or type arguments", () => {
+    const code = [
+      "prisma.$queryRaw`SELECT 1`;",
+      "sql<Row[]>`SELECT 2`;",
+      "sql.type(schema)`SELECT 3`;",
+      "this.db.sql`SELECT 4`;",
+      "getDb().sql`SELECT 5`;",
+      "keyBy(cols.map((col) => `${col}_id`))<Row>`SELECT 6`;",
+      "where(a < b)`SELECT 7`;",
+      "const untagged = `SELECT 8`;",
+    ].join("\n");
+    const paths: string[] = [];
+    extractTaggedTemplates(code, (path) => {
+      paths.push(path);
+      return true;
+    });
+    expect(paths).toEqual([
+      "prisma.$queryRaw",
+      "sql",
+      "sql.type",
+      "this.db.sql",
+      "getDb.sql",
+      "keyBy",
+      "where",
+    ]);
+  });
+
+  it("does not take a keyword for a tag", () => {
+    const code = [
+      "function f() { return `SELECT 1`; }",
+      "switch (q) { case `SELECT 2`: break; }",
+      "const q = sql`SELECT 3`;",
+    ].join("\n");
+    expect(textsOf(code, acceptAll)).toEqual(["SELECT 3"]);
   });
 
   it("does not mistake backticks inside strings or comments for templates", () => {
@@ -87,7 +134,7 @@ describe("extractTaggedTemplates", () => {
 
   it("records interpolation spans, including nested braces", () => {
     const code = "sql`SELECT ${{ a: 1 }.a} FROM t WHERE x = ${id}`";
-    const [template] = extractTaggedTemplates(code, SQL_TAGS);
+    const [template] = extractTaggedTemplates(code, isSqlTag);
     expect(template).toBeDefined();
     expect(template!.interpolations.map(([s, e]) => code.slice(s, e))).toEqual([
       "${{ a: 1 }.a}",

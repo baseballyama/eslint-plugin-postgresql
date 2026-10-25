@@ -195,7 +195,8 @@ const plugin: ESLint.Plugin = {
   rules,
   // Lints the SQL inside `sql` template literals in `.ts` / `.js` files —
   // the shape Drizzle, postgres.js and slonik produce. See the README for
-  // how to wire it up next to a preset.
+  // how to wire it up next to a preset, and `createEmbeddedSqlProcessor` for
+  // other tags.
   processors: {
     "embedded-sql": embeddedSql,
   },
@@ -321,5 +322,7 @@ plugin.configs = {
     ),
   } satisfies Linter.Config,
 };
+
+export { createEmbeddedSqlProcessor } from "./processors/embedded-sql.js";
 
 export default plugin;

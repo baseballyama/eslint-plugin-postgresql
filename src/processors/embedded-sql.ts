@@ -8,20 +8,24 @@ import {
 } from "./extract-tagged-templates.js";
 
 /**
- * Template tags treated as SQL. `sql` is what Drizzle, Kysely and postgres.js
+ * Template tags treated as SQL by default, matched on the last identifier of
+ * the tag's member path. `sql` is what Drizzle, Kysely and postgres.js
  * export; `$queryRaw` / `$executeRaw` are Prisma's raw-query tags, reached
  * through `prisma.$queryRaw`.
  *
- * Tags that are not a plain identifier are out of reach — Prisma's
- * `$queryRawUnsafe("...")` and TypeORM's `.query("...")` take a string
- * argument rather than a template, and modern slonik tags with
- * `sql.type(schema)` whose last token is a `)`.
+ * Prisma's `$queryRawUnsafe("...")` and TypeORM's `.query("...")` are out of
+ * reach: they take a string argument rather than a template. Modern slonik's
+ * ``sql.type(schema)`...` `` ends in `type`, so it needs
+ * `createEmbeddedSqlProcessor`.
  */
 const SQL_TAGS: ReadonlySet<string> = new Set([
   "sql",
   "$queryRaw",
   "$executeRaw",
 ]);
+
+const isDefaultSqlTag = (path: string): boolean =>
+  SQL_TAGS.has(path.slice(path.lastIndexOf(".") + 1));
 
 /** Extension given to the virtual files carved out of the host file. */
 const VIRTUAL_EXTENSION = ".sql";
@@ -428,14 +432,21 @@ const translateMessage = (
 const blockCache = new Map<string, EmbeddedBlock[]>();
 
 /**
- * Lints the SQL inside ``sql`...` `` template literals in JavaScript and
- * TypeScript files — the form Drizzle, postgres.js and slonik use — by
- * emitting one virtual `.sql` file per complete statement.
+ * Creates a processor that lints the SQL inside the tagged template literals
+ * `isSqlTag` accepts in JavaScript and TypeScript files, by emitting one
+ * virtual `.sql` file per complete statement.
+ *
+ * `isSqlTag` is given each tag's member path: the identifiers before the
+ * backtick joined by `.`, without call or type arguments.
+ * ``db.sql<Row[]>`...` `` gives `db.sql`, and ``sql.type(schema)`...` ``
+ * gives `sql.type`.
  *
  * The host file is emitted alongside them, unchanged, so the rules that
  * normally apply to it keep running — including type-aware ones.
  */
-const embeddedSql: Linter.Processor<string | Linter.ProcessorFile> = {
+export const createEmbeddedSqlProcessor = (
+  isSqlTag: (path: string) => boolean,
+): Linter.Processor<string | Linter.ProcessorFile> => ({
   meta: {
     name: "postgresql/embedded-sql",
     version: "1",
@@ -445,7 +456,7 @@ const embeddedSql: Linter.Processor<string | Linter.ProcessorFile> = {
   preprocess(text, filename) {
     const hostLineStarts = lineStartsOf(text);
     const blocks: EmbeddedBlock[] = [];
-    for (const template of extractTaggedTemplates(text, SQL_TAGS)) {
+    for (const template of extractTaggedTemplates(text, isSqlTag)) {
       const block = buildBlock(text, template, hostLineStarts);
       if (block !== null) blocks.push(block);
     }
@@ -485,6 +496,13 @@ const embeddedSql: Linter.Processor<string | Linter.ProcessorFile> = {
     }
     return result;
   },
-};
+});
+
+/**
+ * The processor for ``sql`...` `` template literals — the form Drizzle,
+ * postgres.js and slonik use — and Prisma's `$queryRaw` / `$executeRaw`.
+ */
+const embeddedSql: Linter.Processor<string | Linter.ProcessorFile> =
+  createEmbeddedSqlProcessor(isDefaultSqlTag);
 
 export default embeddedSql;

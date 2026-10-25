@@ -1,7 +1,7 @@
 import { Linter } from "eslint";
 import postgresqlParser from "postgresql-eslint-parser";
 import { describe, expect, it } from "vitest";
-import plugin from "../src/index.js";
+import plugin, { createEmbeddedSqlProcessor } from "../src/index.js";
 
 const processor = plugin.processors?.["embedded-sql"];
 if (processor === undefined) {
@@ -67,6 +67,39 @@ describe("processors/embedded-sql", () => {
       { ruleId: "postgresql/no-select-star", line: 1, column: 44 },
       // The DELETE statement starts at column 26, right after the backtick.
       { ruleId: "postgresql/require-where-in-delete", line: 2, column: 26 },
+    ]);
+  });
+
+  it("lints the tags a processor from createEmbeddedSqlProcessor accepts", () => {
+    const code = [
+      "const a = db.query`SELECT * FROM users`;",
+      "const b = sql`SELECT * FROM users`;",
+      "const c = sql.type(User)`SELECT * FROM users`;",
+    ].join("\n");
+    const messages = new Linter({ configType: "flat" }).verify(
+      code,
+      [
+        {
+          files: ["**/*.ts"],
+          processor: createEmbeddedSqlProcessor(
+            (path) => path === "db.query" || path === "sql.type",
+          ),
+        },
+        {
+          files: ["**/*.sql"],
+          plugins: { postgresql: plugin },
+          languageOptions: { parser: postgresqlParser },
+          rules: { "postgresql/no-select-star": "error" },
+        },
+      ],
+      {
+        filename: "db.ts",
+        filterCodeBlock: (blockFilename) => blockFilename.endsWith(".sql"),
+      },
+    );
+    expect(positionsOf(messages)).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 1, column: 27 },
+      { ruleId: "postgresql/no-select-star", line: 3, column: 33 },
     ]);
   });
 
