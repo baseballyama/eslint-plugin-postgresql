@@ -30,8 +30,11 @@ const WORD_PART = /[A-Za-z_]/;
 
 /** SQL ending where only a parenthesized list can follow. */
 const LIST_POSITION = /\b(?:IN|VALUES)\s*$/iu;
-/** SQL ending in `INSERT INTO <table>`, where a column list or rows follow. */
-const INSERT_TARGET = /\bINSERT\s+INTO\s+\S+\s*$/iu;
+/**
+ * SQL ending in `INSERT INTO <table>`, where a column list or rows follow. The
+ * table name stops at `(`, so `INSERT INTO users(${columns})` is not matched.
+ */
+const INSERT_TARGET = /\bINSERT\s+INTO\s+[^\s(]+\s*$/iu;
 const SET_POSITION = /\bSET\s*$/iu;
 const SINGLE_SET_TARGET = /^\s*(?:=|TO\b)/iu;
 

@@ -165,6 +165,26 @@ describe("processors/embedded-sql", () => {
     ).toEqual([{ ruleId: "postgresql/no-select-star", line: 1, column: 22 }]);
   });
 
+  it("keeps a bare placeholder inside the column list of an INSERT", () => {
+    // `users(` is not a table name followed by rows, so `${sql(columns)}`
+    // stays a column name and the statement still parses.
+    const code =
+      'await sql`INSERT INTO users(${sql(columns)}, "name") VALUES (1, 2)`;';
+    expect(
+      positionsOf(
+        lintSql(code, {
+          "postgresql/no-unnecessary-quoted-identifier": "error",
+        }),
+      ),
+    ).toEqual([
+      {
+        ruleId: "postgresql/no-unnecessary-quoted-identifier",
+        line: 1,
+        column: 46,
+      },
+    ]);
+  });
+
   it("maps positions after an interpolation that spans several lines", () => {
     const code = [
       "const q = sql`SELECT ${columns({",
