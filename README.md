@@ -179,7 +179,10 @@ What the processor picks up, and what it leaves alone:
 
 - **Only complete statements.** ``sql`SELECT id FROM users` `` is linted;
   expression fragments like ``sql`excluded.user_name` `` or
-  ``sql`${users.id} IS NULL` `` have no standalone parse and are skipped.
+  ``sql`${users.id} IS NULL` `` have no standalone parse and are skipped. So
+  are pieces of an `ALTER TABLE` that start with a statement keyword, such as
+  ``sql`DROP COLUMN ${sql(column)}` ``, ``sql`SET NOT NULL` `` or a bare
+  ``sql`DROP` ``.
 - **Interpolations become placeholders.** Each `${...}` is replaced by an
   identifier of exactly the same width, so positions stay accurate. Where an
   identifier can never parse, the placeholder takes the shape the `${...}`

@@ -93,6 +93,40 @@ describe("processors/embedded-sql", () => {
     );
   });
 
+  it("ignores ALTER TABLE sub-commands that start with a statement keyword", () => {
+    const code = [
+      "const a = sql`DROP COLUMN ${sql(column)}`;",
+      "const b = sql`DROP CONSTRAINT IF EXISTS ${sql(name)}`;",
+      "const c = sql`ALTER COLUMN ${sql(column)} TYPE text`;",
+      "const d = sql`ALTER CONSTRAINT ${sql(name)} DEFERRABLE`;",
+      "const e = sql`SET DEFAULT 0`;",
+      "const f = sql`DROP DEFAULT`;",
+      "const g = sql`DROP EXPRESSION IF EXISTS`;",
+      "const h = sql`DROP IDENTITY IF EXISTS`;",
+      "const i = sql`SET NOT NULL`;",
+      "const j = sql`DROP NOT NULL`;",
+      "const k = sql`ALTER TABLE users ALTER COLUMN name ${nullable ? sql`DROP` : sql`SET`} NOT NULL`;",
+    ].join("\n");
+    expect(lintSql(code, { "postgresql/no-syntax-error": "error" })).toEqual(
+      [],
+    );
+  });
+
+  it("still lints statements that start with a sub-command's keyword", () => {
+    // A bare keyword is a fragment only at the end of the template; here a
+    // quoted parameter name follows SET. A parameter whose name only starts
+    // with NOT or DEFAULT is not a sub-command either.
+    const code = [
+      "await sql`DROP TABLE users`;",
+      "await sql`ALTER TABLE users DROP COLUMN name`;",
+      'await sql`SET "app.user_id" = ${id}`;',
+      "await sql`SET default2.mode = 'on'`;",
+    ].join("\n");
+    const blocks = processor.preprocess?.(code, "db.ts") ?? [];
+    processor.postprocess?.([[], [], [], [], []], "db.ts");
+    expect(blocks).toHaveLength(5);
+  });
+
   it("lints a statement that carries interpolations", () => {
     const code = "const q = sql`SELECT * FROM users WHERE id = ${id}`;";
     expect(

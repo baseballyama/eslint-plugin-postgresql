@@ -33,7 +33,8 @@ const VIRTUAL_EXTENSION = ".sql";
 const SYNTAX_ERROR_RULE = "no-syntax-error";
 
 const WHITESPACE = /\s/;
-const WORD_PART = /[A-Za-z_]/;
+const WORD_START = /[A-Za-z_]/;
+const WORD_PART = /[A-Za-z0-9_$]/;
 
 /** SQL ending where only a parenthesized list can follow. */
 const LIST_POSITION = /\b(?:IN|VALUES)\s*$/iu;
@@ -100,6 +101,29 @@ const STATEMENT_KEYWORDS = new Set([
   "UPDATE",
   "VACUUM",
   "WITH",
+]);
+
+/**
+ * Openings of the ALTER TABLE sub-commands that begin with a statement
+ * keyword: their first two words, or just the keyword for a bare
+ * ``sql`DROP` `` or ``sql`SET` ``, as picked in
+ * ``${nullable ? sql`DROP` : sql`SET`} NOT NULL``. No statement opens this
+ * way, so a template that does is a fragment. `SET DATA TYPE` is left out,
+ * since `SET data = ...` is a statement that sets a parameter.
+ */
+const SUBCOMMAND_OPENINGS = new Set([
+  "ALTER COLUMN",
+  "ALTER CONSTRAINT",
+  "DROP",
+  "DROP COLUMN",
+  "DROP CONSTRAINT",
+  "DROP DEFAULT",
+  "DROP EXPRESSION",
+  "DROP IDENTITY",
+  "DROP NOT",
+  "SET",
+  "SET DEFAULT",
+  "SET NOT",
 ]);
 
 interface EmbeddedBlock {
@@ -224,14 +248,16 @@ const skipTrivia = (sql: string, from: number): number => {
 
 /**
  * First word of the SQL text from `from` on, upper-cased, skipping leading
- * whitespace and comments. Returns `null` when the text starts with something
- * that is not a word at all.
+ * whitespace and comments. The word runs to the end of the identifier, so
+ * `not1` is not read as `NOT`. Returns `null` when the text starts with
+ * something that is not a word at all.
  */
 const firstWordOf = (sql: string, from = 0): string | null => {
   const start = skipTrivia(sql, from);
-  let end = start;
+  if (!WORD_START.test(sql.charAt(start))) return null;
+  let end = start + 1;
   while (end < sql.length && WORD_PART.test(sql.charAt(end))) end += 1;
-  return end === start ? null : sql.slice(start, end).toUpperCase();
+  return sql.slice(start, end).toUpperCase();
 };
 
 /**
@@ -305,6 +331,14 @@ const buildBlock = (
 
   const firstWord = firstWordOf(text);
   if (firstWord === null || !STATEMENT_KEYWORDS.has(firstWord)) return null;
+  // A keyword counts as bare only at the end of the template, since
+  // `SET "app.id" = 1` is a statement.
+  const next = skipTrivia(text, skipTrivia(text, 0) + firstWord.length);
+  const opening =
+    next === text.length
+      ? firstWord
+      : `${firstWord} ${firstWordOf(text, next) ?? ""}`;
+  if (SUBCOMMAND_OPENINGS.has(opening)) return null;
 
   return {
     text,
