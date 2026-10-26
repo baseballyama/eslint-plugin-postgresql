@@ -200,12 +200,13 @@ What the processor picks up, and what it leaves alone:
 - **Templates containing a `\` escape are skipped**, because the raw source
   and the string that actually reaches PostgreSQL differ there.
 - **Recognised tags** are `sql` (Drizzle, Kysely, postgres.js) and
-  `$queryRaw` / `$executeRaw` (Prisma). The tag is the last identifier before
-  the backtick, so `prisma.$queryRaw` matches, and type arguments after it are
-  skipped, so ``sql<Row[]>`...` `` matches too. Anything that is not a plain
-  identifier is out of reach: Prisma's `$queryRawUnsafe("...")` and TypeORM's
-  `.query("...")` take a string argument rather than a template, and modern
-  slonik tags with `sql.type(schema)`, whose last token is a `)`.
+  `$queryRaw` / `$executeRaw` (Prisma), matched on the last identifier of the
+  tag's member path, so `prisma.$queryRaw` matches. Call and type arguments
+  after the tag are skipped, so ``sql<Row[]>`...` `` matches too. Other
+  tags, such as modern slonik's ``sql.type(schema)`...` ``, take
+  [a processor of your own](#other-tags). Prisma's `$queryRawUnsafe("...")`
+  and TypeORM's `.query("...")` are out of reach: they take a string argument
+  rather than a template.
 - **The ORM query builder is out of scope.** `db.select().from(users)` and
   `pgTable(...)` never produce SQL text, so no rule can see them. Lint the
   generated migrations instead.
@@ -220,6 +221,28 @@ flags every embedded statement, for instance. Turn those off in the same
   rules: { "postgresql/require-trailing-semicolon": "off" },
 }
 ```
+
+#### Other tags
+
+`createEmbeddedSqlProcessor` builds the same processor for tags of your own.
+It takes a predicate that is given each tag's member path — the identifiers
+before the backtick joined by `.`, without call or type arguments — and
+returns whether the template holds SQL. For modern slonik, whose tags include
+``sql.type(schema)`...` `` (path `sql.type`) and ``sql.unsafe`...` ``:
+
+```js
+import { createEmbeddedSqlProcessor } from "eslint-plugin-postgresql";
+
+{
+  files: ["src/**/*.ts"],
+  processor: createEmbeddedSqlProcessor(
+    (path) => path === "sql" || path.startsWith("sql."),
+  ),
+}
+```
+
+Only a template that starts with a statement keyword becomes a virtual file,
+so also accepting fragment tags such as `sql.fragment` is harmless.
 
 ## Rules
 
