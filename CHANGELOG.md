@@ -1,5 +1,22 @@
 # eslint-plugin-postgresql
 
+## 0.26.0
+
+### Minor Changes
+
+- [#305](https://github.com/baseballyama/eslint-plugin-postgresql/pull/305) [`258175a`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/258175ada45fcc3f26c1af2d56a24718c41d94a8) Thanks [@abrahamguo](https://github.com/abrahamguo)! - Add `createEmbeddedSqlProcessor(isSqlTag)`, which builds the `embedded-sql`
+  processor for SQL tags other than `sql`, `$queryRaw` and `$executeRaw`.
+  `isSqlTag` receives the tag's member path without call or type arguments, so
+  ``db.query`...` `` gives `db.query` and slonik's ``sql.type(schema)`...` ``
+  gives `sql.type`.
+
+### Patch Changes
+
+- [#304](https://github.com/baseballyama/eslint-plugin-postgresql/pull/304) [`d38e1f6`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/d38e1f64cc2f17385a71919588a4ad512e13df0d) Thanks [@abrahamguo](https://github.com/abrahamguo)! - The `embedded-sql` processor now skips `ALTER TABLE` sub-commands that start
+  with a statement keyword, such as `` sql`DROP COLUMN ${sql(column)}` `` or a
+  bare `` sql`SET` ``. They are fragments of a larger statement, but were linted
+  as statements, so `no-syntax-error` reported them.
+
 ## 0.25.4
 
 ### Patch Changes
