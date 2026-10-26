@@ -114,15 +114,17 @@ describe("processors/embedded-sql", () => {
 
   it("still lints statements that start with a sub-command's keyword", () => {
     // A bare keyword is a fragment only at the end of the template; here a
-    // quoted parameter name follows SET.
+    // quoted parameter name follows SET. A parameter whose name only starts
+    // with NOT or DEFAULT is not a sub-command either.
     const code = [
       "await sql`DROP TABLE users`;",
       "await sql`ALTER TABLE users DROP COLUMN name`;",
       'await sql`SET "app.user_id" = ${id}`;',
+      "await sql`SET default2.mode = 'on'`;",
     ].join("\n");
     const blocks = processor.preprocess?.(code, "db.ts") ?? [];
-    processor.postprocess?.([[], [], [], []], "db.ts");
-    expect(blocks).toHaveLength(4);
+    processor.postprocess?.([[], [], [], [], []], "db.ts");
+    expect(blocks).toHaveLength(5);
   });
 
   it("lints a statement that carries interpolations", () => {

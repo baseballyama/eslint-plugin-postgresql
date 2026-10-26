@@ -33,7 +33,8 @@ const VIRTUAL_EXTENSION = ".sql";
 const SYNTAX_ERROR_RULE = "no-syntax-error";
 
 const WHITESPACE = /\s/;
-const WORD_PART = /[A-Za-z_]/;
+const WORD_START = /[A-Za-z_]/;
+const WORD_PART = /[A-Za-z0-9_$]/;
 
 /** SQL ending where only a parenthesized list can follow. */
 const LIST_POSITION = /\b(?:IN|VALUES)\s*$/iu;
@@ -247,14 +248,16 @@ const skipTrivia = (sql: string, from: number): number => {
 
 /**
  * First word of the SQL text from `from` on, upper-cased, skipping leading
- * whitespace and comments. Returns `null` when the text starts with something
- * that is not a word at all.
+ * whitespace and comments. The word runs to the end of the identifier, so
+ * `not1` is not read as `NOT`. Returns `null` when the text starts with
+ * something that is not a word at all.
  */
 const firstWordOf = (sql: string, from = 0): string | null => {
   const start = skipTrivia(sql, from);
-  let end = start;
+  if (!WORD_START.test(sql.charAt(start))) return null;
+  let end = start + 1;
   while (end < sql.length && WORD_PART.test(sql.charAt(end))) end += 1;
-  return end === start ? null : sql.slice(start, end).toUpperCase();
+  return sql.slice(start, end).toUpperCase();
 };
 
 /**
