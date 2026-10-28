@@ -1,0 +1,11 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the table alias `s`.
+    line: 3
+    column: 46
+    endLine: 3
+    endColumn: 47
+output: |-
+  -- The outer and inner subqueries share the alias `s`; the inner one must
+  -- be reported once, not once per subquery.
+  SELECT * FROM (SELECT * FROM (SELECT 1 AS x) AS s) AS s;

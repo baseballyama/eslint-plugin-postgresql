@@ -66,16 +66,43 @@ const rule: RuleModule = {
         });
       }
     };
+    // Paren depth of each token, keyed by its start offset. Built on first
+    // use, in one pass over the tokens.
+    let depthByStart: Map<number, number> | undefined;
+    const depthAt = (offset: number) => {
+      if (!depthByStart) {
+        depthByStart = new Map();
+        let depth = 0;
+        for (const token of sourceCode.ast.tokens ?? []) {
+          if (token.type === "Punctuator" && token.value === ")") depth--;
+          depthByStart.set(token.range[0], depth);
+          if (token.type === "Punctuator" && token.value === "(") depth++;
+        }
+      }
+      return depthByStart.get(offset);
+    };
     // A subquery, function call or parenthesized join ends with `)`, but
     // its own range stops short of it, so start from the alias instead.
     // When the parser cannot place the alias, the alias range points at
     // the start of the node, and the `)` check below rejects it.
+    //
+    // The parser places the alias by searching for its name from the start
+    // of the node, so it can land on a same-named alias nested inside, as
+    // in `(SELECT (1) s) s`. The real alias sits outside the node: above
+    // the depth where a subquery or join starts (inside its parentheses),
+    // and no deeper than where a function call starts (before its
+    // arguments). Anything deeper is inside the node and is skipped.
     const visitParenthesized = (
       node: Ast.RangeSubselect | Ast.RangeFunction | Ast.JoinExpr,
+      startsInsideParens: boolean,
     ) => {
       if (!node.alias) return;
       const aliasToken = sourceCode.getTokenByRangeStart(node.alias.range[0]);
       if (!aliasToken) return;
+      const startDepth = depthAt(node.range[0]);
+      if (startDepth === undefined) return;
+      const aliasDepth = depthAt(aliasToken.range[0])!;
+      if (aliasDepth > startDepth - (startsInsideParens ? 1 : 0)) return;
       const before = sourceCode.getTokenBefore(aliasToken);
       const asToken = isAs(before) ? before : null;
       const close = asToken ? sourceCode.getTokenBefore(asToken) : before;
@@ -102,9 +129,11 @@ const rule: RuleModule = {
           alias.aliasname,
         );
       },
-      RangeSubselect: visitParenthesized,
-      RangeFunction: visitParenthesized,
-      JoinExpr: visitParenthesized,
+      RangeSubselect: (node: Ast.RangeSubselect) =>
+        visitParenthesized(node, true),
+      RangeFunction: (node: Ast.RangeFunction) =>
+        visitParenthesized(node, false),
+      JoinExpr: (node: Ast.JoinExpr) => visitParenthesized(node, true),
     };
   },
 };
