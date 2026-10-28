@@ -1,5 +1,14 @@
 # eslint-plugin-postgresql
 
+## 0.26.1
+
+### Patch Changes
+
+- [#308](https://github.com/baseballyama/eslint-plugin-postgresql/pull/308) [`3644803`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/3644803eb05e7bd3aabff95426ac42949118df2e) Thanks [@abrahamguo](https://github.com/abrahamguo)! - `consistent-as-for-table-alias` now also checks the aliases of subqueries,
+  function calls and parenthesized joins, such as `FROM (SELECT ...) AS s` and
+  `JOIN unnest(...) AS u`. `consistent-as-for-column-alias` now also checks
+  `RETURNING` lists.
+
 ## 0.26.0
 
 ### Minor Changes
