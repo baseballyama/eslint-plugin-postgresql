@@ -12,7 +12,7 @@ const rule: RuleModule = {
     type: "layout",
     docs: {
       description:
-        "Enforce a consistent stance on the `AS` keyword before column aliases in `SELECT` (either always require it, or always forbid it)",
+        "Enforce a consistent stance on the `AS` keyword before column aliases (either always require it, or always forbid it)",
       category: "Stylistic Issues",
       recommended: false,
     },
@@ -46,67 +46,73 @@ const rule: RuleModule = {
       return value;
     };
 
-    return {
-      // Only flag aliases that appear in SELECT's targetList. The same
-      // ResTarget node type is used for INSERT column lists and UPDATE
-      // SET clauses where inserting `AS ` would be a syntax error.
-      SelectStmt(node: Ast.SelectStmt) {
-        const targetList = node.targetList;
-        if (!Array.isArray(targetList)) return;
-        const tokens = context.sourceCode.ast.tokens ?? [];
-        for (const target of targetList) {
-          if (!isResTarget(target)) continue;
-          if (!target.name) continue;
-          const val = target.val as { range?: [number, number] } | undefined;
-          if (!val?.range) continue;
-          const valEnd = val.range[1];
-          let next: AST.Token | undefined;
-          let nextIndex = -1;
-          for (let i = 0; i < tokens.length; i++) {
-            if (tokens[i]!.range[0] >= valEnd) {
-              next = tokens[i];
-              nextIndex = i;
-              break;
-            }
-          }
-          if (!next || nextIndex < 0) continue;
-          const hasAs =
-            next.type === "Keyword" && next.value.toUpperCase() === "AS";
-
-          if (style === "always" && !hasAs) {
-            // Defense against parser ranges that stop in the middle of a
-            // compound expression (TypeCast `expr::type`, dotted ColumnRef
-            // `t.col`, CASE expressions, etc.). If `valEnd` lands inside
-            // the value, the next token is part of the expression — not
-            // the alias — so we must not insert `AS` there. Confirm the
-            // next token is the alias identifier before reporting.
-            const aliasName = target.name;
-            const looksLikeAliasIdentifier =
-              tokenIdentifierText(next) === aliasName;
-            if (!looksLikeAliasIdentifier) continue;
-            context.report({
-              loc: next.loc,
-              messageId: "preferAs",
-              data: { alias: aliasName },
-              fix: (fixer) => fixer.insertTextBeforeRange(next!.range, "AS "),
-            });
-            continue;
-          }
-          if (style === "never" && hasAs) {
-            const after = tokens[nextIndex + 1];
-            if (!after) continue;
-            context.report({
-              loc: next.loc,
-              messageId: "unexpectedAs",
-              data: { alias: target.name },
-              // Drop the `AS` keyword plus the whitespace separating
-              // it from the alias identifier.
-              fix: (fixer) =>
-                fixer.removeRange([next!.range[0], after.range[0]]),
-            });
+    // Only flag aliases that appear in SELECT's targetList or in a
+    // RETURNING list. The same ResTarget node type is used for INSERT
+    // column lists and UPDATE SET clauses where inserting `AS ` would be
+    // a syntax error.
+    const visit = (targetList: Ast.SelectStmt["targetList"]) => {
+      if (!Array.isArray(targetList)) return;
+      const tokens = context.sourceCode.ast.tokens ?? [];
+      for (const target of targetList) {
+        if (!isResTarget(target)) continue;
+        if (!target.name) continue;
+        const val = target.val as { range?: [number, number] } | undefined;
+        if (!val?.range) continue;
+        const valEnd = val.range[1];
+        let next: AST.Token | undefined;
+        let nextIndex = -1;
+        for (let i = 0; i < tokens.length; i++) {
+          if (tokens[i]!.range[0] >= valEnd) {
+            next = tokens[i];
+            nextIndex = i;
+            break;
           }
         }
-      },
+        if (!next || nextIndex < 0) continue;
+        const hasAs =
+          next.type === "Keyword" && next.value.toUpperCase() === "AS";
+
+        if (style === "always" && !hasAs) {
+          // Defense against parser ranges that stop in the middle of a
+          // compound expression (TypeCast `expr::type`, dotted ColumnRef
+          // `t.col`, CASE expressions, etc.). If `valEnd` lands inside
+          // the value, the next token is part of the expression — not
+          // the alias — so we must not insert `AS` there. Confirm the
+          // next token is the alias identifier before reporting.
+          const aliasName = target.name;
+          const looksLikeAliasIdentifier =
+            tokenIdentifierText(next) === aliasName;
+          if (!looksLikeAliasIdentifier) continue;
+          context.report({
+            loc: next.loc,
+            messageId: "preferAs",
+            data: { alias: aliasName },
+            fix: (fixer) => fixer.insertTextBeforeRange(next!.range, "AS "),
+          });
+          continue;
+        }
+        if (style === "never" && hasAs) {
+          const after = tokens[nextIndex + 1];
+          if (!after) continue;
+          context.report({
+            loc: next.loc,
+            messageId: "unexpectedAs",
+            data: { alias: target.name },
+            // Drop the `AS` keyword plus the whitespace separating
+            // it from the alias identifier.
+            fix: (fixer) => fixer.removeRange([next!.range[0], after.range[0]]),
+          });
+        }
+      }
+    };
+
+    return {
+      SelectStmt: (node: Ast.SelectStmt) => visit(node.targetList),
+      InsertStmt: (node: Ast.InsertStmt) => visit(node.returningList),
+      UpdateStmt: (node: Ast.UpdateStmt) => visit(node.returningList),
+      DeleteStmt: (node: Ast.DeleteStmt) => visit(node.returningList),
+      MergeStmt: (node: { returningList?: Ast.SelectStmt["targetList"] }) =>
+        visit(node.returningList),
     };
   },
 };

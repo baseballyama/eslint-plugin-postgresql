@@ -1,0 +1,26 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedAs
+    message: Omit `AS` before the table alias `s`.
+    line: 2
+    column: 29
+    endLine: 2
+    endColumn: 31
+  - messageId: unexpectedAs
+    message: Omit `AS` before the table alias `u`.
+    line: 3
+    column: 26
+    endLine: 3
+    endColumn: 28
+  - messageId: unexpectedAs
+    message: Omit `AS` before the table alias `j`.
+    line: 4
+    column: 49
+    endLine: 4
+    endColumn: 51
+output: |-
+  SELECT s.id, u.n, j.order_id
+  FROM (SELECT id FROM users) s
+  JOIN unnest(ARRAY[1, 2]) u (n) ON u.n = s.id
+  JOIN (orders JOIN order_items USING (order_id)) j ON j.user_id = s.id;

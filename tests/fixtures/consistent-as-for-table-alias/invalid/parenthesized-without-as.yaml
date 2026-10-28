@@ -1,0 +1,24 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the table alias `s`.
+    line: 2
+    column: 29
+    endLine: 2
+    endColumn: 30
+  - messageId: preferAs
+    message: Use `AS` before the table alias `u`.
+    line: 3
+    column: 26
+    endLine: 3
+    endColumn: 27
+  - messageId: preferAs
+    message: Use `AS` before the table alias `j`.
+    line: 4
+    column: 49
+    endLine: 4
+    endColumn: 50
+output: |-
+  SELECT s.id, u.n, j.order_id
+  FROM (SELECT id FROM users) AS s
+  JOIN unnest(ARRAY[1, 2]) AS u (n) ON u.n = s.id
+  JOIN (orders JOIN order_items USING (order_id)) AS j ON j.user_id = s.id;

@@ -33,6 +33,82 @@ const rule: RuleModule = {
   create(context) {
     const option = (context.options[0] ?? {}) as { style?: Style };
     const style: Style = option.style ?? DEFAULT_STYLE;
+    const sourceCode = context.sourceCode;
+    const isAs = (token: AST.Token | null | undefined) =>
+      token?.type === "Keyword" && token.value.toUpperCase() === "AS";
+    const check = (
+      asToken: AST.Token | null,
+      aliasToken: AST.Token | null | undefined,
+      aliasname: string,
+    ) => {
+      // The candidate token is not always the alias — after a table
+      // reference it could be the next clause (`WHERE`, `JOIN`, ...) for
+      // an aliasless reference where the parser just lost the alias info,
+      // or a column-list `(col1, col2)` opening paren. Match by name
+      // to be sure we are pointing at the alias identifier.
+      if (aliasToken?.type !== "Identifier") return;
+      if (aliasToken.value !== aliasname) return;
+      if (style === "always" && !asToken) {
+        context.report({
+          loc: aliasToken.loc,
+          messageId: "preferAs",
+          data: { alias: aliasname },
+          fix: (fixer) => fixer.insertTextBeforeRange(aliasToken.range, "AS "),
+        });
+      }
+      if (style === "never" && asToken) {
+        context.report({
+          loc: asToken.loc,
+          messageId: "unexpectedAs",
+          data: { alias: aliasname },
+          fix: (fixer) =>
+            fixer.removeRange([asToken.range[0], aliasToken.range[0]]),
+        });
+      }
+    };
+    // Paren depth of each token, keyed by its start offset. Built on first
+    // use, in one pass over the tokens.
+    let depthByStart: Map<number, number> | undefined;
+    const depthAt = (offset: number) => {
+      if (!depthByStart) {
+        depthByStart = new Map();
+        let depth = 0;
+        for (const token of sourceCode.ast.tokens ?? []) {
+          if (token.type === "Punctuator" && token.value === ")") depth--;
+          depthByStart.set(token.range[0], depth);
+          if (token.type === "Punctuator" && token.value === "(") depth++;
+        }
+      }
+      return depthByStart.get(offset);
+    };
+    // A subquery, function call or parenthesized join ends with `)`, but
+    // its own range stops short of it, so start from the alias instead.
+    // When the parser cannot place the alias, the alias range points at
+    // the start of the node, and the `)` check below rejects it.
+    //
+    // The parser places the alias by searching for its name from the start
+    // of the node, so it can land on a same-named alias nested inside, as
+    // in `(SELECT (1) s) s`. The real alias sits outside the node: above
+    // the depth where a subquery or join starts (inside its parentheses),
+    // and no deeper than where a function call starts (before its
+    // arguments). Anything deeper is inside the node and is skipped.
+    const visitParenthesized = (
+      node: Ast.RangeSubselect | Ast.RangeFunction | Ast.JoinExpr,
+      startsInsideParens: boolean,
+    ) => {
+      if (!node.alias) return;
+      const aliasToken = sourceCode.getTokenByRangeStart(node.alias.range[0]);
+      if (!aliasToken) return;
+      const startDepth = depthAt(node.range[0]);
+      if (startDepth === undefined) return;
+      const aliasDepth = depthAt(aliasToken.range[0])!;
+      if (aliasDepth > startDepth - (startsInsideParens ? 1 : 0)) return;
+      const before = sourceCode.getTokenBefore(aliasToken);
+      const asToken = isAs(before) ? before : null;
+      const close = asToken ? sourceCode.getTokenBefore(asToken) : before;
+      if (close?.value !== ")") return;
+      check(asToken, aliasToken, node.alias.aliasname);
+    };
     return {
       RangeVar(node: Ast.RangeVar) {
         // The parser exposes the alias only as { aliasname } (no range
@@ -41,51 +117,23 @@ const rule: RuleModule = {
         const alias = node.alias as { aliasname?: string } | undefined;
         if (!alias?.aliasname || !node.range) return;
         const tableEnd = node.range[1];
-        const tokens = context.sourceCode.ast.tokens ?? [];
-        let next: AST.Token | undefined;
-        let nextIndex = -1;
-        for (let i = 0; i < tokens.length; i++) {
-          if (tokens[i]!.range[0] >= tableEnd) {
-            next = tokens[i];
-            nextIndex = i;
-            break;
-          }
-        }
-        if (!next || nextIndex < 0) return;
-        const hasAs =
-          next.type === "Keyword" && next.value.toUpperCase() === "AS";
-        if (style === "always") {
-          if (hasAs) return;
-          // Not every token after the table reference is the alias — it
-          // could be the next clause (`WHERE`, `JOIN`, ...) for an
-          // aliasless reference where the parser just lost the alias info,
-          // or a column-list `(col1, col2)` opening paren. Match by name
-          // to be sure we are pointing at the alias identifier.
-          if (next.type !== "Identifier") return;
-          if (next.value !== alias.aliasname) return;
-          context.report({
-            loc: next.loc,
-            messageId: "preferAs",
-            data: { alias: alias.aliasname },
-            fix: (fixer) => fixer.insertTextBeforeRange(next!.range, "AS "),
-          });
-          return;
-        }
-        // style === "never"
-        if (!hasAs) return;
-        const after = tokens[nextIndex + 1];
-        if (!after) return;
-        // Make sure the identifier following `AS` is the alias we
-        // expect, not part of an unrelated clause.
-        if (after.type !== "Identifier") return;
-        if (after.value !== alias.aliasname) return;
-        context.report({
-          loc: next.loc,
-          messageId: "unexpectedAs",
-          data: { alias: alias.aliasname },
-          fix: (fixer) => fixer.removeRange([next!.range[0], after.range[0]]),
-        });
+        const tokens = sourceCode.ast.tokens ?? [];
+        const nextIndex = tokens.findIndex(
+          (token) => token.range[0] >= tableEnd,
+        );
+        if (nextIndex < 0) return;
+        const hasAs = isAs(tokens[nextIndex]);
+        check(
+          hasAs ? tokens[nextIndex]! : null,
+          tokens[hasAs ? nextIndex + 1 : nextIndex],
+          alias.aliasname,
+        );
       },
+      RangeSubselect: (node: Ast.RangeSubselect) =>
+        visitParenthesized(node, true),
+      RangeFunction: (node: Ast.RangeFunction) =>
+        visitParenthesized(node, false),
+      JoinExpr: (node: Ast.JoinExpr) => visitParenthesized(node, true),
     };
   },
 };
