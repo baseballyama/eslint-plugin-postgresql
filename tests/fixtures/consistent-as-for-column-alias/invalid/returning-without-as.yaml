@@ -1,0 +1,32 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the column alias `user_id`.
+    line: 1
+    column: 52
+    endLine: 1
+    endColumn: 59
+  - messageId: preferAs
+    message: Use `AS` before the column alias `user_id`.
+    line: 2
+    column: 55
+    endLine: 2
+    endColumn: 62
+  - messageId: preferAs
+    message: Use `AS` before the column alias `user_id`.
+    line: 3
+    column: 45
+    endLine: 3
+    endColumn: 52
+  - messageId: preferAs
+    message: Use `AS` before the column alias `user_id`.
+    line: 6
+    column: 14
+    endLine: 6
+    endColumn: 21
+output: |-
+  INSERT INTO users (name) VALUES ('a') RETURNING id AS user_id;
+  UPDATE users SET name = 'b' WHERE id = 1 RETURNING id AS user_id;
+  DELETE FROM users WHERE id = 1 RETURNING id AS user_id;
+  MERGE INTO users USING staged_users ON users.id = staged_users.user_id
+  WHEN MATCHED THEN DELETE
+  RETURNING id AS user_id;

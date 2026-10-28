@@ -1196,7 +1196,7 @@ export const rules: RuleMeta[] = [
   {
     name: "consistent-as-for-column-alias",
     description:
-      "Enforce a consistent stance on the `AS` keyword before column aliases in `SELECT`.",
+      "Enforce a consistent stance on the `AS` keyword before column aliases.",
     longDescription:
       "PostgreSQL allows `SELECT id user_id`, but the optional `AS` is the SQL-standard form and is far easier to read at a glance — without `AS`, an accidental missing comma silently turns a column into an alias of the previous one. Use the `style` option to enforce either direction.",
     type: "layout",

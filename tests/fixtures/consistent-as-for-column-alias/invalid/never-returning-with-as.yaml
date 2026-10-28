@@ -1,0 +1,34 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `user_id`.
+    line: 1
+    column: 52
+    endLine: 1
+    endColumn: 54
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `user_id`.
+    line: 2
+    column: 55
+    endLine: 2
+    endColumn: 57
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `user_id`.
+    line: 3
+    column: 45
+    endLine: 3
+    endColumn: 47
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `user_id`.
+    line: 6
+    column: 14
+    endLine: 6
+    endColumn: 16
+output: |-
+  INSERT INTO users (name) VALUES ('a') RETURNING id user_id;
+  UPDATE users SET name = 'b' WHERE id = 1 RETURNING id user_id;
+  DELETE FROM users WHERE id = 1 RETURNING id user_id;
+  MERGE INTO users USING staged_users ON users.id = staged_users.user_id
+  WHEN MATCHED THEN DELETE
+  RETURNING id user_id;
