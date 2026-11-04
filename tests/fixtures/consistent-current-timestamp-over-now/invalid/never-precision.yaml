@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: preferCurrentTimestampOverLocal
+    message: Use `CURRENT_TIMESTAMP` instead of `LOCALTIMESTAMP`. `LOCALTIMESTAMP` returns a timezone-naive `timestamp`; `CURRENT_TIMESTAMP` returns `timestamptz`, which is what most apps actually want.
+    line: 1
+    column: 8
+    endLine: 1
+    endColumn: 22
+output: SELECT CURRENT_TIMESTAMP(3) FROM t;

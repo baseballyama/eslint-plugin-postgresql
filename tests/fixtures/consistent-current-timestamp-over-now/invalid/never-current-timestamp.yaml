@@ -1,0 +1,24 @@
+options:
+  - style: never
+errors:
+  - messageId: preferNow
+    message: Use `now()` instead of `CURRENT_TIMESTAMP`.
+    line: 1
+    column: 41
+    endLine: 1
+    endColumn: 58
+  - messageId: preferCurrentTimestampOverLocal
+    message: Use `now()` instead of `LOCALTIMESTAMP`. `LOCALTIMESTAMP` returns a timezone-naive `timestamp`; `now()` returns `timestamptz`, which is what most apps actually want.
+    line: 2
+    column: 8
+    endLine: 2
+    endColumn: 22
+  - messageId: preferCurrentTimeOverLocal
+    message: Use `CURRENT_TIME` instead of `LOCALTIME`. `LOCALTIME` returns a timezone-naive `time`; `CURRENT_TIME` returns `timetz`.
+    line: 2
+    column: 24
+    endLine: 2
+    endColumn: 33
+output: |-
+  INSERT INTO events (created_at) VALUES (now());
+  SELECT now(), CURRENT_TIME FROM t;
