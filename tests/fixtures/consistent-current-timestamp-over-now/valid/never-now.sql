@@ -1,0 +1,2 @@
+INSERT INTO events (created_at) VALUES (now());
+SELECT CURRENT_TIMESTAMP(3) FROM t;

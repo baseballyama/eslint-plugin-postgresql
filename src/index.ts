@@ -9,6 +9,7 @@ import consistentAsForTableAlias from "./rules/consistent-as-for-table-alias.js"
 import consistentBetweenOverAnd from "./rules/consistent-between-over-and.js";
 import consistentCreateIndexConcurrently from "./rules/consistent-create-index-concurrently.js";
 import consistentCreateOrReplace from "./rules/consistent-create-or-replace.js";
+import consistentCurrentTimestampOverNow from "./rules/consistent-current-timestamp-over-now.js";
 import consistentDropIndexConcurrently from "./rules/consistent-drop-index-concurrently.js";
 import consistentExplicitInnerJoin from "./rules/consistent-explicit-inner-join.js";
 import consistentExplicitOuterJoin from "./rules/consistent-explicit-outer-join.js";
@@ -72,7 +73,6 @@ import preferBigintId from "./rules/prefer-bigint-id.js";
 import preferAddConstraintNotValid from "./rules/prefer-add-constraint-not-valid.js";
 import preferCastOperator from "./rules/prefer-cast-operator.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
-import preferCurrentTimestampOverNow from "./rules/prefer-current-timestamp-over-now.js";
 import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
 import preferExistsOverInSubquery from "./rules/prefer-exists-over-in-subquery.js";
 import preferInListOverOr from "./rules/prefer-in-list-over-or.js";
@@ -101,6 +101,7 @@ const rules = {
   "consistent-between-over-and": consistentBetweenOverAnd,
   "consistent-create-index-concurrently": consistentCreateIndexConcurrently,
   "consistent-create-or-replace": consistentCreateOrReplace,
+  "consistent-current-timestamp-over-now": consistentCurrentTimestampOverNow,
   "consistent-drop-index-concurrently": consistentDropIndexConcurrently,
   "consistent-explicit-inner-join": consistentExplicitInnerJoin,
   "consistent-explicit-outer-join": consistentExplicitOuterJoin,
@@ -165,7 +166,6 @@ const rules = {
   "prefer-bigint-id": preferBigintId,
   "prefer-cast-operator": preferCastOperator,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
-  "prefer-current-timestamp-over-now": preferCurrentTimestampOverNow,
   "prefer-explicit-null-ordering": preferExplicitNullOrdering,
   "prefer-exists-over-in-subquery": preferExistsOverInSubquery,
   "prefer-in-list-over-or": preferInListOverOr,
@@ -293,12 +293,12 @@ plugin.configs = {
       "postgresql/consistent-as-for-column-alias": "warn",
       "postgresql/consistent-as-for-table-alias": "warn",
       "postgresql/consistent-between-over-and": "warn",
+      "postgresql/consistent-current-timestamp-over-now": "warn",
       "postgresql/consistent-explicit-inner-join": "warn",
       "postgresql/consistent-explicit-outer-join": "warn",
       "postgresql/no-unnecessary-quoted-identifier": "warn",
       "postgresql/plpgsql-keyword-case": "warn",
       "postgresql/prefer-cast-operator": "warn",
-      "postgresql/prefer-current-timestamp-over-now": "warn",
       "postgresql/prefer-in-list-over-or": "warn",
       "postgresql/prefer-keyword-case": "warn",
       "postgresql/prefer-not-equals-operator": "warn",

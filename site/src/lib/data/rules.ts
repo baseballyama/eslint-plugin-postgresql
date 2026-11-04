@@ -1321,11 +1321,11 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-current-timestamp-over-now",
+    name: "consistent-current-timestamp-over-now",
     description:
-      "Prefer SQL-standard `CURRENT_TIMESTAMP` over `now()` / `LOCALTIMESTAMP`.",
+      "Enforce a consistent stance on `CURRENT_TIMESTAMP` vs `now()`, and flag `LOCALTIMESTAMP` / `LOCALTIME`.",
     longDescription:
-      "`CURRENT_TIMESTAMP` is portable across SQL engines, while `now()` is PostgreSQL-only. The rule also flags `LOCALTIMESTAMP` / `LOCALTIME` and rewrites them to `CURRENT_TIMESTAMP` / `CURRENT_TIME` — the `LOCAL*` variants return the timezone-naive `timestamp` / `time` types, which is rarely what application code actually wants.",
+      "`CURRENT_TIMESTAMP` is portable across SQL engines, while `now()` is PostgreSQL-only; both return the start time of the current transaction. Pick one direction with the `style` option. The rule also flags `LOCALTIMESTAMP` / `LOCALTIME` and rewrites them to the chosen `timestamptz` spelling / `CURRENT_TIME` — the `LOCAL*` variants return the timezone-naive `timestamp` / `time` types, which is rarely what application code actually wants.",
     type: "layout",
     recommended: "off",
     fixable: true,
@@ -1337,6 +1337,15 @@ export const rules: RuleMeta[] = [
     correct: [
       "INSERT INTO events (created_at) VALUES (CURRENT_TIMESTAMP);",
       "SELECT CURRENT_TIMESTAMP, CURRENT_TIME FROM t;",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) rewrites `now()` to `CURRENT_TIMESTAMP`. `never` rewrites `CURRENT_TIMESTAMP` to `now()` for projects that standardize on PostgreSQL's spelling, and rewrites `LOCALTIMESTAMP` to `now()` too. `CURRENT_TIMESTAMP(p)` is left alone, since `now()` takes no precision.",
+      },
     ],
   },
   {
