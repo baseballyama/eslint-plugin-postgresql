@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName } from "../utils/ast.js";
@@ -52,14 +51,14 @@ const rule: RuleModule = {
           Array.isArray(typmods)
         ) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "preferText",
           });
           return;
         }
         if (style === "never" && name === "text") {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "unexpectedText",
           });
         }

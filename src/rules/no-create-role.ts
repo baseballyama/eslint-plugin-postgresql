@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 
 interface CreateRoleStmt {
@@ -25,7 +24,7 @@ const rule: RuleModule = {
     return {
       CreateRoleStmt(node: CreateRoleStmt) {
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noCreateRole",
         });
       },

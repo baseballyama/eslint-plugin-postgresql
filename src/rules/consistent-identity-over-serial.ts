@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName, isConstraint } from "../utils/ast.js";
@@ -51,7 +50,7 @@ const rule: RuleModule = {
         const t = getTypeName(node.typeName);
         if (style === "always" && t && SERIAL_TYPES.has(t)) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "preferIdentity",
             data: { type: t },
           });
@@ -59,7 +58,7 @@ const rule: RuleModule = {
         }
         if (style === "never" && hasIdentity(node)) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "unexpectedIdentity",
           });
         }

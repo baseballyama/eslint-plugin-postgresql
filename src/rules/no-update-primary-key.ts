@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isResTarget } from "../utils/ast.js";
@@ -62,7 +61,7 @@ const rule: RuleModule = {
           if (typeof name !== "string") continue;
           if (!local.has(name)) continue;
           context.report({
-            node: target as unknown as Rule.Node,
+            node: target,
             messageId: "noUpdatePk",
             data: { name },
           });

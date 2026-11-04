@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 
 const rule: RuleModule = {
@@ -35,7 +34,7 @@ const rule: RuleModule = {
                 ? parseError.error
                 : "Unknown SQL parsing error";
             context.report({
-              node: stmt as unknown as Rule.Node,
+              node: stmt,
               messageId: "syntaxError",
               data: { message: errorMessage },
             });

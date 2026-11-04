@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -22,7 +21,7 @@ const rule: RuleModule = {
       JoinExpr(node: Ast.JoinExpr) {
         if (node.isNatural) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "noNaturalJoin",
           });
         }

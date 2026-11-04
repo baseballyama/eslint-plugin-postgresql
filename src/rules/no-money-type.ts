@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName } from "../utils/ast.js";
@@ -23,7 +22,7 @@ const rule: RuleModule = {
       ColumnDef(node: Ast.ColumnDef) {
         if (getTypeName(node.typeName) === "money") {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "noMoney",
           });
         }

@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isConstraint } from "../utils/ast.js";
@@ -73,7 +72,7 @@ const rule: RuleModule = {
           const fn = isVolatileDefault((c as { raw_expr?: unknown }).raw_expr);
           if (!fn) continue;
           context.report({
-            node: c as unknown as Rule.Node,
+            node: c,
             messageId: "noVolatileDefault",
             data: { fn },
           });

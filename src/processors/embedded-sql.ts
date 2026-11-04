@@ -409,9 +409,9 @@ const translateMessage = (
   block: EmbeddedBlock,
 ): Linter.LintMessage | null => {
   // A block that fails to parse on a placeholder is still linted, because
-  // rules that read tokens rather than the syntax tree (keyword case, `<>` or
-  // `!=`) work without a parse. Only its syntax error is withheld: that
-  // `${...}` holds a clause or a list, not a name.
+  // rules that read tokens rather than the syntax tree (`<>` or `!=`) work
+  // without a parse. Only its syntax error is withheld: that `${...}` holds a
+  // clause or a list, not a name.
   if (
     block.failsOnPlaceholder &&
     message.ruleId?.endsWith(`/${SYNTAX_ERROR_RULE}`) === true

@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -41,14 +40,14 @@ const rule: RuleModule = {
         const isConcurrent = node.concurrent === true;
         if (style === "always" && !isConcurrent) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "preferConcurrently",
           });
           return;
         }
         if (style === "never" && isConcurrent) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "unexpectedConcurrently",
           });
         }

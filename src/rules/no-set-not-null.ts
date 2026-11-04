@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -23,7 +22,7 @@ const rule: RuleModule = {
       AlterTableCmd(node: Ast.AlterTableCmd) {
         if (node.subtype !== "AT_SetNotNull") return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noSetNotNull",
         });
       },

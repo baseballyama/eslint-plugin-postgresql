@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-postgresql",
-  "version": "0.26.1",
+  "version": "0.26.2",
   "type": "module",
   "packageManager": "pnpm@12.16.1",
   "main": "./dist/index.js",
@@ -68,7 +68,7 @@
     "eslint": "^8.57.1 || ^9.0.0 || ^10.0.0"
   },
   "dependencies": {
-    "libpg-query": "^17.7.4",
+    "libpg-query": "^18.2.2",
     "postgresql-eslint-parser": "^0.6.2"
   }
 }

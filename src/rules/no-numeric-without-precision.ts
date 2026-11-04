@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName } from "../utils/ast.js";
@@ -31,7 +30,7 @@ const rule: RuleModule = {
         if (getTypeName(node.typeName) !== "numeric") return;
         if (hasTypmods(node.typeName)) return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noNumericWithoutPrecision",
         });
       },

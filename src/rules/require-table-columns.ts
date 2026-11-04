@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isColumnDef } from "../utils/ast.js";
@@ -99,7 +98,7 @@ const rule: RuleModule = {
         for (const col of required) {
           if (present.has(col)) continue;
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "missingColumn",
             data: { table: tableName, missing: col, rationale },
           });

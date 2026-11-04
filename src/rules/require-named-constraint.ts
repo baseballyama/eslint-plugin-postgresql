@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isConstraint } from "../utils/ast.js";
@@ -44,7 +43,7 @@ const rule: RuleModule = {
           if (!isConstraint(elt)) continue;
           if (!isUnnamedNamedKind(elt)) continue;
           context.report({
-            node: elt as unknown as Rule.Node,
+            node: elt,
             messageId: "requireNamedConstraint",
           });
         }
@@ -57,7 +56,7 @@ const rule: RuleModule = {
         if (!isConstraint(def)) return;
         if (!isUnnamedNamedKind(def)) return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "requireNamedConstraint",
         });
       },
