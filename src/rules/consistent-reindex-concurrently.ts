@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 
 type Style = "always" | "never";
@@ -56,14 +55,14 @@ const rule: RuleModule = {
         const concurrent = isConcurrent(node.params);
         if (style === "always" && !concurrent) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "preferReindexConcurrently",
           });
           return;
         }
         if (style === "never" && concurrent) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "unexpectedReindexConcurrently",
           });
         }

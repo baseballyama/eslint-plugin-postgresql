@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -25,7 +24,7 @@ const rule: RuleModule = {
           (Ast.RangeVar & { relpersistence?: string }) | undefined;
         if (relation?.relpersistence !== "t") return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noTemporaryTable",
         });
       },

@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName } from "../utils/ast.js";
@@ -41,14 +40,14 @@ const rule: RuleModule = {
         const t = getTypeName(node.typeName);
         if (style === "always" && t === "json") {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "preferJsonb",
           });
           return;
         }
         if (style === "never" && t === "jsonb") {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "unexpectedJsonb",
           });
         }

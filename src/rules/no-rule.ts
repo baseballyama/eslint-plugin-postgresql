@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 import type { RuleModule } from "../utils/rule.js";
 
 const rule: RuleModule = {
@@ -22,9 +22,9 @@ const rule: RuleModule = {
       // The runtime AST tags this node as "RuleStmt" even though the
       // upstream type alias is `CreateRuleStmt` — visit by the runtime
       // name; the upstream typings will be reconciled separately.
-      RuleStmt(node: { range?: [number, number] }) {
+      RuleStmt(node: Ast.BaseNode) {
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noRule",
         });
       },

@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -32,7 +31,7 @@ const rule: RuleModule = {
           return;
         if (node.sortby_nulls !== "SORTBY_NULLS_DEFAULT") return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "preferExplicitNullOrdering",
         });
       },

@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { getTypeName, isColumnDef, isConstraint } from "../utils/ast.js";
@@ -69,7 +68,7 @@ const rule: RuleModule = {
           if (!isPrimaryKey(elt) && !isTablePrimaryKeyOn(elts, elt.colname))
             continue;
           context.report({
-            node: elt as unknown as Rule.Node,
+            node: elt,
             messageId: "preferBigintId",
           });
         }

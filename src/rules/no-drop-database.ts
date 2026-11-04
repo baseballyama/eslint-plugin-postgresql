@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 
 interface DropdbStmt {
@@ -25,7 +24,7 @@ const rule: RuleModule = {
     return {
       DropdbStmt(node: DropdbStmt) {
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noDropDatabase",
         });
       },

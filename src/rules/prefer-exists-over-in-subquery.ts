@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import { isSubLink } from "../utils/ast.js";
 
@@ -26,7 +25,7 @@ const rule: RuleModule = {
         if (node.subLinkType !== "ANY_SUBLINK") return;
         if (!isSubLink(node)) return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "preferExists",
         });
       },

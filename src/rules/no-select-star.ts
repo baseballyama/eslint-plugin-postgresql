@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isAStar, isColumnRef, isResTarget } from "../utils/ast.js";
@@ -30,7 +29,7 @@ const rule: RuleModule = {
           if (!isColumnRef(val)) continue;
           if (val.fields.some(isAStar)) {
             context.report({
-              node: target as unknown as Rule.Node,
+              node: target,
               messageId: "noSelectStar",
             });
           }

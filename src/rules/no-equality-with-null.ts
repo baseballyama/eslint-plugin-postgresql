@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 import type { RuleModule } from "../utils/rule.js";
 
 const NULL_OPS = new Set(["=", "<>", "!="]);
@@ -27,19 +27,14 @@ const rule: RuleModule = {
   },
   create(context) {
     return {
-      A_Expr(node: {
-        kind?: unknown;
-        name?: unknown;
-        lexpr?: unknown;
-        rexpr?: unknown;
-      }) {
+      A_Expr(node: Ast.A_Expr) {
         if (node.kind !== "AEXPR_OP") return;
         if (!Array.isArray(node.name) || node.name.length !== 1) return;
         const op = (node.name[0] as { sval?: unknown }).sval;
         if (typeof op !== "string" || !NULL_OPS.has(op)) return;
         if (!isNullConst(node.lexpr) && !isNullConst(node.rexpr)) return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "useIsNull",
           data: { op },
         });
