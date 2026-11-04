@@ -177,10 +177,16 @@ If you already have a config block that neutralises your JS/TS rules for
 
 What the processor picks up, and what it leaves alone:
 
-- **Only complete statements.** ``sql`SELECT id FROM users` `` is linted;
-  expression fragments like ``sql`excluded.user_name` `` or
-  ``sql`${users.id} IS NULL` `` have no standalone parse and are skipped. So
-  are pieces of an `ALTER TABLE` that start with a statement keyword, such as
+- **Statements, and fragments that parse in a SELECT.** A fragment such as
+  ``sql`${users.id} IS NULL` `` or ``sql`AND age > ${x}` `` has no standalone
+  parse, so it is linted inside the first of `SELECT …`, `SELECT 1 …` and
+  `SELECT * FROM _ …` it parses in, followed by a `;`. Nothing is reported on
+  that added context, so a rule that judges the whole statement, such as
+  `require-limit`, stays quiet about a fragment. A fragment is still linted
+  without the rest of its query, so an assignment like
+  ``sql`deleted_at = NULL` `` reads as a comparison. Fragments that parse in
+  none of these, such as ``sql`RETURNING *` ``, are skipped, as are pieces of
+  an `ALTER TABLE` that start with a statement keyword, such as
   ``sql`DROP COLUMN ${sql(column)}` ``, ``sql`SET NOT NULL` `` or a bare
   ``sql`DROP` ``.
 - **Interpolations become placeholders.** Each `${...}` is replaced by an
@@ -240,8 +246,8 @@ import { createEmbeddedSqlProcessor } from "eslint-plugin-postgresql";
 }
 ```
 
-Only a template that starts with a statement keyword becomes a virtual file,
-so also accepting fragment tags such as `sql.fragment` is harmless.
+Fragment tags such as `sql.fragment` are worth accepting too: their templates
+are linted like any other fragment.
 
 ## Rules
 

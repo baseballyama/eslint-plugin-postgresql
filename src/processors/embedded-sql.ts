@@ -130,12 +130,38 @@ const SUBCOMMAND_OPENINGS = new Set([
   "SET NOT",
 ]);
 
+/**
+ * Contexts a fragment is tried in, in order, until one parses: a select list
+ * or expression (``sql`${a} + 1` ``), a condition that continues one
+ * (``sql`AND age > ${x}` `` parses as `1 AND ...`), and a clause that
+ * continues a FROM (``sql`JOIN orders o ON o.user_id = u.id` ``). These are
+ * the contexts prettier-plugin-embed retries before formatting a fragment.
+ */
+const FRAGMENT_PREFIXES = ["SELECT ", "SELECT 1 ", "SELECT * FROM _ "];
+
+/**
+ * Closes a fragment's statement, so a rule that judges how a statement ends
+ * (`require-trailing-semicolon`) finds it closed instead of asking for a `;`
+ * in the middle of the author's query. The line break keeps a trailing `--`
+ * comment from swallowing the `;`.
+ */
+const FRAGMENT_SUFFIX = "\n;";
+
 interface EmbeddedBlock {
-  /** SQL text with every `${...}` swapped for an equal-length placeholder. */
+  /**
+   * SQL text with every `${...}` swapped for an equal-length placeholder,
+   * wrapped, for a fragment, in the prefix and `;` that let it parse.
+   */
   text: string;
-  /** Offset in the host file of the first character of `text`. */
+  /**
+   * Offset in the host file of the first character of `text`. A fragment's
+   * prefix is not in the host file, so its block starts that much earlier.
+   */
   start: number;
-  /** Placeholder spans, as `[start, end)` offsets into `text`. */
+  /**
+   * Spans the author did not write, as `[start, end)` offsets into `text`:
+   * each placeholder, and a fragment's prefix.
+   */
   placeholders: OffsetRange[];
   /** Offset of each line start in `text`, for line/column → offset lookups. */
   lineStarts: number[];
@@ -334,7 +360,33 @@ const buildBlock = (
   text += raw.slice(cursor);
 
   const firstWord = firstWordOf(text);
-  if (firstWord === null || !STATEMENT_KEYWORDS.has(firstWord)) return null;
+  if (firstWord === null || !STATEMENT_KEYWORDS.has(firstWord)) {
+    // A fragment has no standalone parse, so it is linted inside the first
+    // context it parses in. One that parses in none is left alone, since its
+    // syntax error could be the missing context's rather than the author's.
+    const prefix = FRAGMENT_PREFIXES.find(
+      (candidate) =>
+        !parse(candidate + text + FRAGMENT_SUFFIX).body.some(
+          (node) => node.type === "SQLParseError",
+        ),
+    );
+    if (prefix === undefined) return null;
+    const fragment = prefix + text + FRAGMENT_SUFFIX;
+    return {
+      text: fragment,
+      start: template.start - prefix.length,
+      placeholders: [
+        [0, prefix.length],
+        ...placeholders.map(([start, end]): OffsetRange => [
+          start + prefix.length,
+          end + prefix.length,
+        ]),
+      ],
+      lineStarts: lineStartsOf(fragment),
+      hostLineStarts,
+      failsOnPlaceholder: false,
+    };
+  }
   // A keyword counts as bare only at the end of the template, since
   // `SET "app.id" = 1` is a statement.
   const next = skipTrivia(text, skipTrivia(text, 0) + firstWord.length);
@@ -468,7 +520,7 @@ const blockCache = new Map<string, EmbeddedBlock[]>();
 /**
  * Creates a processor that lints the SQL inside the tagged template literals
  * `isSqlTag` accepts in JavaScript and TypeScript files, by emitting one
- * virtual `.sql` file per complete statement.
+ * virtual `.sql` file per statement or fragment.
  *
  * `isSqlTag` is given each tag's member path: the identifiers before the
  * backtick joined by `.`, without call or type arguments.

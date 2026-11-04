@@ -115,15 +115,59 @@ describe("processors/embedded-sql", () => {
     ).toEqual([{ ruleId: "postgresql/no-select-star", line: 2, column: 10 }]);
   });
 
-  it("ignores expression fragments that are not complete statements", () => {
+  it("lints a fragment in the first context it parses in", () => {
+    // A select list, a condition after `SELECT 1`, and a clause after `FROM`.
+    // The rule reads the syntax tree, so each fragment has to parse.
     const code = [
-      "const a = sql`excluded.cognito_user_sub`;",
-      "const b = sql`${users.userName} IS NULL`;",
-      "const c = sql`current_timestamp(3)`;",
+      "const a = sql`${users.userName} = NULL`;",
+      "const b = sql`AND deleted_at = NULL`;",
+      "const c = sql`JOIN orders o ON o.deleted_at = NULL`;",
     ].join("\n");
-    expect(lintSql(code, { "postgresql/no-syntax-error": "error" })).toEqual(
-      [],
-    );
+    expect(
+      positionsOf(
+        lintSql(code, { "postgresql/no-equality-with-null": "error" }),
+      ),
+    ).toEqual([
+      { ruleId: "postgresql/no-equality-with-null", line: 1, column: 33 },
+      { ruleId: "postgresql/no-equality-with-null", line: 2, column: 30 },
+      { ruleId: "postgresql/no-equality-with-null", line: 3, column: 45 },
+    ]);
+  });
+
+  it("does not report on the context around a fragment", () => {
+    // The `SELECT * FROM _` before the JOIN and the `;` after it are ours, so
+    // the `*`, the missing LIMIT and the missing `;` are not the author's.
+    const code = [
+      "const a = sql`JOIN orders o ON o.user_id = u.id`;",
+      "const b = sql`a -- trailing comment`;",
+    ].join("\n");
+    expect(
+      lintSql(code, {
+        "postgresql/no-select-star": "error",
+        "postgresql/require-limit": "error",
+        "postgresql/require-trailing-semicolon": "error",
+      }),
+    ).toEqual([]);
+  });
+
+  it("maps interpolations inside a fragment", () => {
+    const code = "const q = sql`x = 1 and ${c}`;";
+    expect(
+      positionsOf(lintSql(code, { "postgresql/prefer-keyword-case": "error" })),
+    ).toEqual([
+      { ruleId: "postgresql/prefer-keyword-case", line: 1, column: 21 },
+    ]);
+  });
+
+  it("ignores fragments that parse in none of those contexts", () => {
+    const code = [
+      "const a = sql`ADD PRIMARY KEY (id)`;",
+      "const b = sql`RETURNING *`;",
+      "const c = sql`ON CONFLICT (id) DO NOTHING`;",
+    ].join("\n");
+    const blocks = processor.preprocess?.(code, "db.ts") ?? [];
+    processor.postprocess?.([[]], "db.ts");
+    expect(blocks).toEqual([code]);
   });
 
   it("ignores ALTER TABLE sub-commands that start with a statement keyword", () => {
@@ -435,6 +479,14 @@ describe("processors/embedded-sql", () => {
     });
     expect(result.fixed).toBe(true);
     expect(result.output).toBe("const q = sql`SELECT * FROM t WHERE a <> 1`;");
+  });
+
+  it("applies a fix inside a fragment at its place in the host file", () => {
+    const code = "const q = sql`AND age != ${minAge}`;";
+    const result = fixSql(code, {
+      "postgresql/prefer-not-equals-operator": "error",
+    });
+    expect(result.output).toBe("const q = sql`AND age <> ${minAge}`;");
   });
 
   it("drops a fix that would rewrite an interpolation", () => {
