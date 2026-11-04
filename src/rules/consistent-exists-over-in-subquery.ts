@@ -1,4 +1,4 @@
-import type { AST, Rule } from "eslint";
+import type { AST } from "eslint";
 import type { Ast } from "postgresql-eslint-parser";
 import type { RuleModule } from "../utils/rule.js";
 import {
@@ -70,8 +70,14 @@ const getFromNames = (items: unknown[]): string[] | undefined => {
   for (const item of items) {
     if (isRangeVar(item)) {
       names.push(item.alias?.aliasname ?? item.relname!);
-    } else if (isRangeSubselect(item) || isRangeFunction(item)) {
+    } else if (isRangeSubselect(item)) {
+      // An unaliased sub-`SELECT` (PostgreSQL 16+) has no name to reach.
       if (item.alias) names.push(item.alias.aliasname);
+    } else if (isRangeFunction(item)) {
+      // An unaliased function is reachable by its own name, which this
+      // rule does not resolve.
+      if (!item.alias) return undefined;
+      names.push(item.alias.aliasname);
     } else if (isJoinExpr(item)) {
       // An aliased join hides the names of the tables inside it.
       const joined = item.alias
@@ -79,6 +85,8 @@ const getFromNames = (items: unknown[]): string[] | undefined => {
         : getFromNames([item.larg, item.rarg]);
       if (!joined) return undefined;
       names.push(...joined);
+      // `JOIN ... USING (col) AS j` also names the joined columns `j.col`.
+      if (item.join_using_alias) names.push(item.join_using_alias.aliasname);
     } else {
       return undefined;
     }
@@ -173,7 +181,7 @@ const rule: RuleModule = {
           // semantically-equivalent `x = ANY (subquery)` form.
           if (node.subLinkType !== "ANY_SUBLINK") return;
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "preferExists",
           });
           return;
@@ -208,7 +216,7 @@ const rule: RuleModule = {
         const { comparison, inner, outer } = correlations[0]!;
         const outerText = getColumnText(outer);
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "preferIn",
           data: { column: outerText },
           fix(fixer) {
@@ -224,28 +232,42 @@ const rule: RuleModule = {
             })!;
             const [startRef, endRef] =
               inner.range[0] < outer.range[0] ? [inner, outer] : [outer, inner];
-            const [startToken] = getColumnTokens(startRef);
-            const [, endToken] = getColumnTokens(endRef);
+            const [startToken, startRefEnd] = getColumnTokens(startRef);
+            const [endRefStart, endToken] = getColumnTokens(endRef);
+            // Only rewrite a bare `a.b = c.d`: a parenthesized side such as
+            // `other.id = (t.x)` would leave a stray `)` behind.
+            const operator = sourceCode.getTokenAfter(startRefEnd);
+            if (
+              operator?.value !== "=" ||
+              sourceCode.getTokenBefore(endRefStart) !== operator
+            ) {
+              return null;
+            }
             // Remove the comparison together with its `AND` (or with
             // `WHERE` when it is the only condition). Anything else around
             // it, such as parentheses, is left for a human to rewrite.
             const before = sourceCode.getTokenBefore(startToken);
             const after = sourceCode.getTokenAfter(endToken);
+            // Bail out when a comment sits in the text being removed or
+            // replaced, so the fix never deletes one.
             let removal: AST.Range;
             if (
               isKeyword(before, "AND") ||
               (where === comparison && isKeyword(before, "WHERE"))
             ) {
-              removal = [
-                sourceCode.getTokenBefore(before)!.range[1],
-                endToken.range[1],
-              ];
+              const keep = sourceCode.getTokenBefore(before)!;
+              if (sourceCode.commentsExistBetween(keep, endToken)) return null;
+              removal = [keep.range[1], endToken.range[1]];
             } else if (isKeyword(after, "AND")) {
-              removal = [
-                startToken.range[0],
-                sourceCode.getTokenAfter(after)!.range[0],
-              ];
+              const keep = sourceCode.getTokenAfter(after)!;
+              if (sourceCode.commentsExistBetween(startToken, keep)) {
+                return null;
+              }
+              removal = [startToken.range[0], keep.range[0]];
             } else {
+              return null;
+            }
+            if (sourceCode.commentsExistBetween(selectToken, fromToken)) {
               return null;
             }
             return [

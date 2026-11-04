@@ -13,3 +13,5 @@ SELECT * FROM t WHERE EXISTS (SELECT 1 FROM (other JOIN kind ON kind.id = other.
 SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x HAVING count(*) > 1);
 SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x OFFSET 1);
 SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x FOR UPDATE);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other, generate_series(1, 3) WHERE generate_series.generate_series = other.id);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other JOIN kind USING (id) AS j WHERE j.id = other.kind_id);

@@ -37,6 +37,12 @@ errors:
     column: 21
     endLine: 6
     endColumn: 27
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 12
+    column: 23
+    endLine: 12
+    endColumn: 29
 output: |-
   SELECT * FROM t WHERE t.x IN (SELECT other.id FROM other);
   SELECT * FROM t WHERE t.y > 0 AND t.x IN (SELECT o.id FROM other o WHERE o.kind = 'a');
@@ -48,3 +54,4 @@ output: |-
     FROM other
     WHERE other.gone
   );
+  SELECT * FROM t WHERE t.x IN (SELECT j.id FROM other JOIN kind USING (id) AS j);

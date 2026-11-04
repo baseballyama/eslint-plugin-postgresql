@@ -9,3 +9,4 @@ DELETE FROM t WHERE EXISTS (
   WHERE other.gone
     AND other.id = t.x
 );
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other JOIN kind USING (id) AS j WHERE j.id = t.x);
