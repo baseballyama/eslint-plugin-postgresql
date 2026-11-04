@@ -1,5 +1,15 @@
 # eslint-plugin-postgresql
 
+## 0.26.2
+
+### Patch Changes
+
+- [#314](https://github.com/baseballyama/eslint-plugin-postgresql/pull/314) [`91813ad`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/91813ad575516f544c96473022c4887df4eb5c2b) Thanks [@abrahamguo](https://github.com/abrahamguo)! - `prefer-keyword-case` no longer reports names that spell a keyword, such as a
+  `uuid` or `table_name` column or an `int` cast, in SQL that fails to parse.
+  Without a syntax tree it cannot tell a name from a keyword, so it now skips
+  that SQL until it parses. This includes `sql` templates whose `${...}` holds a
+  clause, which `prefer-keyword-case` checked since 0.25.4.
+
 ## 0.26.1
 
 ### Patch Changes
