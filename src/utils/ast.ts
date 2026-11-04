@@ -41,6 +41,21 @@ export const isRangeSubselect = (node: unknown): node is Ast.RangeSubselect =>
 export const isRangeFunction = (node: unknown): node is Ast.RangeFunction =>
   isObjectWithType(node, "RangeFunction");
 
+export const isRangeVar = (node: unknown): node is Ast.RangeVar =>
+  isObjectWithType(node, "RangeVar");
+
+export const isJoinExpr = (node: unknown): node is Ast.JoinExpr =>
+  isObjectWithType(node, "JoinExpr");
+
+export const isSelectStmt = (node: unknown): node is Ast.SelectStmt =>
+  isObjectWithType(node, "SelectStmt");
+
+export const isBoolExpr = (node: unknown): node is Ast.BoolExprPG =>
+  isObjectWithType(node, "BoolExpr");
+
+export const isAExpr = (node: unknown): node is Ast.A_Expr =>
+  isObjectWithType(node, "A_Expr");
+
 const isObjectWithType = <T extends string>(
   node: unknown,
   type: T,

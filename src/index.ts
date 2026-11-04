@@ -11,6 +11,7 @@ import consistentCreateIndexConcurrently from "./rules/consistent-create-index-c
 import consistentCreateOrReplace from "./rules/consistent-create-or-replace.js";
 import consistentCurrentTimestampOverNow from "./rules/consistent-current-timestamp-over-now.js";
 import consistentDropIndexConcurrently from "./rules/consistent-drop-index-concurrently.js";
+import consistentExistsOverInSubquery from "./rules/consistent-exists-over-in-subquery.js";
 import consistentExplicitInnerJoin from "./rules/consistent-explicit-inner-join.js";
 import consistentExplicitOuterJoin from "./rules/consistent-explicit-outer-join.js";
 import consistentFkNotValid from "./rules/consistent-fk-not-valid.js";
@@ -74,7 +75,6 @@ import preferAddConstraintNotValid from "./rules/prefer-add-constraint-not-valid
 import preferCastOperator from "./rules/prefer-cast-operator.js";
 import preferCoalesceOverCase from "./rules/prefer-coalesce-over-case.js";
 import preferExplicitNullOrdering from "./rules/prefer-explicit-null-ordering.js";
-import preferExistsOverInSubquery from "./rules/prefer-exists-over-in-subquery.js";
 import preferInListOverOr from "./rules/prefer-in-list-over-or.js";
 import preferKeywordCase from "./rules/prefer-keyword-case.js";
 import preferNotEqualsOperator from "./rules/prefer-not-equals-operator.js";
@@ -103,6 +103,7 @@ const rules = {
   "consistent-create-or-replace": consistentCreateOrReplace,
   "consistent-current-timestamp-over-now": consistentCurrentTimestampOverNow,
   "consistent-drop-index-concurrently": consistentDropIndexConcurrently,
+  "consistent-exists-over-in-subquery": consistentExistsOverInSubquery,
   "consistent-explicit-inner-join": consistentExplicitInnerJoin,
   "consistent-explicit-outer-join": consistentExplicitOuterJoin,
   "consistent-fk-not-valid": consistentFkNotValid,
@@ -167,7 +168,6 @@ const rules = {
   "prefer-cast-operator": preferCastOperator,
   "prefer-coalesce-over-case": preferCoalesceOverCase,
   "prefer-explicit-null-ordering": preferExplicitNullOrdering,
-  "prefer-exists-over-in-subquery": preferExistsOverInSubquery,
   "prefer-in-list-over-or": preferInListOverOr,
   "prefer-keyword-case": preferKeywordCase,
   "prefer-not-equals-operator": preferNotEqualsOperator,

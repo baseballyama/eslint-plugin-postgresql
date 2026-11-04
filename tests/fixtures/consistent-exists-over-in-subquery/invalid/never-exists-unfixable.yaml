@@ -1,0 +1,40 @@
+options:
+  - style: never
+errors:
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 1
+    column: 23
+    endLine: 1
+    endColumn: 29
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 2
+    column: 23
+    endLine: 2
+    endColumn: 29
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 3
+    column: 23
+    endLine: 3
+    endColumn: 29
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 4
+    column: 23
+    endLine: 4
+    endColumn: 29
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 5
+    column: 23
+    endLine: 5
+    endColumn: 29
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 7
+    column: 23
+    endLine: 7
+    endColumn: 29
+output: null
