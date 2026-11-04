@@ -1,0 +1,50 @@
+options:
+  - style: never
+errors:
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 1
+    column: 23
+    endLine: 1
+    endColumn: 29
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 2
+    column: 35
+    endLine: 2
+    endColumn: 41
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 3
+    column: 23
+    endLine: 3
+    endColumn: 29
+  - messageId: preferIn
+    message: Use `u.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 4
+    column: 45
+    endLine: 4
+    endColumn: 51
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 5
+    column: 30
+    endLine: 5
+    endColumn: 36
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 6
+    column: 21
+    endLine: 6
+    endColumn: 27
+output: |-
+  SELECT * FROM t WHERE t.x IN (SELECT other.id FROM other);
+  SELECT * FROM t WHERE t.y > 0 AND t.x IN (SELECT o.id FROM other o WHERE o.kind = 'a');
+  SELECT * FROM t WHERE t.x IN (SELECT other.id FROM other WHERE other.kind = 'a');
+  SELECT * FROM t JOIN u ON u.id = t.u_id AND u.x IN (SELECT other.id FROM other);
+  SELECT * FROM t WHERE t.a OR t.x IN (SELECT other.id FROM other JOIN kind k ON k.id = other.kind_id WHERE k.name = 'a');
+  DELETE FROM t WHERE t.x IN (
+    SELECT other.id
+    FROM other
+    WHERE other.gone
+  );

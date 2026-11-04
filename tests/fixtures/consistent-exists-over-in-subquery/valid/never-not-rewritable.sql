@@ -1,0 +1,15 @@
+SELECT * FROM t WHERE x IN (SELECT id FROM other);
+SELECT * FROM t WHERE NOT EXISTS (SELECT 1 FROM other WHERE other.id = t.x);
+SELECT EXISTS (SELECT 1 FROM other WHERE other.id = t.x) FROM t;
+SELECT * FROM t WHERE EXISTS (SELECT count(*) FROM other WHERE other.id = t.x);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x LIMIT 1);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x GROUP BY other.id);
+SELECT * FROM t WHERE EXISTS (SELECT DISTINCT ON (other.k) 1 FROM other WHERE other.id = t.x);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x AND other.k = t.k);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id > t.x);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE id = x);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other = t.x);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM (other JOIN kind ON kind.id = other.kind_id) j WHERE other.id = t.x);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x HAVING count(*) > 1);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x OFFSET 1);
+SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x FOR UPDATE);

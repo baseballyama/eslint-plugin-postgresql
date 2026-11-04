@@ -1606,13 +1606,14 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
-    name: "prefer-exists-over-in-subquery",
-    description: "Prefer `EXISTS (subquery)` over `column IN (subquery)`.",
+    name: "consistent-exists-over-in-subquery",
+    description:
+      "Enforce a consistent stance on `EXISTS (subquery)` vs `column IN (subquery)`.",
     longDescription:
-      "`column IN (subquery)` returns NULL whenever the subquery yields a NULL row, which silently filters every row from the outer query. `EXISTS (subquery)` returns a clean boolean and is typically planned more cheaply too. Literal `IN` lists (`x IN (1, 2, 3)`) are out of scope.",
+      "`column IN (subquery)` returns NULL whenever the subquery yields a NULL row, which silently filters every row from the outer query. `EXISTS (subquery)` returns a clean boolean and is typically planned more cheaply too. Literal `IN` lists (`x IN (1, 2, 3)`) are out of scope. Flip with the `style` option for projects that prefer `IN`; the rewrite is limited to subqueries where the two forms keep the same rows.",
     type: "suggestion",
     recommended: "warn",
-    fixable: false,
+    fixable: true,
     category: "perf",
     incorrect: [
       "SELECT * FROM t WHERE x IN (SELECT id FROM other);",
@@ -1621,6 +1622,15 @@ export const rules: RuleMeta[] = [
     correct: [
       "SELECT * FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.x);",
       "SELECT * FROM t WHERE x IN (1, 2, 3); -- literal list is out of scope",
+    ],
+    options: [
+      {
+        name: "style",
+        type: '"always" | "never"',
+        default: '"always"',
+        description:
+          "`always` (default) reports `IN (subquery)` and `= ANY (subquery)`. `never` rewrites a positive `EXISTS` in a `WHERE`, `ON` or `HAVING` condition whose sub-`SELECT` is tied to the outer query by one `inner.col = outer.col` comparison into `outer.col IN (SELECT inner.col ...)`. It leaves `NOT EXISTS` alone, and sub-`SELECT`s with `DISTINCT`, `GROUP BY`, `HAVING`, `LIMIT` / `OFFSET`, a locking clause, or anything but constants and columns in the select list.",
+      },
     ],
   },
   {

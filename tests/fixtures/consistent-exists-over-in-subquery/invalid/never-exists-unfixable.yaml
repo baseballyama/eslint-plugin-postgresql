@@ -1,0 +1,10 @@
+options:
+  - style: never
+errors:
+  - messageId: preferIn
+    message: Use `t.x IN (subquery)` instead of `EXISTS (...)`. As a row filter both keep the same rows, and `IN` needs no correlated comparison.
+    line: 1
+    column: 23
+    endLine: 1
+    endColumn: 29
+output: null
