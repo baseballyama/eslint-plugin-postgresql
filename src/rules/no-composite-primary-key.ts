@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isConstraint } from "../utils/ast.js";
@@ -34,7 +33,7 @@ const rule: RuleModule = {
         for (const elt of elts) {
           if (isCompositePrimaryKey(elt)) {
             context.report({
-              node: elt as unknown as Rule.Node,
+              node: elt,
               messageId: "noCompositePk",
             });
           }
@@ -44,7 +43,7 @@ const rule: RuleModule = {
         if (node.subtype !== "AT_AddConstraint") return;
         if (isCompositePrimaryKey(node.def)) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "noCompositePk",
           });
         }

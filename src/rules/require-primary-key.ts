@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isColumnDef, isConstraint } from "../utils/ast.js";
@@ -58,7 +57,7 @@ const rule: RuleModule = {
               ? relation.relname
               : "<unknown>";
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "missingPrimaryKey",
             data: { table: relname },
           });

@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -25,7 +24,7 @@ const rule: RuleModule = {
         if (Array.isArray(node.groupClause) && node.groupClause.length > 0)
           return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noHavingWithoutGroupBy",
         });
       },

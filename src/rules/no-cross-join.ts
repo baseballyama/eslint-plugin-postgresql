@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 import { isRangeFunction, isRangeSubselect } from "../utils/ast.js";
@@ -39,7 +38,7 @@ const rule: RuleModule = {
           !node.isNatural;
         if (isCrossJoin) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "noCrossJoin",
           });
         }

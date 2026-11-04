@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 import type { RuleModule } from "../utils/rule.js";
 
 const rule: RuleModule = {
@@ -19,7 +19,7 @@ const rule: RuleModule = {
   },
   create(context) {
     return {
-      GrantStmt(node: { is_grant?: unknown; privileges?: unknown }) {
+      GrantStmt(node: Ast.GrantStmt) {
         // `GrantStmt` covers both GRANT and REVOKE; we only care about
         // GRANT (REVOKE ALL is fine — taking everything back is the
         // safe direction).
@@ -27,11 +27,14 @@ const rule: RuleModule = {
         // libpg-query represents `GRANT ALL` (or `GRANT ALL
         // PRIVILEGES`) as `privileges: undefined / null`. A specific
         // list of privileges populates the array.
-        if (Array.isArray(node.privileges) && node.privileges.length > 0) {
+        if (
+          Array.isArray(node["privileges"]) &&
+          node["privileges"].length > 0
+        ) {
           return;
         }
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noGrantAll",
         });
       },

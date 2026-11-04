@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -27,7 +26,7 @@ const rule: RuleModule = {
         const action = (node as { fk_del_action?: string }).fk_del_action;
         if (action !== "c") return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noCascade",
         });
       },

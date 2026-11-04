@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -24,7 +23,7 @@ const rule: RuleModule = {
         const fromClause = node.fromClause;
         if (Array.isArray(fromClause) && fromClause.length > 1) {
           context.report({
-            node: node as unknown as Rule.Node,
+            node,
             messageId: "noImplicitJoin",
           });
         }

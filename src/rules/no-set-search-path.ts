@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 
 interface VariableSetStmt {
@@ -66,7 +65,7 @@ const rule: RuleModule = {
         if (node.name !== "search_path") return;
         if (functionScopedSets.has(node as unknown as object)) return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noSetSearchPath",
         });
       },

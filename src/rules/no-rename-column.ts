@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 
 interface RenameStmtNode {
@@ -27,7 +26,7 @@ const rule: RuleModule = {
       RenameStmt(node: RenameStmtNode) {
         if (node.renameType !== "OBJECT_COLUMN") return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "noRenameColumn",
         });
       },

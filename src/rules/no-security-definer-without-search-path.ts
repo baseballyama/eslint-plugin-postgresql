@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Ast } from "postgresql-eslint-parser";
 import type { RuleModule } from "../utils/rule.js";
 
 interface DefElem {
@@ -24,7 +24,7 @@ const rule: RuleModule = {
   },
   create(context) {
     return {
-      CreateFunctionStmt(node: { options?: unknown[] }) {
+      CreateFunctionStmt(node: Ast.CreateFunctionStmt) {
         const options = (node.options ?? []) as DefElem[];
         let isDefiner = false;
         let hasSet = false;
@@ -43,7 +43,7 @@ const rule: RuleModule = {
         }
         if (!isDefiner || hasSet) return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "missingSearchPath",
         });
       },

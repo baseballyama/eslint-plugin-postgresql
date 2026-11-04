@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -32,7 +31,7 @@ const rule: RuleModule = {
         for (const expr of groupClause) {
           if (isIntegerConst(expr)) {
             context.report({
-              node: expr as unknown as Rule.Node,
+              node: expr,
               messageId: "noGroupByOrdinal",
             });
           }

@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 import type { Ast } from "postgresql-eslint-parser";
 
@@ -33,7 +32,7 @@ const rule: RuleModule = {
           if (!sortBy || sortBy.type !== "SortBy") continue;
           if (isIntegerConst(sortBy.node)) {
             context.report({
-              node: sortBy as unknown as Rule.Node,
+              node: sortBy,
               messageId: "noOrderByOrdinal",
             });
           }

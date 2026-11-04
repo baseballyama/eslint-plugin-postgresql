@@ -1,4 +1,3 @@
-import type { Rule } from "eslint";
 import type { RuleModule } from "../utils/rule.js";
 
 interface NullTestNode {
@@ -100,7 +99,7 @@ const rule: RuleModule = {
       CaseExpr(node: CaseExprNode) {
         if (!isCoalesceShape(node)) return;
         context.report({
-          node: node as unknown as Rule.Node,
+          node,
           messageId: "preferCoalesceOverCase",
         });
       },
