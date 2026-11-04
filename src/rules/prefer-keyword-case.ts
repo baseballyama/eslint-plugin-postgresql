@@ -1,4 +1,5 @@
 import type { RuleModule } from "../utils/rule.js";
+import type { Ast } from "postgresql-eslint-parser";
 
 type CaseStyle = "upper" | "lower";
 type TypeCaseStyle = CaseStyle | "skip";
@@ -242,7 +243,13 @@ const rule: RuleModule = {
     const transformType = typesMode === "skip" ? null : transformer(typesMode);
 
     return {
-      Program(node) {
+      Program(node: Ast.Program) {
+        // Telling a keyword from a name that spells one (#144, #145) needs
+        // the syntax tree, so SQL that fails to parse is left to
+        // `no-syntax-error`.
+        if (node.body.some((statement) => statement.type === "SQLParseError")) {
+          return;
+        }
         const tokens = context.sourceCode.ast.tokens ?? [];
         const {
           generalIdentifierStarts,

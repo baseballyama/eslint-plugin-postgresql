@@ -194,9 +194,8 @@ What the processor picks up, and what it leaves alone:
   placeholder, or right after one at the end of the statement or on a
   reserved word such as `SELECT`, no syntax error is reported: that `${...}`
   holds a clause or a list, not a name. Rules that read tokens rather than
-  the syntax tree, such as `prefer-keyword-case` and
-  `prefer-not-equals-operator`, still check the template. A syntax error
-  anywhere else is reported.
+  the syntax tree, such as `prefer-not-equals-operator`, still check the
+  template. A syntax error anywhere else is reported.
 - **Templates containing a `\` escape are skipped**, because the raw source
   and the string that actually reaches PostgreSQL differ there.
 - **Recognised tags** are `sql` (Drizzle, Kysely, postgres.js) and
