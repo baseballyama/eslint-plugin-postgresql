@@ -1,5 +1,11 @@
 # eslint-plugin-postgresql
 
+## 0.29.1
+
+### Patch Changes
+
+- [#325](https://github.com/baseballyama/eslint-plugin-postgresql/pull/325) [`9ab7e6f`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/9ab7e6fe4a6b23d581ccb40d88589308bf8719ec) Thanks [@baseballyama](https://github.com/baseballyama)! - `require-trailing-semicolon` no longer checks embedded SQL (the templates the `embedded-sql` processor lints), so its fix no longer puts a `;` in one. Query builders splice templates into each other, so a `;` added to ``sql`SELECT id FROM users` `` ended any query that used it as a subquery. The `**/*.ts/*.sql` override the README used to suggest for this rule is no longer needed, and an `eslint-disable` comment for it inside a template is now reported as unused.
+
 ## 0.29.0
 
 ### Minor Changes
