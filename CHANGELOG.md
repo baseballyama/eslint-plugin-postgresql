@@ -1,5 +1,15 @@
 # eslint-plugin-postgresql
 
+## 0.29.0
+
+### Minor Changes
+
+- [#321](https://github.com/baseballyama/eslint-plugin-postgresql/pull/321) [`1a99f1e`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/1a99f1e6f2c206803885dcfd88efa5b9dc9ccc9b) Thanks [@abrahamguo](https://github.com/abrahamguo)! - The embedded-SQL processor now lints fragments, such as ``sql`AND age > ${x}` `` or
+  ``sql`${users.id} IS NULL` ``, instead of skipping every template that is not a
+  complete statement. A fragment is parsed inside the first of `SELECT …`,
+  `SELECT 1 …` and `SELECT * FROM _ …` that accepts it, and nothing is reported
+  on that added context.
+
 ## 0.28.0
 
 ### Minor Changes
