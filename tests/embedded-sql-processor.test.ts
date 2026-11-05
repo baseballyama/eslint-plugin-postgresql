@@ -531,18 +531,54 @@ describe("processors/embedded-sql", () => {
     expect(output).toMatch(/^const q = sql`SELECT 1\s*`;$/u);
   });
 
+  it("ignores eslint-disable in a `--` comment inside a template", () => {
+    // ESLint honours only the `-line` forms in a line comment, which is why
+    // the README asks for `/* ... */`.
+    const code = [
+      "const q = sql`",
+      "  -- eslint-disable postgresql/no-select-star",
+      "  SELECT * FROM a; -- eslint-disable-line postgresql/no-select-star",
+      "  SELECT * FROM b`;",
+    ].join("\n");
+    expect(
+      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
+    ).toEqual([{ ruleId: "postgresql/no-select-star", line: 4, column: 10 }]);
+  });
+
   it("does not apply a JavaScript directive outside the template", () => {
     // ESLint lints the template as a file of its own, so the host file's
     // comment cannot disable a rule on it (README: "Disabling a rule in a
-    // template").
-    const code =
+    // template"). The host file, which does not register the plugin here,
+    // reports the named rule as missing, and a bare directive as unused.
+    const rules = { "postgresql/no-select-star": "error" } as const;
+    const named =
       "const q = sql`SELECT * FROM users`; // eslint-disable-line postgresql/no-select-star";
     expect(
-      positionsOf(lintSql(code, { "postgresql/no-select-star": "error" })),
-    ).toContainEqual({
-      ruleId: "postgresql/no-select-star",
-      line: 1,
-      column: 22,
-    });
+      lintSql(named, rules).map(({ ruleId, line, column, message }) => ({
+        ruleId,
+        line,
+        column,
+        missing: message.startsWith("Definition for rule"),
+      })),
+    ).toEqual([
+      {
+        ruleId: "postgresql/no-select-star",
+        line: 1,
+        column: 22,
+        missing: false,
+      },
+      {
+        ruleId: "postgresql/no-select-star",
+        line: 1,
+        column: 37,
+        missing: true,
+      },
+    ]);
+    const bare = "const q = sql`SELECT * FROM users`; // eslint-disable-line";
+    expect(positionsOf(lintSql(bare, rules))).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 1, column: 22 },
+      { ruleId: null, line: 1, column: 37 },
+    ]);
+    expect(fixSql(bare, rules).output).not.toContain("eslint-disable");
   });
 });
