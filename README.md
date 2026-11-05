@@ -251,6 +251,46 @@ import { createEmbeddedSqlProcessor } from "eslint-plugin-postgresql";
 Fragment tags such as `sql.fragment` are worth accepting too: their templates
 are linted like any other fragment.
 
+#### Disabling a rule in a template
+
+ESLint lints each template as a `.sql` file of its own, so a disable
+directive has to sit inside the template, as a SQL comment:
+
+```ts
+const rows =
+  await sql`SELECT * FROM users /* eslint-disable-line postgresql/no-select-star */`;
+```
+
+`eslint-disable-next-line` and `eslint-disable` / `eslint-enable` pairs work
+the same way. Write them as `/* … */`:
+
+- ESLint ignores `eslint-disable` and `eslint-enable` in a `--` line comment,
+  without a warning. Only the `-line` and `-next-line` forms work there.
+- A template can end up in the middle of a line of the composed query, where
+  a `--` comment would swallow the rest of that line.
+
+PostgreSQL ignores the comment like any other. A `${...}` that spans several
+lines becomes a single-line placeholder, so a line directive on either side
+of it may cover the lines the interpolation took up too.
+
+To turn a rule off for every template in a file, use a config block on its
+virtual files instead, placed after your `**/*.sql` block so it wins:
+
+```js
+{
+  files: ["src/db.ts/*.sql"],
+  rules: { "postgresql/no-select-star": "off" },
+}
+```
+
+A JavaScript comment outside the template, such as
+`// eslint-disable-line postgresql/no-select-star`, does not reach the SQL.
+ESLint applies it to the host file, where nothing from the SQL is reported.
+When the plugin is not registered for the host file, as in the processor
+setup at the start of this section, ESLint reports the rule name as one it
+cannot find. Otherwise, and for a comment without a rule name, ESLint 9 and
+later report it as an unused directive, which `--fix` deletes.
+
 ## Rules
 
 Click a rule name to open its documentation page (examples, rationale, options).
