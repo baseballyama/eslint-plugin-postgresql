@@ -135,19 +135,45 @@ describe("processors/embedded-sql", () => {
   });
 
   it("does not report on the context around a fragment", () => {
-    // The `SELECT * FROM _` before the JOIN and the `;` after it are ours, so
-    // the `*`, the missing LIMIT and the missing `;` are not the author's.
-    const code = [
-      "const a = sql`JOIN orders o ON o.user_id = u.id`;",
-      "const b = sql`a -- trailing comment`;",
-    ].join("\n");
+    // The `SELECT * FROM _` before the JOIN is ours, so the `*` and the
+    // missing LIMIT are not the author's.
+    const code = "const a = sql`JOIN orders o ON o.user_id = u.id`;";
     expect(
       lintSql(code, {
         "postgresql/no-select-star": "error",
         "postgresql/require-limit": "error",
-        "postgresql/require-trailing-semicolon": "error",
       }),
     ).toEqual([]);
+  });
+
+  it("does not ask a template to end with `;`", () => {
+    // Query builders splice templates into each other, so a `;` added to
+    // `ids` would end the second query inside its `IN (...)`.
+    const code = [
+      "const ids = sql`SELECT id FROM users WHERE active`;",
+      "const rows = sql`SELECT id FROM orders WHERE user_id IN (${ids})`;",
+      "const cond = sql`AND deleted_at IS NULL -- live rows only`;",
+    ].join("\n");
+    const rules = { "postgresql/require-trailing-semicolon": "error" } as const;
+    expect(lintSql(code, rules)).toEqual([]);
+    expect(fixSql(code, rules).output).toBe(code);
+  });
+
+  it("reports a directive for require-trailing-semicolon in a template as unused", () => {
+    // The rule never applies to a template, so nothing in one can use the
+    // directive, whether the template is a statement or a fragment.
+    const code = [
+      "const a = sql`SELECT 1 /* eslint-disable-line postgresql/require-trailing-semicolon */`;",
+      "const b = sql`/* eslint-disable */ AND x = 1`;",
+    ].join("\n");
+    expect(
+      positionsOf(
+        lintSql(code, { "postgresql/require-trailing-semicolon": "error" }),
+      ),
+    ).toEqual([
+      { ruleId: null, line: 1, column: 24 },
+      { ruleId: null, line: 2, column: 15 },
+    ]);
   });
 
   it("maps interpolations inside a fragment", () => {

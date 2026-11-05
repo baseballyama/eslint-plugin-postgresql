@@ -180,8 +180,8 @@ What the processor picks up, and what it leaves alone:
 - **Statements, and fragments that parse in a SELECT.** A fragment such as
   ``sql`${users.id} IS NULL` `` or ``sql`AND age > ${x}` `` has no standalone
   parse, so it is linted inside the first of `SELECT …`, `SELECT 1 …` and
-  `SELECT * FROM _ …` it parses in, followed by a `;`. Nothing is reported on
-  that added context, so a rule that judges the whole statement, such as
+  `SELECT * FROM _ …` it parses in. Nothing is reported on that added
+  context, so a rule that judges the whole statement, such as
   `require-limit`, stays quiet about a fragment. A fragment is still linted
   without the rest of its query, so an assignment like
   ``sql`deleted_at = NULL` `` reads as a comparison. Fragments that parse in
@@ -215,15 +215,17 @@ What the processor picks up, and what it leaves alone:
 - **The ORM query builder is out of scope.** `db.select().from(users)` and
   `pgTable(...)` never produce SQL text, so no rule can see them. Lint the
   generated migrations instead.
+- **`require-trailing-semicolon` does not apply.** It checks how a SQL file
+  ends, and a template is not a file: query builders splice it into other
+  templates, where a `;` would end the composed statement early.
 
-Rules written for standalone files can be noisy here — `require-trailing-semicolon`
-flags every embedded statement, for instance. Turn those off in the same
-`**/*.ts/*.sql` block:
+A rule that is too noisy on embedded SQL can be turned off for the virtual
+files alone, in a `**/*.ts/*.sql` block:
 
 ```js
 {
   files: ["**/*.ts/*.sql"],
-  rules: { "postgresql/require-trailing-semicolon": "off" },
+  rules: { "postgresql/require-limit": "off" },
 }
 ```
 
