@@ -139,18 +139,10 @@ const SUBCOMMAND_OPENINGS = new Set([
  */
 const FRAGMENT_PREFIXES = ["SELECT ", "SELECT 1 ", "SELECT * FROM _ "];
 
-/**
- * Closes a fragment's statement, so a rule that judges how a statement ends
- * (`require-trailing-semicolon`) finds it closed instead of asking for a `;`
- * in the middle of the author's query. The line break keeps a trailing `--`
- * comment from swallowing the `;`.
- */
-const FRAGMENT_SUFFIX = "\n;";
-
 interface EmbeddedBlock {
   /**
    * SQL text with every `${...}` swapped for an equal-length placeholder,
-   * wrapped, for a fragment, in the prefix and `;` that let it parse.
+   * after, for a fragment, the prefix that lets it parse.
    */
   text: string;
   /**
@@ -366,12 +358,12 @@ const buildBlock = (
     // syntax error could be the missing context's rather than the author's.
     const prefix = FRAGMENT_PREFIXES.find(
       (candidate) =>
-        !parse(candidate + text + FRAGMENT_SUFFIX).body.some(
+        !parse(candidate + text).body.some(
           (node) => node.type === "SQLParseError",
         ),
     );
     if (prefix === undefined) return null;
-    const fragment = prefix + text + FRAGMENT_SUFFIX;
+    const fragment = prefix + text;
     return {
       text: fragment,
       start: template.start - prefix.length,
