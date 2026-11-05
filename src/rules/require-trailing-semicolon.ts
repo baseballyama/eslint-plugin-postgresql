@@ -1,5 +1,7 @@
 import type { RuleModule } from "../utils/rule.js";
 
+const SQL_EXTENSION = ".sql";
+
 const rule: RuleModule = {
   meta: {
     type: "layout",
@@ -15,12 +17,18 @@ const rule: RuleModule = {
     },
   },
   create(context) {
-    // A file a processor carved out of another one, such as a `sql` template,
-    // is not a file of its own: query builders splice templates into each
-    // other, where a `;` would end the composed statement early. Reporting
-    // nothing there (rather than dropping reports later) also leaves a
-    // disable directive for this rule unused, so ESLint flags it.
-    if (context.filename !== context.physicalFilename) return {};
+    // SQL a processor carved out of a non-SQL file, such as a `sql` template
+    // in TypeScript, is not a file of its own: query builders splice
+    // templates into each other, where a `;` would end the composed statement
+    // early. Reporting nothing there (rather than dropping reports later) also
+    // leaves a disable directive for this rule unused, so ESLint flags it. A
+    // processor that hands a `.sql` file back as a block still gets checked.
+    if (
+      context.filename !== context.physicalFilename &&
+      !context.physicalFilename.endsWith(SQL_EXTENSION)
+    ) {
+      return {};
+    }
     return {
       Program() {
         // The parser's per-statement `range[1]` is unreliable for

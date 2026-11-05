@@ -1540,7 +1540,7 @@ export const rules: RuleMeta[] = [
     name: "require-trailing-semicolon",
     description: "Require a trailing `;` after every top-level SQL statement.",
     longDescription:
-      "Every top-level statement must end with `;`. The check is file-level: it inspects the trailing token of the source rather than the per-statement range, which avoids the libpg-query quirk where the last statement's `range[1]` can point mid-token. SQL in a `sql` template (or any other block a processor carves out of a file) is not checked: query builders splice templates into each other, where a `;` would end the composed statement early.",
+      "Every top-level statement must end with `;`. The check is file-level: it inspects the trailing token of the source rather than the per-statement range, which avoids the libpg-query quirk where the last statement's `range[1]` can point mid-token. SQL in a `sql` template (or any other SQL a processor carves out of a non-SQL file, such as a Markdown code block) is not checked: query builders splice templates into each other, where a `;` would end the composed statement early.",
     type: "layout",
     recommended: "off",
     fixable: true,
