@@ -36,14 +36,6 @@ const VIRTUAL_EXTENSION = ".sql";
  */
 const SYNTAX_ERROR_RULE = "no-syntax-error";
 
-/**
- * Name of the rule that asks a SQL file to end with `;`. A template is not a
- * file: query builders splice it into another template, where a `;` would end
- * the composed statement early (``IN (${ids})`` would read `IN (SELECT ...;)`).
- * Its reports are dropped, so its fix never puts a `;` in a template.
- */
-const TRAILING_SEMICOLON_RULE = "require-trailing-semicolon";
-
 const WHITESPACE = /\s/;
 const WORD_START = /[A-Za-z_]/;
 const WORD_PART = /[A-Za-z0-9_$]/;
@@ -468,9 +460,6 @@ const translateMessage = (
     block.failsOnPlaceholder &&
     message.ruleId?.endsWith(`/${SYNTAX_ERROR_RULE}`) === true
   ) {
-    return null;
-  }
-  if (message.ruleId?.endsWith(`/${TRAILING_SEMICOLON_RULE}`) === true) {
     return null;
   }
 

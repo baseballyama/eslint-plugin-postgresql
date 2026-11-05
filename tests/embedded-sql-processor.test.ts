@@ -159,6 +159,23 @@ describe("processors/embedded-sql", () => {
     expect(fixSql(code, rules).output).toBe(code);
   });
 
+  it("reports a directive for require-trailing-semicolon in a template as unused", () => {
+    // The rule never applies to a template, so nothing in one can use the
+    // directive, whether the template is a statement or a fragment.
+    const code = [
+      "const a = sql`SELECT 1 /* eslint-disable-line postgresql/require-trailing-semicolon */`;",
+      "const b = sql`/* eslint-disable */ AND x = 1`;",
+    ].join("\n");
+    expect(
+      positionsOf(
+        lintSql(code, { "postgresql/require-trailing-semicolon": "error" }),
+      ),
+    ).toEqual([
+      { ruleId: null, line: 1, column: 24 },
+      { ruleId: null, line: 2, column: 15 },
+    ]);
+  });
+
   it("maps interpolations inside a fragment", () => {
     const code = "const q = sql`x = 1 and ${c}`;";
     expect(

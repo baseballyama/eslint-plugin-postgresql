@@ -15,6 +15,12 @@ const rule: RuleModule = {
     },
   },
   create(context) {
+    // A file a processor carved out of another one, such as a `sql` template,
+    // is not a file of its own: query builders splice templates into each
+    // other, where a `;` would end the composed statement early. Reporting
+    // nothing there (rather than dropping reports later) also leaves a
+    // disable directive for this rule unused, so ESLint flags it.
+    if (context.filename !== context.physicalFilename) return {};
     return {
       Program() {
         // The parser's per-statement `range[1]` is unreliable for
