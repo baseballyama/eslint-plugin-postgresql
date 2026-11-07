@@ -154,7 +154,7 @@ outright:
 Error while loading rule '@typescript-eslint/await-thenable': You have used a
 rule which requires type information, but don't have parserOptions set to
 generate type information for this file.
-Occurred while linting src/db.ts/0_0.sql
+Occurred while linting src/db.ts/0_sql.sql
 ```
 
 Switch those rules off on the virtual files, the same way you would for a
@@ -280,6 +280,20 @@ virtual files instead, placed after your `**/*.sql` block so it wins:
 {
   files: ["src/db.ts/*.sql"],
   rules: { "postgresql/no-select-star": "off" },
+}
+```
+
+Each virtual file is named after its template's tag, the member path
+[a processor of your own](#other-tags) is given, behind the index ESLint
+adds: ``db.sql`...` `` in `src/db.ts` is linted as `src/db.ts/0_db.sql.sql`.
+So a config block can also turn a rule off for one tag's templates, in
+every file. For a second client such as `warehouse.sql`, whose analytics
+queries are meant to read whole tables:
+
+```js
+{
+  files: ["**/*_warehouse.sql.sql"],
+  rules: { "postgresql/require-limit": "off" },
 }
 ```
 
