@@ -103,6 +103,30 @@ describe("processors/embedded-sql", () => {
     ]);
   });
 
+  it("names each virtual file after its tag, so a config block can single one out", () => {
+    const code = [
+      "const a = sql`SELECT * FROM users`;",
+      "const b = warehouse.sql`SELECT * FROM orders`;",
+    ].join("\n");
+    const messages = new Linter({ configType: "flat" }).verify(
+      code,
+      [
+        ...configFor({ "postgresql/no-select-star": "error" }),
+        {
+          files: ["**/*_warehouse.sql.sql"],
+          rules: { "postgresql/no-select-star": "off" },
+        },
+      ],
+      {
+        filename: "db.ts",
+        filterCodeBlock: (blockFilename) => blockFilename.endsWith(".sql"),
+      },
+    );
+    expect(positionsOf(messages)).toEqual([
+      { ruleId: "postgresql/no-select-star", line: 1, column: 22 },
+    ]);
+  });
+
   it("maps positions on later lines of a multi-line template", () => {
     const code = [
       "await db.execute(sql`",
@@ -489,7 +513,7 @@ describe("processors/embedded-sql", () => {
     expect(blocks).toHaveLength(2);
     expect(blocks[0]).toEqual({
       text: "SELECT id FROM users",
-      filename: "0.sql",
+      filename: "sql.sql",
     });
     // A named block would be linted under a synthetic path like `db.ts/1.ts`,
     // which type-aware setups cannot find in the TypeScript program — every

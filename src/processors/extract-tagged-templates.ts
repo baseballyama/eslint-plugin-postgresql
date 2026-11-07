@@ -4,6 +4,8 @@
 export type OffsetRange = [number, number];
 
 export interface TaggedTemplate {
+  /** Member path of the tag, such as `prisma.$queryRaw`. */
+  tag: string;
   /** Offset of the first character after the opening backtick. */
   start: number;
   /** Offset of the closing backtick. */
@@ -16,7 +18,8 @@ interface TemplateFrame {
   kind: "template";
   /** The code frame the opening backtick was found in. */
   parent: Frame;
-  tagged: boolean;
+  /** Member path of the tag `isSqlTag` accepted; `null` for any other template. */
+  tag: string | null;
   start: number;
   interpolations: OffsetRange[];
   openInterpolation: number | null;
@@ -191,8 +194,9 @@ export const extractTaggedTemplates = (
         continue;
       }
       if (char === "`") {
-        if (frame.tagged) {
+        if (frame.tag !== null) {
           found.push({
+            tag: frame.tag,
             start: frame.start,
             end: i,
             interpolations: frame.interpolations,
@@ -244,7 +248,7 @@ export const extractTaggedTemplates = (
       frame = {
         kind: "template",
         parent: frame,
-        tagged: pathBefore !== null && isSqlTag(pathBefore),
+        tag: pathBefore !== null && isSqlTag(pathBefore) ? pathBefore : null,
         start: i + 1,
         interpolations: [],
         openInterpolation: null,
