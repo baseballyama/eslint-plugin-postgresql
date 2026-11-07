@@ -10,7 +10,7 @@ const config = {
   // conventions from here — let the site own its own audit if it ever needs
   // one.
   ignore: ["tests/fixtures/**/*", "site/**"],
-  ignoreDependencies: ["libpg-query", "@changesets/changelog-github"],
+  ignoreDependencies: ["@changesets/changelog-github"],
 } as const satisfies KnipConfig;
 
 export default config;
