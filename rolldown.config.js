@@ -9,5 +9,4 @@ export default defineConfig({
     sourcemap: true,
   },
   platform: "node",
-  external: ["libpg-query"],
 });
