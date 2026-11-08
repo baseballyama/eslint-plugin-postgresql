@@ -9,6 +9,10 @@ const config = {
   // conventions from here — let the site own its own audit if it ever needs
   // one.
   ignore: ["site/**"],
+  // Only the bundled postgresql-eslint-parser loads this, through
+  // `createRequire().resolve()`, so knip can't see it from src/.
+  // scripts/check-dist.js fails if it's missing.
+  ignoreDependencies: ["@libpg-query/parser"],
 } as const satisfies KnipConfig;
 
 export default config;
