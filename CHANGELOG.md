@@ -1,5 +1,17 @@
 # eslint-plugin-postgresql
 
+## 0.30.1
+
+### Patch Changes
+
+- [#335](https://github.com/baseballyama/eslint-plugin-postgresql/pull/335) [`59f3518`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/59f3518e82534835fee51e4571726c90dff40967) Thanks [@abrahamguo](https://github.com/abrahamguo)! - Depend on `@libpg-query/parser` instead of `postgresql-eslint-parser`. The
+  plugin bundles the parser's code, and that code loads `@libpg-query/parser` at
+  runtime, but the plugin relied on the package manager hoisting it to where the
+  plugin could find it. In a layout that exposes only declared dependencies,
+  loading the plugin failed with `Cannot find module '@libpg-query/parser'`.
+  `postgresql-eslint-parser` moves to `devDependencies`, so installs no longer
+  download it.
+
 ## 0.30.0
 
 ### Minor Changes
