@@ -46,7 +46,7 @@ getting confused**, not for your own convenience.
 pnpm install                # install dependencies
 pnpm test                   # run vitest
 pnpm test:watch             # vitest in watch mode
-pnpm check:all              # format + types + lint + build + publint + knip
+pnpm check:all              # format + types + lint + build + dist:check + publint + knip
 pnpm test:all               # check:all + tests
 pnpm format:fix             # prettier --write .
 pnpm lint:fix               # oxlint --fix

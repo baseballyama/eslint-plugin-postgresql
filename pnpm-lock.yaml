@@ -166,12 +166,12 @@ importers:
 
   .:
     dependencies:
+      '@libpg-query/parser':
+        specifier: ^17.6.10
+        version: 17.6.10
       eslint:
         specifier: ^8.57.1 || ^9.0.0 || ^10.0.0
         version: 10.14.0(jiti@2.7.0)
-      postgresql-eslint-parser:
-        specifier: ^0.6.2
-        version: 0.6.2
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^1.0.1
@@ -191,6 +191,9 @@ importers:
       oxlint:
         specifier: ^1.91.0
         version: 1.91.0
+      postgresql-eslint-parser:
+        specifier: ^0.6.2
+        version: 0.6.2
       prettier:
         specifier: ^3.9.10
         version: 3.9.10
