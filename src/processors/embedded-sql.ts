@@ -141,6 +141,11 @@ const FRAGMENT_PREFIXES = ["SELECT ", "SELECT 1 ", "SELECT * FROM _ "];
 
 interface EmbeddedBlock {
   /**
+   * Member path of the template's tag. It names the virtual file, so a config
+   * block can single out one tag's templates.
+   */
+  tag: string;
+  /**
    * SQL text with every `${...}` swapped for an equal-length placeholder,
    * after, for a fragment, the prefix that lets it parse.
    */
@@ -365,6 +370,7 @@ const buildBlock = (
     if (prefix === undefined) return null;
     const fragment = prefix + text;
     return {
+      tag: template.tag,
       text: fragment,
       start: template.start - prefix.length,
       placeholders: [
@@ -389,6 +395,7 @@ const buildBlock = (
   if (SUBCOMMAND_OPENINGS.has(opening)) return null;
 
   return {
+    tag: template.tag,
     text,
     start: template.start,
     placeholders,
@@ -512,7 +519,7 @@ const blockCache = new Map<string, EmbeddedBlock[]>();
 /**
  * Creates a processor that lints the SQL inside the tagged template literals
  * `isSqlTag` accepts in JavaScript and TypeScript files, by emitting one
- * virtual `.sql` file per statement or fragment.
+ * virtual `.sql` file per statement or fragment, named after its tag.
  *
  * `isSqlTag` is given each tag's member path: the identifiers before the
  * backtick joined by `.`, without call or type arguments.
@@ -541,9 +548,11 @@ export const createEmbeddedSqlProcessor = (
     blockCache.set(filename, blocks);
 
     return [
-      ...blocks.map((block, index) => ({
+      ...blocks.map((block) => ({
         text: block.text,
-        filename: `${index}${VIRTUAL_EXTENSION}`,
+        // ESLint prefixes each name with the block's index, as in
+        // `db.ts/0_sql.sql`, so names can repeat.
+        filename: `${block.tag}${VIRTUAL_EXTENSION}`,
       })),
       // The host file goes back as a bare string, not a named block. ESLint
       // lints a string block with the original options — same config, same
