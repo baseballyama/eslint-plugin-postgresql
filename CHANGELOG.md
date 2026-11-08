@@ -1,5 +1,21 @@
 # eslint-plugin-postgresql
 
+## 0.30.0
+
+### Minor Changes
+
+- [#328](https://github.com/baseballyama/eslint-plugin-postgresql/pull/328) [`462dcad`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/462dcade81aa44cb115b93e77c279dc955d93a31) Thanks [@abrahamguo](https://github.com/abrahamguo)! - The embedded-SQL processor now names each virtual file after its template's tag,
+  so ``db.sql`...` `` in `src/db.ts` is linted as `src/db.ts/0_db.sql.sql` instead
+  of `src/db.ts/0_0.sql`. A config block can use that name to turn rules off for
+  one tag's templates, such as `files: ["**/*_warehouse.sql.sql"]`.
+
+### Patch Changes
+
+- [#329](https://github.com/baseballyama/eslint-plugin-postgresql/pull/329) [`7aff284`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/7aff284876e7830d0db138ccaaa6a0f76aaa2b72) Thanks [@abrahamguo](https://github.com/abrahamguo)! - Remove the unused `libpg-query` dependency. SQL is parsed by the bundled
+  `postgresql-eslint-parser`, which loads `@libpg-query/parser` instead, so
+  nothing imported `libpg-query`. Installs no longer download it or its
+  `@pgsql/types`, and the plugin behaves the same.
+
 ## 0.29.1
 
 ### Patch Changes
