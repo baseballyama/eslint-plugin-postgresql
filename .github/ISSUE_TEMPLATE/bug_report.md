@@ -90,7 +90,7 @@ export default [
 ## Environment
 
 - `eslint-plugin-postgresql` version: <!-- e.g., 0.1.0 -->
-- `postgresql-eslint-parser` version: <!-- e.g., 0.1.8 -->
+- `@libpg-query/parser` version: <!-- e.g., 17.6.10 (`npm ls @libpg-query/parser`) -->
 - `eslint` version: <!-- e.g., 9.18.0 -->
 - Runtime: <!-- e.g., Node 22.5.0 on macOS 14.6 arm64 -->
 
