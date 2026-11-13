@@ -1,4 +1,4 @@
-import type { AST } from "eslint";
+import type { AST, Rule } from "eslint";
 import type { Ast } from "postgresql-eslint-parser";
 import type { RuleModule } from "../utils/rule.js";
 import {
@@ -84,6 +84,7 @@ const rule: RuleModule = {
       recommended: false,
     },
     fixable: "code",
+    hasSuggestions: true,
     schema: [
       {
         type: "object",
@@ -98,6 +99,7 @@ const rule: RuleModule = {
         "Use `USING ({{columns}})` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.",
       preferUsingAndWhere:
         "Use `USING ({{columns}})` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.",
+      suggestUsing: "Replace the `ON` condition with `USING ({{columns}})`.",
     },
   },
   create(context) {
@@ -181,20 +183,26 @@ const rule: RuleModule = {
         const endToken = openParens
           ? sourceCode.getTokenAfter(lastToken, { skip: openParens - 1 })!
           : lastToken;
+        const fix = (fixer: Rule.RuleFixer) =>
+          fixer.replaceTextRange(
+            [onToken.range[0], endToken.range[1]],
+            `USING (${columns})`,
+          );
+        // The rewrite would delete a comment in the condition, so it is
+        // never offered then. On a joined side it fails if another table
+        // there has the column too, and under `SELECT *` it changes the
+        // output columns, so those only get a suggestion to review.
+        const hasComments = sourceCode.commentsExistBetween(onToken, endToken);
+        const needsReview = joinedSide || changesOutputColumns(node);
         context.report({
           loc: { start: onToken.loc.start, end: endToken.loc.end },
           messageId: "preferUsing",
           data: { columns },
-          fix:
-            joinedSide ||
-            changesOutputColumns(node) ||
-            sourceCode.commentsExistBetween(onToken, endToken)
-              ? null
-              : (fixer) =>
-                  fixer.replaceTextRange(
-                    [onToken.range[0], endToken.range[1]],
-                    `USING (${columns})`,
-                  ),
+          fix: hasComments || needsReview ? null : fix,
+          suggest:
+            hasComments || !needsReview
+              ? []
+              : [{ messageId: "suggestUsing", data: { columns }, fix }],
         });
       },
     };

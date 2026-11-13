@@ -5,22 +5,54 @@ errors:
     column: 41
     endLine: 1
     endColumn: 73
+    suggestions:
+      - messageId: suggestUsing
+        desc: Replace the `ON` condition with `USING (customer_id)`.
+        output: |-
+          SELECT * FROM orders o JOIN customers c USING (customer_id);
+          SELECT j.* FROM (orders o JOIN customers c ON c.customer_id = o.customer_id) AS j;
+          UPDATE invoices SET paid = TRUE FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE invoices.order_id = o.id RETURNING *;
+          SELECT j.* FROM (orders o JOIN customers c ON c.customer_id = o.customer_id JOIN regions r ON r.id = c.region_id) AS j;
   - messageId: preferUsing
     message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
     line: 2
     column: 44
     endLine: 2
     endColumn: 76
+    suggestions:
+      - messageId: suggestUsing
+        desc: Replace the `ON` condition with `USING (customer_id)`.
+        output: |-
+          SELECT * FROM orders o JOIN customers c ON c.customer_id = o.customer_id;
+          SELECT j.* FROM (orders o JOIN customers c USING (customer_id)) AS j;
+          UPDATE invoices SET paid = TRUE FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE invoices.order_id = o.id RETURNING *;
+          SELECT j.* FROM (orders o JOIN customers c ON c.customer_id = o.customer_id JOIN regions r ON r.id = c.region_id) AS j;
   - messageId: preferUsing
     message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
     line: 3
     column: 64
     endLine: 3
     endColumn: 96
+    suggestions:
+      - messageId: suggestUsing
+        desc: Replace the `ON` condition with `USING (customer_id)`.
+        output: |-
+          SELECT * FROM orders o JOIN customers c ON c.customer_id = o.customer_id;
+          SELECT j.* FROM (orders o JOIN customers c ON c.customer_id = o.customer_id) AS j;
+          UPDATE invoices SET paid = TRUE FROM orders o JOIN customers c USING (customer_id) WHERE invoices.order_id = o.id RETURNING *;
+          SELECT j.* FROM (orders o JOIN customers c ON c.customer_id = o.customer_id JOIN regions r ON r.id = c.region_id) AS j;
   - messageId: preferUsing
     message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
     line: 4
     column: 44
     endLine: 4
     endColumn: 76
+    suggestions:
+      - messageId: suggestUsing
+        desc: Replace the `ON` condition with `USING (customer_id)`.
+        output: |-
+          SELECT * FROM orders o JOIN customers c ON c.customer_id = o.customer_id;
+          SELECT j.* FROM (orders o JOIN customers c ON c.customer_id = o.customer_id) AS j;
+          UPDATE invoices SET paid = TRUE FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE invoices.order_id = o.id RETURNING *;
+          SELECT j.* FROM (orders o JOIN customers c USING (customer_id) JOIN regions r ON r.id = c.region_id) AS j;
 output: null

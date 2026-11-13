@@ -5,4 +5,10 @@ errors:
     column: 44
     endLine: 1
     endColumn: 90
+  - messageId: preferUsing
+    message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 2
+    column: 41
+    endLine: 2
+    endColumn: 87
 output: null

@@ -1494,7 +1494,7 @@ export const rules: RuleMeta[] = [
     description:
       "Prefer `JOIN ... USING (col)` over `JOIN ... ON a.col = b.col`.",
     longDescription:
-      "When an `ON` condition matches a column to the same-named column on the other side (`a.col = b.col`, or `schema.table.col`), `USING` names the column once and merges the pair into a single output column. When every condition is such a pair, the rule rewrites the `ON` to `USING`. The fix is skipped under a bare `SELECT *` / `RETURNING *` or an aliased parenthesized join, where merging the pair would change the output columns. When there are other conditions too, the rule reports without a fix that they belong in `WHERE`, but only for an inner join that no outer join encloses, where they keep the same rows. A join whose key compares differently named columns (`i.order_id = o.id`) keeps `ON`.",
+      "When an `ON` condition matches a column to the same-named column on the other side (`a.col = b.col`, or `schema.table.col`), `USING` names the column once and merges the pair into a single output column. When every condition is such a pair, the rule rewrites the `ON` to `USING`. Under a bare `SELECT *` / `RETURNING *` or an aliased parenthesized join, where merging the pair changes the output columns, the rewrite is offered as a suggestion instead of a fix. When there are other conditions too, the rule reports without a fix that they belong in `WHERE`, but only for an inner join that no outer join encloses, where they keep the same rows. A join whose key compares differently named columns (`i.order_id = o.id`) keeps `ON`.",
     type: "suggestion",
     recommended: "off",
     fixable: true,
@@ -1514,7 +1514,7 @@ export const rules: RuleMeta[] = [
         type: "boolean",
         default: false,
         description:
-          "Also report joins where a side is itself a join, such as the second `JOIN` of a chain. `USING (col)` fails when two tables on one side both have `col`, and the rule can't see the schema, so these are off by default and never fixed.",
+          "Also report joins where a side is itself a join, such as the second `JOIN` of a chain. `USING (col)` fails when two tables on one side both have `col`, and the rule can't see the schema, so these are off by default and only get a suggestion.",
       },
     ],
   },

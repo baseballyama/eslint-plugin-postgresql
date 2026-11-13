@@ -7,12 +7,32 @@ errors:
     column: 82
     endLine: 1
     endColumn: 114
+    suggestions:
+      - messageId: suggestUsing
+        desc: Replace the `ON` condition with `USING (customer_id)`.
+        output: |-
+          SELECT o.id FROM orders o JOIN shipments s ON s.order_id = o.id JOIN customers c USING (customer_id);
+          SELECT o.id FROM orders o JOIN (customers c JOIN regions r ON r.id = c.region_id) ON c.customer_id = o.customer_id;
+          SELECT o.id
+          FROM orders o
+          JOIN shipments s ON s.order_id = o.id
+          JOIN customers c ON c.customer_id = o.customer_id AND c.since < s.shipped_at;
   - messageId: preferUsing
     message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
     line: 2
     column: 83
     endLine: 2
     endColumn: 115
+    suggestions:
+      - messageId: suggestUsing
+        desc: Replace the `ON` condition with `USING (customer_id)`.
+        output: |-
+          SELECT o.id FROM orders o JOIN shipments s ON s.order_id = o.id JOIN customers c ON c.customer_id = o.customer_id;
+          SELECT o.id FROM orders o JOIN (customers c JOIN regions r ON r.id = c.region_id) USING (customer_id);
+          SELECT o.id
+          FROM orders o
+          JOIN shipments s ON s.order_id = o.id
+          JOIN customers c ON c.customer_id = o.customer_id AND c.since < s.shipped_at;
   - messageId: preferUsingAndWhere
     message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
     line: 6
