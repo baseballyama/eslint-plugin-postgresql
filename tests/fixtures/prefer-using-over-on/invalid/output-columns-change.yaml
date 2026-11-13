@@ -1,0 +1,26 @@
+errors:
+  - messageId: preferUsing
+    message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 1
+    column: 41
+    endLine: 1
+    endColumn: 73
+  - messageId: preferUsing
+    message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 2
+    column: 44
+    endLine: 2
+    endColumn: 76
+  - messageId: preferUsing
+    message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 3
+    column: 64
+    endLine: 3
+    endColumn: 96
+  - messageId: preferUsing
+    message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 4
+    column: 44
+    endLine: 4
+    endColumn: 76
+output: null
