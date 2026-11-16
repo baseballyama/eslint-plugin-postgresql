@@ -15,6 +15,13 @@ type ExpectedError = {
   column: number;
   endLine?: number;
   endColumn?: number;
+  suggestions?: ExpectedSuggestion[];
+};
+
+type ExpectedSuggestion = {
+  messageId: string;
+  desc: string;
+  output: string;
 };
 
 type FixtureMeta = {
@@ -85,14 +92,28 @@ const writeYaml = (folderPath: string, baseName: string, meta: FixtureMeta) => {
   );
 };
 
-const messageToExpected = (m: Linter.LintMessage): ExpectedError => ({
-  messageId: m.messageId ?? "",
-  message: m.message,
-  line: m.line,
-  column: m.column,
-  ...(m.endLine !== undefined ? { endLine: m.endLine } : {}),
-  ...(m.endColumn !== undefined ? { endColumn: m.endColumn } : {}),
-});
+// Each suggestion is recorded as the code it produces when applied on its
+// own, like `output` for the fixes.
+const messageToExpected =
+  (code: string) =>
+  (m: Linter.LintMessage): ExpectedError => ({
+    messageId: m.messageId ?? "",
+    message: m.message,
+    line: m.line,
+    column: m.column,
+    ...(m.endLine !== undefined ? { endLine: m.endLine } : {}),
+    ...(m.endColumn !== undefined ? { endColumn: m.endColumn } : {}),
+    ...(m.suggestions !== undefined
+      ? {
+          suggestions: m.suggestions.map(({ messageId, desc, fix }) => ({
+            messageId: messageId ?? "",
+            desc,
+            output:
+              code.slice(0, fix.range[0]) + fix.text + code.slice(fix.range[1]),
+          })),
+        }
+      : {}),
+  });
 
 const buildFixtureMetaFromLint = (
   rule: RuleModule,
@@ -109,7 +130,7 @@ const buildFixtureMetaFromLint = (
         .join("; ")}`,
     );
   }
-  const errors = messages.map(messageToExpected);
+  const errors = messages.map(messageToExpected(code));
   const fixable =
     rule.meta?.fixable !== undefined && rule.meta?.fixable !== null;
   let output: string | null = null;
@@ -135,7 +156,7 @@ const assertInvalidFixture = (
 ) => {
   const actual = lintOnce(rule, ruleName, code, options);
   expect(
-    actual.map(messageToExpected),
+    actual.map(messageToExpected(code)),
     `[${ruleName}/${filename}] reported errors should match fixture`,
   ).toEqual(expected);
 
@@ -165,7 +186,7 @@ const assertValidFixture = (
 ) => {
   const actual = lintOnce(rule, ruleName, code, options);
   expect(
-    actual.map(messageToExpected),
+    actual.map(messageToExpected(code)),
     `[${ruleName}/${filename}] valid fixture should produce no errors`,
   ).toEqual([]);
 };

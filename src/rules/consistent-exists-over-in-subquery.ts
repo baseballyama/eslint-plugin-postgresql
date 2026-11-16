@@ -2,13 +2,10 @@ import type { AST } from "eslint";
 import type { Ast } from "postgresql-eslint-parser";
 import type { RuleModule } from "../utils/rule.js";
 import {
+  getFromNames,
   isAExpr,
   isBoolExpr,
   isColumnRef,
-  isJoinExpr,
-  isRangeFunction,
-  isRangeSubselect,
-  isRangeVar,
   isResTarget,
   isSelectStmt,
 } from "../utils/ast.js";
@@ -59,39 +56,6 @@ const isRowFilter = (node: Ast.SubLink): boolean => {
     container !== null &&
     ROW_FILTER_KEYS.some((key) => Reflect.get(container, key) === child)
   );
-};
-
-/**
- * Names a `table.column` reference can use to reach these `FROM` items, or
- * `undefined` when an item is one this rule does not model.
- */
-const getFromNames = (items: unknown[]): string[] | undefined => {
-  const names: string[] = [];
-  for (const item of items) {
-    if (isRangeVar(item)) {
-      names.push(item.alias?.aliasname ?? item.relname!);
-    } else if (isRangeSubselect(item)) {
-      // An unaliased sub-`SELECT` (PostgreSQL 16+) has no name to reach.
-      if (item.alias) names.push(item.alias.aliasname);
-    } else if (isRangeFunction(item)) {
-      // An unaliased function is reachable by its own name, which this
-      // rule does not resolve.
-      if (!item.alias) return undefined;
-      names.push(item.alias.aliasname);
-    } else if (isJoinExpr(item)) {
-      // An aliased join hides the names of the tables inside it.
-      const joined = item.alias
-        ? [item.alias.aliasname]
-        : getFromNames([item.larg, item.rarg]);
-      if (!joined) return undefined;
-      names.push(...joined);
-      // `JOIN ... USING (col) AS j` also names the joined columns `j.col`.
-      if (item.join_using_alias) names.push(item.join_using_alias.aliasname);
-    } else {
-      return undefined;
-    }
-  }
-  return names;
 };
 
 /**

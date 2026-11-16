@@ -41,7 +41,7 @@ export const isRangeSubselect = (node: unknown): node is Ast.RangeSubselect =>
 export const isRangeFunction = (node: unknown): node is Ast.RangeFunction =>
   isObjectWithType(node, "RangeFunction");
 
-export const isRangeVar = (node: unknown): node is Ast.RangeVar =>
+const isRangeVar = (node: unknown): node is Ast.RangeVar =>
   isObjectWithType(node, "RangeVar");
 
 export const isJoinExpr = (node: unknown): node is Ast.JoinExpr =>
@@ -55,6 +55,39 @@ export const isBoolExpr = (node: unknown): node is Ast.BoolExprPG =>
 
 export const isAExpr = (node: unknown): node is Ast.A_Expr =>
   isObjectWithType(node, "A_Expr");
+
+/**
+ * Names a `table.column` reference can use to reach these `FROM` items, or
+ * `undefined` for an item whose names aren't modelled here.
+ */
+export const getFromNames = (items: unknown[]): string[] | undefined => {
+  const names: string[] = [];
+  for (const item of items) {
+    if (isRangeVar(item)) {
+      names.push(item.alias?.aliasname ?? item.relname!);
+    } else if (isRangeSubselect(item)) {
+      // An unaliased sub-`SELECT` (PostgreSQL 16+) has no name to reach.
+      if (item.alias) names.push(item.alias.aliasname);
+    } else if (isRangeFunction(item)) {
+      // An unaliased function is reachable by its own name, which is
+      // not resolved here.
+      if (!item.alias) return undefined;
+      names.push(item.alias.aliasname);
+    } else if (isJoinExpr(item)) {
+      // An aliased join hides the names of the tables inside it.
+      const joined = item.alias
+        ? [item.alias.aliasname]
+        : getFromNames([item.larg, item.rarg]);
+      if (!joined) return undefined;
+      names.push(...joined);
+      // `JOIN ... USING (col) AS j` also names the joined columns `j.col`.
+      if (item.join_using_alias) names.push(item.join_using_alias.aliasname);
+    } else {
+      return undefined;
+    }
+  }
+  return names;
+};
 
 const isObjectWithType = <T extends string>(
   node: unknown,
