@@ -31,13 +31,15 @@ const [sqlSource, plReservedSource, plUnreservedSource] = await Promise.all([
 ]);
 
 const keywords = new Map();
+const asLabelKeywords = new Set();
 for (const line of sqlSource.split("\n")) {
   // PG_KEYWORD("name", TOKEN_VALUE, CATEGORY, BARE_LABEL_STATUS)
   const match = line.match(
-    /^PG_KEYWORD\("([^"]+)",\s*\w+,\s*(UNRESERVED_KEYWORD|COL_NAME_KEYWORD|TYPE_FUNC_NAME_KEYWORD|RESERVED_KEYWORD)/,
+    /^PG_KEYWORD\("([^"]+)",\s*\w+,\s*(UNRESERVED_KEYWORD|COL_NAME_KEYWORD|TYPE_FUNC_NAME_KEYWORD|RESERVED_KEYWORD),\s*(BARE_LABEL|AS_LABEL)/,
   );
   if (!match) continue;
   keywords.set(match[1], match[2]);
+  if (match[3] === "AS_LABEL") asLabelKeywords.add(match[1]);
 }
 
 if (keywords.size === 0) {
@@ -120,9 +122,18 @@ const out =
   `// corrupt the SQL.\n` +
   `export const PLPGSQL_RESERVED_KEYWORDS: ReadonlySet<string> = new Set([\n` +
   plpgsqlReserved.map((k) => `  ${JSON.stringify(k)},`).join("\n") +
+  `\n]);\n\n` +
+  `// Keywords that need \`AS\` before them when used as a column alias —\n` +
+  `// AS_LABEL in kwlist.h. \`SELECT 1 AS month\` parses; \`SELECT 1 month\`\n` +
+  `// does not.\n` +
+  `export const PG_AS_LABEL_KEYWORDS: ReadonlySet<string> = new Set([\n` +
+  [...asLabelKeywords]
+    .sort()
+    .map((k) => `  ${JSON.stringify(k)},`)
+    .join("\n") +
   `\n]);\n`;
 
 writeFileSync(outFile, out);
 console.log(
-  `Wrote ${keywords.size} kwlist keywords (${requiresQuotes.length} require quoting) and ${plpgsqlReserved.length} reserved plpgsql keywords to ${outFile}`,
+  `Wrote ${keywords.size} kwlist keywords (${requiresQuotes.length} require quoting, ${asLabelKeywords.size} need AS as a column alias) and ${plpgsqlReserved.length} reserved plpgsql keywords to ${outFile}`,
 );

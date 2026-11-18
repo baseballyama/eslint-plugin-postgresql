@@ -1,0 +1,25 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `order`.
+    line: 7
+    column: 6
+    endLine: 7
+    endColumn: 8
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `full_name`.
+    line: 8
+    column: 8
+    endLine: 8
+    endColumn: 10
+output: |-
+  -- PostgreSQL accepts some keywords (`month`, `from`, ...) as a column
+  -- alias only after `AS`, so it stays. A quoted alias is an ordinary
+  -- identifier, so its `AS` goes.
+  SELECT
+    to_char(created_at, 'YYYY-MM') AS month,
+    created_at AS from,
+    id "order",
+    name full_name
+  FROM users;
