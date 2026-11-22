@@ -1,0 +1,35 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the column alias `user_id`.
+    line: 5
+    column: 8
+    endLine: 5
+    endColumn: 15
+  - messageId: preferAs
+    message: Use `AS` before the column alias `created_month`.
+    line: 6
+    column: 36
+    endLine: 6
+    endColumn: 49
+  - messageId: preferAs
+    message: Use `AS` before the column alias `created_on`.
+    line: 7
+    column: 30
+    endLine: 7
+    endColumn: 40
+  - messageId: preferAs
+    message: Use `AS` before the column alias `end`.
+    line: 8
+    column: 44
+    endLine: 8
+    endColumn: 47
+output: |-
+  -- The parser anchors dotted columns and function calls on their first
+  -- name, and no range covers a closing `)` or a CASE's `END`. The rule
+  -- steps over those tokens to reach the alias, including one named `end`.
+  SELECT
+    u.id AS user_id,
+    to_char(u.created_at, 'YYYY-MM') AS created_month,
+    CAST(u.created_at AS date) AS created_on,
+    CASE WHEN u.active THEN 'a' ELSE 'b' END AS end
+  FROM users u;

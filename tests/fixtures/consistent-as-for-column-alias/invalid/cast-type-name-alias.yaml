@@ -1,0 +1,27 @@
+errors:
+  - messageId: preferAs
+    message: Use `AS` before the column alias `date`.
+    line: 4
+    column: 20
+    endLine: 4
+    endColumn: 24
+  - messageId: preferAs
+    message: Use `AS` before the column alias `timestamp`.
+    line: 5
+    column: 25
+    endLine: 5
+    endColumn: 34
+  - messageId: preferAs
+    message: Use `AS` before the column alias `text`.
+    line: 6
+    column: 16
+    endLine: 6
+    endColumn: 20
+output: |-
+  -- An alias named like the cast's type. The rule used to insert `AS`
+  -- after `::`, turning `x::date date` into `x::AS date date`.
+  SELECT
+    created_at::date AS date,
+    created_at::timestamp AS timestamp,
+    tags::text[] AS text
+  FROM users;

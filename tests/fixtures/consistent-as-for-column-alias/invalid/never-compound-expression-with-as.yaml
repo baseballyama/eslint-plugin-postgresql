@@ -1,0 +1,68 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `user_id`.
+    line: 2
+    column: 8
+    endLine: 2
+    endColumn: 10
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `total`.
+    line: 3
+    column: 12
+    endLine: 3
+    endColumn: 14
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `expires_ms`.
+    line: 4
+    column: 43
+    endLine: 4
+    endColumn: 45
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `created_on`.
+    line: 5
+    column: 30
+    endLine: 5
+    endColumn: 32
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `status`.
+    line: 6
+    column: 44
+    endLine: 6
+    endColumn: 46
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `first_tag`.
+    line: 7
+    column: 13
+    endLine: 7
+    endColumn: 15
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `row_num`.
+    line: 8
+    column: 37
+    endLine: 8
+    endColumn: 39
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `max_id`.
+    line: 9
+    column: 21
+    endLine: 9
+    endColumn: 23
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `last_order_id`.
+    line: 9
+    column: 46
+    endLine: 9
+    endColumn: 48
+output: |-
+  SELECT
+    u.id user_id,
+    count(*) total,
+    extract(epoch FROM u.expires_at) * 1000 expires_ms,
+    CAST(u.created_at AS date) created_on,
+    CASE WHEN u.active THEN 'a' ELSE 'b' END status,
+    u.tags[1] first_tag,
+    row_number() OVER (ORDER BY u.id) row_num,
+    (SELECT max(o.id) max_id FROM orders o) last_order_id
+  FROM users u;
