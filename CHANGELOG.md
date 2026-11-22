@@ -1,5 +1,18 @@
 # eslint-plugin-postgresql
 
+## 0.30.2
+
+### Patch Changes
+
+- [#343](https://github.com/baseballyama/eslint-plugin-postgresql/pull/343) [`c7a533d`](https://github.com/baseballyama/eslint-plugin-postgresql/commit/c7a533d58ff31edb9ba777047144b0a3aaf84c91) Thanks [@abrahamguo](https://github.com/abrahamguo)! - `consistent-as-for-column-alias` now also checks aliases after dotted columns,
+  function calls, subscripts and `CASE` expressions, such as `t.id AS user_id`,
+  `count(*) total` and `CASE ... END AS status`. With `style: "never"`, it no
+  longer removes an `AS` that PostgreSQL needs: before a keyword it accepts as a
+  column alias only after `AS` (the fix turned `SELECT 1 AS month` into
+  `SELECT 1 month`, which is a syntax error), and before a keyword that can
+  continue the expression, such as `SELECT x + y AS at`. With `style: "always"`,
+  it no longer turns `x::date date` into `x::AS date date`.
+
 ## 0.30.1
 
 ### Patch Changes
