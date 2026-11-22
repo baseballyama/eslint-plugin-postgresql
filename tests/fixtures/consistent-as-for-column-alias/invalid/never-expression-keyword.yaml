@@ -1,0 +1,21 @@
+options:
+  - style: never
+errors:
+  - messageId: unexpectedAs
+    message: Omit `AS` before the column alias `full_name`.
+    line: 10
+    column: 8
+    endLine: 10
+    endColumn: 10
+output: |-
+  -- These keywords can continue the value before them, so PostgreSQL needs
+  -- the `AS`: `x + y at` would start `AT TIME ZONE`, and `U&'...' uescape`
+  -- expects a string. The `AS` before `full_name` still goes.
+  SELECT
+    price + tax AS at,
+    a = b AS in,
+    NOT a AS is,
+    name LIKE 'a%' AS escape,
+    U&'d\0061t\+000061' AS uescape,
+    name full_name
+  FROM items;

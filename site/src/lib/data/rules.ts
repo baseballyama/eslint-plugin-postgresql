@@ -1211,7 +1211,7 @@ export const rules: RuleMeta[] = [
         type: '"always" | "never"',
         default: '"always"',
         description:
-          "`always` (default) requires `AS` before column aliases. `never` forbids the keyword, except before the keywords PostgreSQL accepts as a column alias only after `AS`, such as `month` or `from`.",
+          "`always` (default) requires `AS` before column aliases. `never` forbids the keyword, except where PostgreSQL needs it: before a keyword it accepts as a column alias only after `AS`, such as `month` or `from`, or one that can continue the expression, such as `at` or `in`.",
       },
     ],
   },

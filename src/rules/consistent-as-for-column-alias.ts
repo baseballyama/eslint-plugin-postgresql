@@ -11,6 +11,27 @@ const DEFAULT_STYLE: Style = "always";
 const OPENING_BRACKETS: ReadonlySet<string> = new Set(["(", "["]);
 const CLOSING_BRACKETS: ReadonlySet<string> = new Set([")", "]"]);
 
+// Keywords that kwlist.h allows as a bare column alias, but that can also
+// continue the expression before them, so dropping `AS` breaks the query:
+// `SELECT x + y AS at` parses, `SELECT x + y at` does not (`at` would start
+// `AT TIME ZONE`). Found by parsing `SELECT <expr> <keyword>` with
+// libpg-query for every BARE_LABEL keyword; most of them carry their own
+// precedence in gram.y. `uescape` follows a `U&'...'` string.
+const EXPRESSION_KEYWORDS: ReadonlySet<string> = new Set([
+  "and",
+  "at",
+  "between",
+  "collate",
+  "escape",
+  "ilike",
+  "in",
+  "is",
+  "like",
+  "operator",
+  "similar",
+  "uescape",
+]);
+
 const rule: RuleModule = {
   meta: {
     type: "layout",
@@ -85,6 +106,20 @@ const rule: RuleModule = {
       return depths[index]!;
     };
 
+    // Index of the first token starting at or after `offset`, by binary
+    // search. Not `getTokenByRangeStart`: the tokenizer emits no token for
+    // the `$` of a `$1` parameter.
+    const firstTokenAtOrAfter = (offset: number) => {
+      let low = 0;
+      let high = tokens.length;
+      while (low < high) {
+        const mid = (low + high) >>> 1;
+        if (tokens[mid]!.range[0] < offset) low = mid + 1;
+        else high = mid;
+      }
+      return low;
+    };
+
     // Whether the token at `index`, past the last range inside a value,
     // still belongs to the value. The parser anchors a dotted column
     // (`t.col`) or a function call (`count(*)`) on its first name, and no
@@ -113,11 +148,7 @@ const rule: RuleModule = {
         if (!target.name) continue;
         const valRange = getFullSourceRange(target.val);
         if (!valRange) continue;
-        // Not `getTokenByRangeStart`: the tokenizer emits no token for
-        // the `$` of a `$1` parameter.
-        let index = tokens.findIndex(
-          (token) => token.range[0] >= target.range[0],
-        );
+        let index = firstTokenAtOrAfter(target.range[0]);
         const valueDepth = depthAt(index);
         while (
           index < tokens.length &&
@@ -152,9 +183,12 @@ const rule: RuleModule = {
         if (style === "never" && hasAs) {
           const after = tokens[index + 1];
           if (!after) continue;
-          // PostgreSQL accepts these keywords as a column alias only after
-          // `AS`: `SELECT 1 AS month` parses, `SELECT 1 month` does not.
-          if (PG_AS_LABEL_KEYWORDS.has(after.value.toLowerCase())) continue;
+          // Keep an `AS` that PostgreSQL needs: AS_LABEL keywords are a
+          // column alias only after `AS` (`SELECT 1 month` does not parse),
+          // and EXPRESSION_KEYWORDS can continue the value.
+          const alias = after.value.toLowerCase();
+          if (PG_AS_LABEL_KEYWORDS.has(alias) || EXPRESSION_KEYWORDS.has(alias))
+            continue;
           context.report({
             loc: next.loc,
             messageId: "unexpectedAs",
