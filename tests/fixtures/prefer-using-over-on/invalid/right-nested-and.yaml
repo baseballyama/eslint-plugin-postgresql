@@ -1,0 +1,8 @@
+errors:
+  - messageId: preferUsing
+    message: Use `USING (region_id, tenant_id, zone_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 1
+    column: 42
+    endLine: 1
+    endColumn: 128
+output: SELECT o.id FROM orders o JOIN regions r USING (region_id, tenant_id, zone_id);

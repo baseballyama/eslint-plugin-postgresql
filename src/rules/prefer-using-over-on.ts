@@ -71,6 +71,15 @@ const changesOutputColumns = (join: Ast.JoinExpr) => {
   });
 };
 
+/**
+ * The `AND`-ed conditions of a join, in source order. The parser only
+ * flattens a left-nested `AND`, so `x AND (y AND z)` is flattened here.
+ */
+const getConjuncts = (expr: unknown): unknown[] =>
+  isBoolExpr(expr) && expr.boolop === "AND_EXPR"
+    ? expr.args!.flatMap(getConjuncts)
+    : [expr];
+
 const isKeyword = (token: AST.Token, keyword: string) =>
   token.type === "Keyword" && token.value.toUpperCase() === keyword;
 
@@ -125,12 +134,12 @@ const rule: RuleModule = {
         if (joinedSide && !checkJoinedSides) return;
         const leftNames = new Set(getFromNames([node.larg]));
         const rightNames = new Set(getFromNames([node.rarg]));
-        const { quals } = node;
-        const conjuncts =
-          isBoolExpr(quals) && quals.boolop === "AND_EXPR"
-            ? quals.args!
-            : [quals];
+        const conjuncts = getConjuncts(node.quals);
         const pairs: (readonly [Ast.ColumnRef, Ast.ColumnRef])[] = [];
+        // `USING` rejects a column listed twice, so a repeated pair names
+        // its column once.
+        const columnNames = new Set<string>();
+        const columnTexts: string[] = [];
         let hasOtherConditions = false;
         for (const conjunct of conjuncts) {
           const equality = getCrossSideEquality(
@@ -147,11 +156,13 @@ const rule: RuleModule = {
           // `ON`, so `USING` can't take over the join.
           if (a.column !== b.column) return;
           pairs.push([a.ref, b.ref]);
+          if (!columnNames.has(a.column)) {
+            columnNames.add(a.column);
+            columnTexts.push(sourceCode.getText(getColumnTokens(a.ref)[1]));
+          }
         }
         if (!pairs.length) return;
-        const columns = pairs
-          .map(([ref]) => sourceCode.getText(getColumnTokens(ref)[1]))
-          .join(", ");
+        const columns = columnTexts.join(", ");
         const onToken = sourceCode.getTokenBefore(
           sourceCode.getTokenByRangeStart(
             getFullSourceRange(conjuncts[0])![0],
