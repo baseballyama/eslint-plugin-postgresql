@@ -1490,6 +1490,35 @@ export const rules: RuleMeta[] = [
     ],
   },
   {
+    name: "prefer-using-over-on",
+    description:
+      "Prefer `JOIN ... USING (col)` over `JOIN ... ON a.col = b.col`.",
+    longDescription:
+      "When an `ON` condition matches a column to the same-named column on the other side (`a.col = b.col`, or `schema.table.col`), `USING` names the column once and merges the pair into a single output column. When every condition is such a pair, the rule rewrites the `ON` to `USING`. Under a bare `SELECT *` / `RETURNING *` or an aliased parenthesized join, where merging the pair changes the output columns, the rewrite is offered as a suggestion instead of a fix. When there are other conditions too, the rule reports without a fix that they belong in `WHERE`, but only for an inner join that no outer join encloses, where they keep the same rows. A join whose key compares differently named columns (`i.order_id = o.id`) keeps `ON`.",
+    type: "suggestion",
+    recommended: "off",
+    fixable: true,
+    category: "style",
+    incorrect: [
+      "SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id;",
+      "SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active;",
+    ],
+    correct: [
+      "SELECT o.id FROM orders o JOIN customers c USING (customer_id);",
+      "SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE c.active;",
+      "SELECT o.id FROM orders o JOIN customers c ON c.id = o.customer_id; -- different names: not in scope",
+    ],
+    options: [
+      {
+        name: "checkJoinedSides",
+        type: "boolean",
+        default: false,
+        description:
+          "Also report joins where a side is itself a join, such as the second `JOIN` of a chain. `USING (col)` fails when two tables on one side both have `col`, and the rule can't see the schema, so these are off by default and only get a suggestion.",
+      },
+    ],
+  },
+  {
     name: "require-if-exists",
     description: "Require `IF EXISTS` on every `DROP` statement.",
     longDescription:

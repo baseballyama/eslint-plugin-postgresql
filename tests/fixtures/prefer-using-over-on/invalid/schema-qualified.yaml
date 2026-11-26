@@ -1,0 +1,11 @@
+errors:
+  - messageId: preferUsing
+    message: Use `USING (customer_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 3
+    column: 23
+    endLine: 3
+    endColumn: 82
+output: |-
+  SELECT public.orders.id
+  FROM public.orders
+  JOIN public.customers USING (customer_id);

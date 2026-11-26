@@ -1,0 +1,18 @@
+errors:
+  - messageId: preferUsing
+    message: Use `USING (tenant_id, "CustomerId")` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 3
+    column: 23
+    endLine: 3
+    endColumn: 89
+  - messageId: preferUsing
+    message: Use `USING (region_id, tenant_id)` instead of `ON`. Every condition here matches a column to the same-named column on the other side, which `USING` names once.
+    line: 4
+    column: 42
+    endLine: 4
+    endColumn: 106
+output: |-
+  SELECT o.id
+  FROM orders o
+  LEFT JOIN customers c USING (tenant_id, "CustomerId");
+  SELECT o.id FROM orders o JOIN regions r USING (region_id, tenant_id);

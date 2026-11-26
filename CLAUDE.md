@@ -205,7 +205,9 @@ that wires the fixture loader.
    with `<basename>.yaml` containing:
    - `options:` — optional rule options array.
    - `errors:` — list of expected reports. Each entry pins `messageId`,
-     `message`, `line`, `column`, and (when available) `endLine` / `endColumn`.
+     `message`, `line`, `column`, and (when available) `endLine` / `endColumn`
+     and `suggestions` (each one's `messageId`, `desc`, and the `output` it
+     produces when applied on its own).
    - `output:` — required. Either the autofixed SQL string, or `null` to
      assert no fix is produced (also required for non-fixable rules).
 
