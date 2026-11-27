@@ -1,0 +1,26 @@
+errors:
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 1
+    column: 45
+    endLine: 1
+    endColumn: 47
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 2
+    column: 44
+    endLine: 2
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 3
+    column: 55
+    endLine: 3
+    endColumn: 57
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 4
+    column: 64
+    endLine: 4
+    endColumn: 66
+output: null

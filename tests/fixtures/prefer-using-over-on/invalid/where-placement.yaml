@@ -1,0 +1,51 @@
+errors:
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 1
+    column: 44
+    endLine: 1
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 2
+    column: 44
+    endLine: 2
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 3
+    column: 44
+    endLine: 3
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 4
+    column: 44
+    endLine: 4
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 5
+    column: 45
+    endLine: 5
+    endColumn: 47
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 6
+    column: 64
+    endLine: 6
+    endColumn: 66
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 7
+    column: 54
+    endLine: 7
+    endColumn: 56
+output: |-
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE active;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE c.active AND o.total > 0;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE c.active AND (o.total > 0 OR o.rush);
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) JOIN regions r ON r.id = c.region_id, shipments s WHERE c.active;
+  SELECT o.id FROM (orders o JOIN customers c USING (customer_id)) JOIN regions r ON r.id = c.region_id WHERE c.active;
+  SELECT n FROM (SELECT o.id AS n FROM orders o JOIN customers c USING (customer_id) WHERE c.active) t;
+  DELETE FROM invoices USING orders o JOIN customers c USING (customer_id) WHERE c.active AND invoices.order_id = o.id;

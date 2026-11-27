@@ -1,0 +1,107 @@
+errors:
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 1
+    column: 44
+    endLine: 1
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 2
+    column: 41
+    endLine: 2
+    endColumn: 43
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 3
+    column: 44
+    endLine: 3
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 4
+    column: 44
+    endLine: 4
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 5
+    column: 44
+    endLine: 5
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 6
+    column: 44
+    endLine: 6
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 7
+    column: 44
+    endLine: 7
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 8
+    column: 44
+    endLine: 8
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 9
+    column: 44
+    endLine: 9
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 10
+    column: 44
+    endLine: 10
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 11
+    column: 44
+    endLine: 11
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 12
+    column: 64
+    endLine: 12
+    endColumn: 66
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 13
+    column: 68
+    endLine: 13
+    endColumn: 70
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 14
+    column: 74
+    endLine: 14
+    endColumn: 76
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 15
+    column: 44
+    endLine: 15
+    endColumn: 46
+output: |-
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active GROUP BY o.id;
+  SELECT 1 FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active HAVING count(*) > 1;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active WINDOW w AS (ORDER BY o.id);
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active ORDER BY o.id;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active LIMIT 1;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active OFFSET 1;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active FETCH FIRST 1 ROW ONLY;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active FOR UPDATE;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active UNION SELECT id FROM archived_orders;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active INTERSECT SELECT id FROM archived_orders;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active EXCEPT SELECT id FROM archived_orders;
+  UPDATE invoices SET paid = TRUE FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active RETURNING invoices.id;
+  INSERT INTO paid_orders SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active ON CONFLICT DO NOTHING;
+  CREATE TABLE active_orders AS SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.active WITH NO DATA;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), unnest(o.tags) WITH ORDINALITY t (tag, n) WHERE c.active;
