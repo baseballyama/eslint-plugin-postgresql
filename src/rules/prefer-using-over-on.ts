@@ -184,8 +184,8 @@ const rule: RuleModule = {
         : token.value.toUpperCase();
     const getNextValue = (token: AST.Token) =>
       sourceCode.getTokenAfter(token)?.value.toUpperCase() ?? "";
-    // `WITH TIME ZONE` belongs to a type and `WITH ORDINALITY` to a
-    // function in `FROM`, while `WITH CHECK OPTION` and `WITH [NO] DATA`
+    // `WITH TIME ZONE` belongs to a type, `WITH ORDINALITY` to a function
+    // in `FROM` and `WITH UNIQUE [KEYS]` to `IS JSON`, while `WITH CHECK OPTION` and `WITH [NO] DATA`
     // follow the query of a view or table. `ON CONFLICT` follows the query
     // of an `INSERT`.
     const isClauseStart = (token: AST.Token) => {
@@ -193,7 +193,7 @@ const rule: RuleModule = {
       return (
         CLAUSE_STARTS.has(word) ||
         (word === "WITH" &&
-          !["TIME", "ORDINALITY"].includes(getNextValue(token))) ||
+          !["TIME", "ORDINALITY", "UNIQUE"].includes(getNextValue(token))) ||
         (word === "ON" && getNextValue(token) === "CONFLICT")
       );
     };
@@ -356,11 +356,14 @@ const rule: RuleModule = {
               : [using, fixer.insertTextBefore(whereStart, `${moved} AND `)];
           };
           // In `WHERE`, an unqualified column can also name a column of
-          // another `FROM` item.
+          // another `FROM` item, or of the target of an `UPDATE` / `DELETE`.
           const needsReview =
             joinedSide ||
             changesOutputColumns(node) ||
-            ((joins.length > 1 || fromItems.length > 1) &&
+            ((joins.length > 1 ||
+              fromItems.length > 1 ||
+              statement.type === "UpdateStmt" ||
+              statement.type === "DeleteStmt") &&
               [...others].some(hasUnqualifiedColumn));
           context.report({
             loc: onToken.loc,

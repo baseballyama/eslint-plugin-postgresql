@@ -12,6 +12,8 @@ errors:
           SELECT * FROM orders o JOIN customers c USING (customer_id) WHERE c.active;
           SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active, regions r;
           SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active JOIN regions r ON r.id = c.region_id;
+          UPDATE orders SET total = 0 FROM refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
+          DELETE FROM orders USING refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
   - messageId: preferUsingAndWhere
     message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
     line: 2
@@ -25,6 +27,8 @@ errors:
           SELECT * FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active;
           SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE active;
           SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active JOIN regions r ON r.id = c.region_id;
+          UPDATE orders SET total = 0 FROM refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
+          DELETE FROM orders USING refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
   - messageId: preferUsingAndWhere
     message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
     line: 3
@@ -38,4 +42,36 @@ errors:
           SELECT * FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active;
           SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active, regions r;
           SELECT o.id FROM orders o JOIN customers c USING (customer_id) JOIN regions r ON r.id = c.region_id WHERE active;
+          UPDATE orders SET total = 0 FROM refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
+          DELETE FROM orders USING refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 4
+    column: 61
+    endLine: 4
+    endColumn: 63
+    suggestions:
+      - messageId: suggestUsingAndWhere
+        desc: Replace the `ON` condition with `USING (customer_id)` and move the other conditions to `WHERE`.
+        output: |-
+          SELECT * FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active;
+          SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active, regions r;
+          SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active JOIN regions r ON r.id = c.region_id;
+          UPDATE orders SET total = 0 FROM refunds f JOIN customers c USING (customer_id) WHERE active AND orders.id = f.order_id;
+          DELETE FROM orders USING refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 5
+    column: 53
+    endLine: 5
+    endColumn: 55
+    suggestions:
+      - messageId: suggestUsingAndWhere
+        desc: Replace the `ON` condition with `USING (customer_id)` and move the other conditions to `WHERE`.
+        output: |-
+          SELECT * FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active;
+          SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active, regions r;
+          SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND active JOIN regions r ON r.id = c.region_id;
+          UPDATE orders SET total = 0 FROM refunds f JOIN customers c ON c.customer_id = f.customer_id AND active WHERE orders.id = f.order_id;
+          DELETE FROM orders USING refunds f JOIN customers c USING (customer_id) WHERE active AND orders.id = f.order_id;
 output: null
