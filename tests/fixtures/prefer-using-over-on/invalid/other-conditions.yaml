@@ -17,4 +17,12 @@ errors:
     column: 18
     endLine: 8
     endColumn: 20
-output: null
+output: |-
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE c.active;
+  SELECT o.id
+  FROM orders o
+  JOIN customers c USING (customer_id)
+  WHERE o.created_at < c.closed_at AND o.total > 0;
+  SELECT o.id
+  FROM orders o
+  JOIN customers c USING (customer_id) WHERE EXISTS (SELECT 1 FROM refunds r JOIN payments p ON p.refund_id = r.id);

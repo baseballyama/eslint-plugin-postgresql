@@ -1,0 +1,15 @@
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r GROUP BY o.id;
+SELECT 1 FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r HAVING count(*) > 1;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r WINDOW w AS (ORDER BY o.id);
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r ORDER BY o.id;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r LIMIT 1;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r OFFSET 1;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r FETCH FIRST 1 ROW ONLY;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r FOR UPDATE;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r UNION SELECT id FROM archived_orders;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r INTERSECT SELECT id FROM archived_orders;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r EXCEPT SELECT id FROM archived_orders;
+UPDATE invoices SET paid = TRUE FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r RETURNING invoices.id;
+INSERT INTO paid_orders SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r ON CONFLICT DO NOTHING;
+CREATE TABLE active_orders AS SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, regions r WITH NO DATA;
+SELECT o.id FROM orders o JOIN customers c ON c.customer_id = o.customer_id AND c.active, unnest(o.tags) WITH ORDINALITY t (tag, n);

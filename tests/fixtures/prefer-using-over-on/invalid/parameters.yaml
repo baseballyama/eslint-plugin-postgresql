@@ -1,0 +1,16 @@
+errors:
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 1
+    column: 44
+    endLine: 1
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 2
+    column: 44
+    endLine: 2
+    endColumn: 46
+output: |-
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE $1 = c.region_id;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE $1 = c.region_id AND $2 = o.id;

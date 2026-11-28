@@ -83,6 +83,48 @@ const getConjuncts = (expr: unknown): unknown[] =>
 const isKeyword = (token: AST.Token, keyword: string) =>
   token.type === "Keyword" && token.value.toUpperCase() === keyword;
 
+/** `;` and the keywords that start a clause after a `FROM` list. */
+const CLAUSE_STARTS = new Set([
+  ";",
+  "WHERE",
+  "GROUP",
+  "HAVING",
+  "WINDOW",
+  "ORDER",
+  "LIMIT",
+  "OFFSET",
+  "FETCH",
+  "FOR",
+  "UNION",
+  "INTERSECT",
+  "EXCEPT",
+  "RETURNING",
+]);
+
+/**
+ * `,` and the keywords that can follow the condition of a join that no
+ * outer join encloses.
+ */
+const JOIN_STARTS = new Set([
+  ",",
+  "JOIN",
+  "INNER",
+  "CROSS",
+  "NATURAL",
+  "ON",
+  "USING",
+]);
+
+/** Whether `node` has a column that doesn't name its table. */
+const hasUnqualifiedColumn = (node: unknown): boolean =>
+  isColumnRef(node)
+    ? node.fields.length === 1
+    : typeof node === "object" &&
+      node !== null &&
+      Object.entries(node).some(
+        ([key, value]) => key !== "parent" && hasUnqualifiedColumn(value),
+      );
+
 const rule: RuleModule = {
   meta: {
     type: "suggestion",
@@ -109,6 +151,8 @@ const rule: RuleModule = {
       preferUsingAndWhere:
         "Use `USING ({{columns}})` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.",
       suggestUsing: "Replace the `ON` condition with `USING ({{columns}})`.",
+      suggestUsingAndWhere:
+        "Replace the `ON` condition with `USING ({{columns}})` and move the other conditions to `WHERE`.",
     },
   },
   create(context) {
@@ -125,6 +169,62 @@ const rule: RuleModule = {
         sourceCode.getTokenAfter(first, { skip: ref.fields.length * 2 - 3 })!,
       ] as const;
     };
+    // A node's full range starts at its first token, inside any `(`
+    // around it.
+    const getFirstToken = (node: unknown) =>
+      sourceCode.getTokenByRangeStart(getFullSourceRange(node)![0])!;
+    const getKeywordBefore = (node: unknown, keyword: string) =>
+      sourceCode.getTokenBefore(getFirstToken(node), {
+        filter: (token) => isKeyword(token, keyword),
+      })!;
+    // A keyword after `.` is a column name, as in `t.order`.
+    const getWord = (token: AST.Token) =>
+      sourceCode.getTokenBefore(token)?.value === "."
+        ? ""
+        : token.value.toUpperCase();
+    const getNextValue = (token: AST.Token) =>
+      sourceCode.getTokenAfter(token)?.value.toUpperCase() ?? "";
+    // `WITH TIME ZONE` belongs to a type, `WITH ORDINALITY` to a function
+    // in `FROM` and `WITH UNIQUE [KEYS]` to `IS JSON`, while `WITH CHECK OPTION` and `WITH [NO] DATA`
+    // follow the query of a view or table. `ON CONFLICT` follows the query
+    // of an `INSERT`.
+    const isClauseStart = (token: AST.Token) => {
+      const word = getWord(token);
+      return (
+        CLAUSE_STARTS.has(word) ||
+        (word === "WITH" &&
+          !["TIME", "ORDINALITY", "UNIQUE"].includes(getNextValue(token))) ||
+        (word === "ON" && getNextValue(token) === "CONFLICT")
+      );
+    };
+    const isJoinConditionEnd = (token: AST.Token) =>
+      isClauseStart(token) || JOIN_STARTS.has(getWord(token));
+    // The last token after `start` before one that `isEnd` accepts outside
+    // the parentheses and brackets opened after `start`, or before a `)`
+    // closing one opened before it.
+    const getClauseEnd = (
+      start: AST.Token,
+      isEnd: (token: AST.Token) => boolean,
+    ) => {
+      let depth = 0;
+      let end = start;
+      for (
+        let token = sourceCode.getTokenAfter(start);
+        token;
+        token = sourceCode.getTokenAfter(token)
+      ) {
+        if (token.value === "(" || token.value === "[") {
+          depth++;
+        } else if (token.value === ")" || token.value === "]") {
+          if (!depth) break;
+          depth--;
+        } else if (!depth && isEnd(token)) {
+          break;
+        }
+        end = token;
+      }
+      return end;
+    };
     return {
       JoinExpr(node: Ast.JoinExpr) {
         // `USING (col)` needs `col` exactly once on each side. Without the
@@ -140,7 +240,7 @@ const rule: RuleModule = {
         // its column once.
         const columnNames = new Set<string>();
         const columnTexts: string[] = [];
-        let hasOtherConditions = false;
+        const others = new Set<unknown>();
         for (const conjunct of conjuncts) {
           const equality = getCrossSideEquality(
             conjunct,
@@ -148,7 +248,7 @@ const rule: RuleModule = {
             rightNames,
           );
           if (!equality) {
-            hasOtherConditions = true;
+            others.add(conjunct);
             continue;
           }
           const [a, b] = equality;
@@ -163,23 +263,116 @@ const rule: RuleModule = {
         }
         if (!pairs.length) return;
         const columns = columnTexts.join(", ");
-        const onToken = sourceCode.getTokenBefore(
-          sourceCode.getTokenByRangeStart(
-            getFullSourceRange(conjuncts[0])![0],
-          )!,
-          { filter: (token) => isKeyword(token, "ON") },
-        )!;
-        if (hasOtherConditions) {
+        const onToken = getKeywordBefore(conjuncts[0], "ON");
+        if (others.size) {
           // In `WHERE`, the other conditions keep the same rows only when
           // this join and every join around it are inner joins: an outer
           // join keeps the rows they reject.
+          const joins: Ast.JoinExpr[] = [];
           for (let join: unknown = node; isJoinExpr(join); join = join.parent) {
-            if (join.jointype !== "JOIN_INNER") return;
+            joins.push(join);
           }
+          if (joins.some((join) => join.jointype !== "JOIN_INNER")) return;
+          const statement = joins.at(-1)!.parent!;
+          // `DELETE` lists its other tables in `USING`.
+          const fromItems: unknown =
+            Reflect.get(statement, "fromClause") ??
+            Reflect.get(statement, "usingClause");
+          const whereClause: { type: string } | undefined = Reflect.get(
+            statement,
+            "whereClause",
+          );
+          const endToken = getClauseEnd(onToken, isJoinConditionEnd);
+          // The fix would delete a comment in the condition. `WHERE` can't
+          // see the tables inside an aliased join, `MERGE` has no `WHERE`,
+          // and `WHERE CURRENT OF` takes no other condition.
+          if (
+            sourceCode.commentsExistBetween(onToken, endToken) ||
+            joins.some((join) => join.alias) ||
+            !Array.isArray(fromItems) ||
+            whereClause?.type === "CurrentOfExpr"
+          ) {
+            context.report({
+              loc: onToken.loc,
+              messageId: "preferUsingAndWhere",
+              data: { columns },
+            });
+            return;
+          }
+          const separators = conjuncts.slice(1).map((conjunct) =>
+            sourceCode.getTokenBefore(getFirstToken(conjunct), {
+              filter: (token) => token.value !== "(",
+            })!,
+          );
+          // Each condition runs from `ON` or its `AND` to the next `AND` or
+          // the end, along with any `(` or `)` grouping it with others.
+          const moved = conjuncts
+            .flatMap((conjunct, i) => {
+              if (!others.has(conjunct)) return [];
+              const next = separators[i];
+              const tokens = sourceCode.getTokensBetween(
+                i ? separators[i - 1]! : onToken,
+                next ?? endToken,
+              );
+              if (!next) tokens.push(endToken);
+              const grouping =
+                tokens.filter((token) => token.value === "(").length -
+                tokens.filter((token) => token.value === ")").length;
+              return sourceCode.text.slice(
+                tokens[Math.max(grouping, 0)]!.range[0],
+                tokens.at(Math.min(grouping, 0) - 1)!.range[1],
+              );
+            })
+            .join(" AND ");
+          const fix = (fixer: Rule.RuleFixer) => {
+            const using = fixer.replaceTextRange(
+              [onToken.range[0], endToken.range[1]],
+              `USING (${columns})`,
+            );
+            if (!whereClause) {
+              return [
+                using,
+                fixer.insertTextAfter(
+                  getClauseEnd(
+                    getKeywordBefore(fromItems[0], "FROM"),
+                    isClauseStart,
+                  ),
+                  ` WHERE ${moved}`,
+                ),
+              ];
+            }
+            const whereToken = getKeywordBefore(whereClause, "WHERE");
+            const whereStart = sourceCode.getTokenAfter(whereToken)!;
+            // `AND` binds tighter than `OR`.
+            return isBoolExpr(whereClause) && whereClause.boolop === "OR_EXPR"
+              ? [
+                  using,
+                  fixer.insertTextBefore(whereStart, `${moved} AND (`),
+                  fixer.insertTextAfter(
+                    getClauseEnd(whereToken, isClauseStart),
+                    ")",
+                  ),
+                ]
+              : [using, fixer.insertTextBefore(whereStart, `${moved} AND `)];
+          };
+          // In `WHERE`, an unqualified column can also name a column of
+          // another `FROM` item, or of the target of an `UPDATE` / `DELETE`.
+          const needsReview =
+            joinedSide ||
+            changesOutputColumns(node) ||
+            ((joins.length > 1 ||
+              fromItems.length > 1 ||
+              statement.type === "UpdateStmt" ||
+              statement.type === "DeleteStmt") &&
+              [...others].some(hasUnqualifiedColumn));
           context.report({
             loc: onToken.loc,
             messageId: "preferUsingAndWhere",
             data: { columns },
+            fix: needsReview ? null : fix,
+            suggest: needsReview
+              ? [{ messageId: "suggestUsingAndWhere", data: { columns }, fix }]
+              : [],
           });
           return;
         }

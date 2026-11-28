@@ -39,4 +39,14 @@ errors:
     column: 18
     endLine: 6
     endColumn: 20
+    suggestions:
+      - messageId: suggestUsingAndWhere
+        desc: Replace the `ON` condition with `USING (customer_id)` and move the other conditions to `WHERE`.
+        output: |-
+          SELECT o.id FROM orders o JOIN shipments s ON s.order_id = o.id JOIN customers c ON c.customer_id = o.customer_id;
+          SELECT o.id FROM orders o JOIN (customers c JOIN regions r ON r.id = c.region_id) ON c.customer_id = o.customer_id;
+          SELECT o.id
+          FROM orders o
+          JOIN shipments s ON s.order_id = o.id
+          JOIN customers c USING (customer_id) WHERE c.since < s.shipped_at;
 output: null

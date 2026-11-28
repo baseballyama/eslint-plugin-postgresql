@@ -1,0 +1,79 @@
+errors:
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 1
+    column: 44
+    endLine: 1
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 2
+    column: 44
+    endLine: 2
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 3
+    column: 44
+    endLine: 3
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 4
+    column: 44
+    endLine: 4
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 5
+    column: 44
+    endLine: 5
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 6
+    column: 44
+    endLine: 6
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 7
+    column: 59
+    endLine: 7
+    endColumn: 61
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 8
+    column: 59
+    endLine: 8
+    endColumn: 61
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 9
+    column: 44
+    endLine: 9
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 10
+    column: 44
+    endLine: 10
+    endColumn: 46
+  - messageId: preferUsingAndWhere
+    message: Use `USING (customer_id)` and move the other conditions to `WHERE`. In inner joins they keep the same rows there, and `USING` names each same-named column once.
+    line: 11
+    column: 44
+    endLine: 11
+    endColumn: 46
+output: |-
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE c.since BETWEEN o.created_at - 30 AND o.created_at;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.order > 0 AND c.ids <@ ARRAY[1, 2];
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id), regions r WHERE c.since::timestamp with time zone > o.created_at;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) INNER JOIN regions r ON r.id = c.region_id WHERE c.active;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) CROSS JOIN regions r WHERE c.active;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) NATURAL JOIN refunds WHERE c.active;
+  SELECT o.id FROM regions r JOIN orders o JOIN customers c USING (customer_id) ON r.id = o.region_id WHERE c.active;
+  SELECT o.id FROM regions r JOIN orders o JOIN customers c USING (customer_id) USING (zone_id) WHERE c.active;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE c.meta IS JSON WITH UNIQUE KEYS AND c.active;
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) WHERE c.active AND (o.rush OR o.meta IS JSON OBJECT WITH UNIQUE);
+  SELECT o.id FROM orders o JOIN customers c USING (customer_id) JOIN regions r ON r.id = c.region_id AND r.meta IS JSON WITH UNIQUE KEYS WHERE c.active;
